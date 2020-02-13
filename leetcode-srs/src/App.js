@@ -2,7 +2,8 @@ import React, {Fragment} from 'react';
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom'
 import logo from './logo.svg';
 import './App.css';
-import ProblemTitleBox from './containers/MainPage/ProblemTitleBox';
+import MainPage from './containers/MainPage/MainPage';
+import Navbar from './containers/SharedItems/Navbar'
 
 
 function App() {
@@ -10,8 +11,8 @@ function App() {
     // {/* <Provider store={store}> */}
       <Router>
         <Fragment>
-          {/* <Navbar /> */}
-          <Route exact path="/" component={ProblemTitleBox} />
+          <Navbar />
+          <Route exact path="/" component={MainPage} />
           <section className="container">
             {/* <Alert />
             <Switch>

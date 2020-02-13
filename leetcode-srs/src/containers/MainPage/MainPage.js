@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react'
 import {Link} from 'react-router-dom'
 import PropTypes from 'prop-types'
-import classes from './ProblemTitleBox.module.css'
+import classes from './MainPage.module.css'
 
 /*
 This component has the following functions:
@@ -27,7 +27,7 @@ const ProblemTitleBox = (props) => {
             Set some 'problem started' redux state
             Use said state to refresh main page to include timer
             Include result box
-
+        This is all nice-to-have, but I should just get the base flow working first
         */
         console.log('Problem started')
     }
