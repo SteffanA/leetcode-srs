@@ -22,6 +22,19 @@ const SubmissionSchema = mongoose.Schema({
         type: Date,
         default: Date.now,
         required: true,
+    },
+    // Optional: store the memory used for this submission (data from LC)
+    mem_used: {
+        type: Number,
+    },
+    // Optional: store the amount of time used for this submission (data from LC)
+    execution_time: {
+        type: Number,
+    },
+    // How long did it take from starting the problem to submitting this?
+    time_spent: {
+        type: Number,
+        required: true,
     }
 })
 
