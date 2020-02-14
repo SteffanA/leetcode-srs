@@ -23,7 +23,8 @@ const UserSchema = new mongoose.Schema({
     // Date user created their account
     creationDate: {
         type: Date,
-        default: Date.now
+        default: Date.now,
+        required: true,
     },
     // Lists this user has associated with themself.
     // These lists may or may not be public
