@@ -31,7 +31,7 @@ const ListSchema = mongoose.Schema({
     problems: [
         {
             problem: {
-                type: Schema.Types.ObjectId,
+                type: mongoose.Schema.Types.ObjectId,
                 ref: 'problems',
                 required: true,
             },
