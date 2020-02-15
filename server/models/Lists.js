@@ -36,7 +36,13 @@ const ListSchema = mongoose.Schema({
                 required: true,
             },
         }
-    ]
+    ],
+    // Who made this list? Only they may edit it.
+    creator: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+        required: true,
+    }
 })
 
 module.exports = List = mongoose.model('list', ListSchema)

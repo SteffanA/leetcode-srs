@@ -31,10 +31,13 @@ router.post('/', [auth, [
             public
         } = req.body
 
+        // Get the current user to make them the creator
+        const user = await User.findById(req.user.id)
         // TODO: Should we check to ensure public is a bool?
         const newList = new List({
             name,
-            public
+            public,
+            creator: user,
         })
 
         const list = await newList.save()
@@ -44,5 +47,42 @@ router.post('/', [auth, [
         return res.status(500).send('Server Error')
     }
 })
+
+// @route  DELETE api/lists
+// @desc   Delete an existing list
+// @access Private
+router.delete('/:id', [auth],
+async (req, res) => {
+    try {
+        // Get our User object
+        const user = await User.findById(req.user.id)
+        // Get our List object
+        const list = await List.findById(req.params.id)
+        
+        // Check that this list belongs to the user
+        if (user._id.toString() != list.creator.toString()) {
+            console.log(user._id)
+            console.log(list.creator)
+            return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
+        }
+        // Check that this list is not public
+        if (list.public) {
+            // Do not allow deletion of public lists.
+            // Other users may have this list in their list of lists, so
+            // we want to ensure that we don't suddenly erase it from them.
+            // Return forbidden request
+            return res.status(403).json({errors: [{msg: 'Cannot delete a public list.'}]})
+        }
+
+        // Remove the list 
+        await list.remove()
+
+        return res.json({msg: 'List removed'})
+    } catch (error) {
+        console.error(error.message)
+        return res.status(500).send('Server Error')
+    }
+})
+
 
 module.exports = router
