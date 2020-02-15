@@ -31,7 +31,7 @@ const UserSchema = new mongoose.Schema({
     lists: [
         {
             list: {
-                type: Schema.Types.ObjectId,
+                type: mongoose.Schema.Types.ObjectId,
                 ref: 'lists',
             }
         }

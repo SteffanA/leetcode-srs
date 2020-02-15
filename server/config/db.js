@@ -16,9 +16,12 @@ For this project
 @${process.env.MONGODB_HOST}:${process.env.MONGODB_PORT}/${process.env.DATABASE_NAME}
 ?authSource=admin
 
+Due to some issues reported online, changed to have options in connect function
+See: https://github.com/Automattic/mongoose/issues/8180, https://github.com/Automattic/mongoose/issues/8381
+
 May need &tlsInsecure=true option
 */
-const db = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_HOST}:${process.env.MONGODB_PORT}/${process.env.DATABASE_NAME}?authSource=admin`
+const db = `mongodb://${process.env.MONGODB_HOST}:${process.env.MONGODB_PORT}?retryWrites=true&w=majority`
 
 // Connect to our MongoDB instance
 const connectDB = async () => {
@@ -26,6 +29,11 @@ const connectDB = async () => {
         await mongoose.connect(db, {
             // These are options to get rid of depreciation messages
             useNewUrlParser: true,
+            useUnifiedTopology: true,
+            useCreateIndex: true,
+            user: `${process.env.MONGODB_USER}`,
+            pass: `${process.env.MONGODB_PASS}`,
+            dbName: `${process.env.DATABASE_NAME}`,
         })
         console.log('MongoDB connected...')
     } catch (error) {

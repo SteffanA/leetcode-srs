@@ -14,7 +14,7 @@ dotenv.config()
 router.post('/', [
     // Validation checks to ensure we get data expected.
     check('name', 'Name is required.').not().isEmpty(),
-    check('email', 'Please include a valid email.').not.isEmpty(),
+    check('email', 'Please include a valid email.').not().isEmpty(),
     check('password', 'Please enter a password with at least 6 characters.').isLength({min: 6})
 ], async (req, res) => {
     // Check that our... checks are valid
@@ -39,13 +39,16 @@ router.post('/', [
         user = new User({
             name: name,
             email: email,
+            password: password,
             // Creation date will be made by default to NOW
-            //We're not going to store unencrypted password
         })
 
         // Encypt the password
         const salt = await bcrypt.genSalt(10)
-        user.password = await bcrypt.hash(password, salt)
+        user.password = await bcrypt.hash(user.password, salt)
+        //TODO: Understand why the below wouldn't work when pw not attached to user
+        // const hashPass = await bcrypt.hash(password, salt)
+        // user.password = await hashPass
 
         // Now we can save our user
         await user.save()
@@ -60,7 +63,6 @@ router.post('/', [
         // Set our timeout for the token
         // Default to an hour, unless in development mode
         const timeout = process.env.DEVELOPMENT ? 360000 : 3600
-
         // Sign our token
         jwt.sign(
             payload,
@@ -75,7 +77,7 @@ router.post('/', [
         )
         console.log('User registered')
     } catch (error) {
-        console.error('Error registering: ', err.message)
+        console.error('Error registering: ', error.message)
         return res.status(500).send('Server error')
     }
 })

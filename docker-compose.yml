@@ -8,6 +8,8 @@ services:
     volumes:
       # Make sure our data is persistent
       - ./mongodb_data:/data/db
+    ports:
+      - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: 
       MONGO_INITDB_ROOT_PASSWORD: 
