@@ -6,6 +6,11 @@ These are problems directly grabbed from LeetCode.
 const mongoose = require('mongoose')
 
 const ProblemSchema = mongoose.Schema({
+    id: {
+        type: Number,
+        unique: true,
+        required: true
+    },
     // Name of the problem
     name: {
         type: String,

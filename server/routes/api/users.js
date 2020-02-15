@@ -1,12 +1,13 @@
+const User = require('../../models/User')
+
 const express = require('express')
 const {check, validationResult} = require('express-validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
-const User = require('../../models/User')
 
 const router = express.Router()
-dotenv.config()
+dotenv.config() // So we can read environ vars
 
 // @route  POST api/users
 // @desc   Register user

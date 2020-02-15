@@ -25,3 +25,5 @@ const Auth = (req, res, next) => {
         return res.status(401).json({msg: 'Invalid token. Authorization denied.'})
     }
 }
+
+module.exports = Auth
