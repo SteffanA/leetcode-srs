@@ -34,7 +34,17 @@ router.get('/:id', async (req, res) => {
 // @desc   Get all problems
 // @access Public
 router.get('/', async (req, res) => {
+    try {
+        const problems = await Problem.find()
+        if (!problems) {
+            return res.status(404).json({errors: [{msg: 'No problems found.'}]})
+        }
 
+        return res.json(problems)
+    } catch (error) {
+        console.error(error.message)
+        return res.status(500).send('Server error.')
+    }
 })
 
 // @route  POST /api/problems
