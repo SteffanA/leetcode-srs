@@ -13,29 +13,77 @@ const router = express.Router()
 // @route  GET api/lists
 // @desc   Get all public Lists
 // @access Public
-router.get('/', (req, res) => {
-
+router.get('/', async (req, res) => {
+    try {
+        const lists =  await List.find({public: true})
+        if (!lists) {
+            return res.status(404).json({errors: [{msg: 'No lists found.'}]})
+        }
+        return res.json(lists)
+    } catch (error) {
+        console.error(error.message)
+        return res.status(500).send('Server Error')
+    }
 })
 
-// @route  GET api/lists/me
-// @desc   Get all private Lists user controls
+// @route  GET api/lists/own
+// @desc   Get all Lists user has created
 // @access Private
-router.get('/me', (req, res) => {
-
+router.get('/own', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id)
+        const lists = await List.find({creator: user._id})
+        if (!lists) {
+            return res.status(404).json({errors: [{msg: 'You do not own any lists.'}]})
+        }
+        return res.json(lists)
+    } catch (error) {
+        
+    }
 })
+
 
 // @route  GET api/lists/:id
 // @desc   Get a public list
 // @access Public
-router.get('/', (req, res) => {
-
+router.get('/:id', async (req, res) => {
+    try {
+        const list = await List.findById(req.params.id)
+        if (!list) {
+            return res.status(404).json({errors: [{msg: 'List not found.'}]})
+        }
+        // Ensure list is public
+        if (!list.public) {
+            // Send not found response to mask that list exists to un-auth'd user
+            return res.status(404).json({errors: [{msg: 'List not found.'}]})
+        }
+        return res.json(list)
+    } catch (error) {
+        console.error(error.message)
+        return res.status(500).send('Server Error')
+    }
 })
 
 // @route  GET api/lists/:id
-// @desc   Get a private list
+// @desc   Get a public list, or private list user owns
 // @access Private 
-router.get('/', (req, res) => {
-
+router.get('/private/:id', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id)
+        const list = await List.findById(req.params.id)
+        if (!list) {
+            return res.status(404).json({errors: [{msg: 'List not found.'}]})
+        }
+        // Check that list is either public or owned by user
+        if (!(list.public || user._id.toString() === list.creator.toString())) {
+            // Send not found response to mask that list exists to un-auth'd user
+            return res.status(404).json({errors: [{msg: 'List not found.'}]})
+        }
+        return res.json(list)
+    } catch (error) {
+        console.error(error.message)
+        return res.status(500).send('Server Error')
+    }
 })
 
 // @route  POST api/lists
@@ -94,6 +142,12 @@ async (req, res) => {
 
         // Get user
         const user = await User.findById(req.user.id)
+
+        // Ensure list is public, or owned by User
+        if (!(list.public || user._id.toString() === list.creator.toString())) {
+            // Send not found response to mask that list exists to un-auth'd user
+            return res.status(404).json({errors: [{msg: 'List not found.'}]})
+        }
 
         // Make a copy of the list
         const copyList = new List({
