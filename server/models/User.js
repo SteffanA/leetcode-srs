@@ -35,6 +35,15 @@ const UserSchema = new mongoose.Schema({
                 ref: 'lists',
             }
         }
+    ],
+    // Status of problems this user has done
+    problem_statuses: [
+        {
+            problem_status: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'problem_status'
+            }
+        }
     ]
 })
 

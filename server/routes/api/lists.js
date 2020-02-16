@@ -38,7 +38,8 @@ router.get('/own', auth, async (req, res) => {
         }
         return res.json(lists)
     } catch (error) {
-        
+        console.error(error.message)
+        return res.status(500).send('Server Error')
     }
 })
 
