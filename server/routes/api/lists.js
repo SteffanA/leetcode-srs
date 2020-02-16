@@ -49,6 +49,47 @@ router.post('/', [auth, [
     }
 })
 
+
+// @route  PUT api/lists/:id
+// @desc   Update an existing list's non-Problem attributes
+// @access Private
+router.put('/:id', [auth],
+async (req, res) => {
+    try {
+        const list = await List.findById(req.params.id)
+        // Ensure our list exists
+        if (!list) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
+
+        const user = await User.findById(req.user.id)
+        // Ensure that this user owns the list
+        if (user._id.toString() != list.creator.toString()) {
+            return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
+        }
+        // Ensure list isn't public - cannot rename a public list, or take private
+        if (list.public) {
+            return res.status(403).json({errors: [{msg: 'Cannot update a public list.'}]})
+        }
+
+        const {
+            name,
+            public
+        } = req.body
+
+        // Update the list
+        if (name) {list.name = name}
+        if (public) {list.public = public}
+
+        // Save the updated list
+        const updatedList = await list.save()
+        return res.json(updatedList)
+    } catch (error) {
+        console.error(error.message)
+        return res.status(500).send('Server Error')
+    }
+})
+
 // @route  DELETE api/lists/id
 // @desc   Delete an existing list
 // @access Private
