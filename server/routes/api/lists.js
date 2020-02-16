@@ -5,10 +5,38 @@ const Problem = require('../../models/Problem')
 const express = require('express')
 const { check, validationResult } = require('express-validator')
 const auth = require('../../middleware/auth')
+const mongoose = require('mongoose')
 
 const router = express.Router()
 
 
+// @route  GET api/lists
+// @desc   Get all public Lists
+// @access Public
+router.get('/', (req, res) => {
+
+})
+
+// @route  GET api/lists/me
+// @desc   Get all private Lists user controls
+// @access Private
+router.get('/me', (req, res) => {
+
+})
+
+// @route  GET api/lists/:id
+// @desc   Get a public list
+// @access Public
+router.get('/', (req, res) => {
+
+})
+
+// @route  GET api/lists/:id
+// @desc   Get a private list
+// @access Private 
+router.get('/', (req, res) => {
+
+})
 
 // @route  POST api/lists
 // @desc   Create a new list
@@ -49,6 +77,40 @@ router.post('/', [auth, [
     }
 })
 
+// @route  POST api/lists/copy/:id
+// @desc   Copy a public list into user's private lists
+// @access Private
+router.post('/copy/:id', [auth],
+async (req, res) => {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
+        // Get list an ensure it exists
+        const list = await List.findById(req.params.id)
+        if (!list) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
+
+        // Get user
+        const user = await User.findById(req.user.id)
+
+        // Make a copy of the list
+        const copyList = new List({
+            name: list.name,
+            public: false,
+            problems: list.problems,
+            creator: user
+        })
+
+        // Save the copy list
+        const newList = await copyList.save()
+        return res.json(newList)
+    } catch (error) {
+        console.error(error.message)
+        return res.status(500).send('Server Error')
+    }
+})
 
 // @route  PUT api/lists/:id
 // @desc   Update an existing list's non-Problem attributes
@@ -56,6 +118,9 @@ router.post('/', [auth, [
 router.put('/:id', [auth],
 async (req, res) => {
     try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
         const list = await List.findById(req.params.id)
         // Ensure our list exists
         if (!list) {
@@ -99,6 +164,9 @@ async (req, res) => {
         // Get our User object
         const user = await User.findById(req.user.id)
         // Get our List object
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
         const list = await List.findById(req.params.id)
 
         // Ensure our list exists
@@ -136,6 +204,9 @@ router.put('/add/:list_id/:problem_id', [auth],
 async (req, res) => {
     try {
         // Get the list
+        if (!mongoose.Types.ObjectId.isValid(req.params.list_id)) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
         const list = await List.findById(req.params.list_id)
         // Ensure the list exists
         if (!list) {
@@ -147,6 +218,9 @@ async (req, res) => {
             return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
         }
         // Get problem
+        if (!mongoose.Types.ObjectId.isValid(req.params.problem_id)) {
+            return res.status(404).send({errors: [{msg: 'Problem not found.'}]})
+        }
         const problem = await Problem.findOne({id: req.params.problem_id})
         // Ensure problem exists
         if (!problem) {
@@ -180,6 +254,9 @@ router.put('/remove/:list_id/:problem_id', [auth],
 async (req, res) => {
     try {
         // Get the list
+        if (!mongoose.Types.ObjectId.isValid(req.params.list_id)) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
         const list = await List.findById(req.params.list_id)
         // Ensure the list exists
         if (!list) {
@@ -191,6 +268,9 @@ async (req, res) => {
             return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
         }
         // Get problem
+        if (!mongoose.Types.ObjectId.isValid(req.params.problem_id)) {
+            return res.status(404).send({errors: [{msg: 'Problem not found.'}]})
+        }
         const problem = await Problem.findOne({id: req.params.problem_id})
         // Ensure problem exists
         if (!problem) {
