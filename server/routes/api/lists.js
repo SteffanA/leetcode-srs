@@ -1,5 +1,6 @@
 const List = require('../../models/Lists.js')
 const User = require('../../models/User')
+const Problem = require('../../models/Problem')
 
 const express = require('express')
 const { check, validationResult } = require('express-validator')
@@ -48,7 +49,7 @@ router.post('/', [auth, [
     }
 })
 
-// @route  DELETE api/lists
+// @route  DELETE api/lists/id
 // @desc   Delete an existing list
 // @access Private
 router.delete('/:id', [auth],
@@ -58,11 +59,14 @@ async (req, res) => {
         const user = await User.findById(req.user.id)
         // Get our List object
         const list = await List.findById(req.params.id)
+
+        // Ensure our list exists
+        if (!list) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
         
         // Check that this list belongs to the user
         if (user._id.toString() != list.creator.toString()) {
-            console.log(user._id)
-            console.log(list.creator)
             return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
         }
         // Check that this list is not public
@@ -78,6 +82,91 @@ async (req, res) => {
         await list.remove()
 
         return res.json({msg: 'List removed'})
+    } catch (error) {
+        console.error(error.message)
+        return res.status(500).send('Server Error')
+    }
+})
+
+// @route  PUT api/lists/add/list_id/problem_id
+// @desc   Add a problem to a list
+// @access Private
+router.put('/add/:list_id/:problem_id', [auth],
+async (req, res) => {
+    try {
+        // Get the list
+        const list = await List.findById(req.params.list_id)
+        // Ensure the list exists
+        if (!list) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
+        // Ensure it's created by user
+        const user = await User.findById(req.user.id)
+        if (list.creator.toString() != user._id.toString()) {
+            return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
+        }
+        // Get problem
+        const problem = await Problem.findOne({id: req.params.problem_id})
+        // Ensure problem exists
+        if (!problem) {
+            return res.status(404).send({errors: [{msg: 'Problem not found.'}]})
+        }
+        // Ensure not already in list
+        const inList = list.problems.find((curProb) => {
+            return curProb._id.toString() === problem._id.toString()
+        })
+        if (inList) {
+            // Already a part of the list, can't add twice.
+            return res.status(409).json({errors: [{msg: 'Problem already a part of this list.'}]})
+        }
+        // Attach to list
+        list.problems.push(problem)
+        
+        // Update our list
+        updatedList = await list.save()
+        return res.json(updatedList)
+    } catch (error) {
+        console.error(error.message)
+        return res.status(500).send('Server Error')
+    }
+})
+
+
+// @route  PUT api/lists/remove/list_id/problem_id
+// @desc   Remove a problem from a list
+// @access Private
+router.put('/remove/:list_id/:problem_id', [auth],
+async (req, res) => {
+    try {
+        // Get the list
+        const list = await List.findById(req.params.list_id)
+        // Ensure the list exists
+        if (!list) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
+        // Ensure it's created by user
+        const user = await User.findById(req.user.id)
+        if (list.creator.toString() != user._id.toString()) {
+            return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
+        }
+        // Get problem
+        const problem = await Problem.findOne({id: req.params.problem_id})
+        // Ensure problem exists
+        if (!problem) {
+            return res.status(404).send({errors: [{msg: 'Problem not found.'}]})
+        }
+        // Ensure problem is part of the list
+        const index = list.problems.map(curProb=> curProb._id.toString() ).indexOf(problem._id.toString())
+        if (index === -1) {
+            // Not in the list, can't remove it
+            return res.status(404).json({errors: [{msg: 'Problem not part of this list.'}]})
+        }
+        // Remove from the list
+        list.problems.splice(index, 1)
+        
+        // Update our list
+        updatedList = await list.save()
+        return res.json(updatedList)
     } catch (error) {
         console.error(error.message)
         return res.status(500).send('Server Error')

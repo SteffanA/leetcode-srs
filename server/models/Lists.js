@@ -33,7 +33,6 @@ const ListSchema = mongoose.Schema({
             problem: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'problems',
-                required: true,
             },
         }
     ],
