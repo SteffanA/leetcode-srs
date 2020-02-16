@@ -9,7 +9,7 @@ const dotenv = require('dotenv')
 const router = express.Router()
 dotenv.config() // for environ variables
 
-// @route  GET /api/problems
+// @route  GET /api/problems/:id
 // @desc   Get a problem by id
 // @access Public
 router.get('/:id', async (req, res) => {
@@ -28,6 +28,13 @@ router.get('/:id', async (req, res) => {
         console.error(error.message)
         return res.status(500).send('Server error.')
     }
+})
+
+// @route  GET /api/problems/
+// @desc   Get all problems
+// @access Public
+router.get('/', async (req, res) => {
+
 })
 
 // @route  POST /api/problems

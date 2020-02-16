@@ -1,10 +1,13 @@
 const User = require('../../models/User')
+const List = require('../../models/Lists')
 
 const express = require('express')
 const {check, validationResult} = require('express-validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
+const auth = require('../../middleware/auth')
+const mongoose = require('mongoose')
 
 const router = express.Router()
 dotenv.config() // So we can read environ vars
@@ -83,8 +86,80 @@ router.post('/', [
     }
 })
 
+// @route  PUT api/users/add/:id
+// @desc   Add a List to User's Lists array
+// @access Private
+router.put('/add/:id', auth,
+async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id)
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
+        const list = await List.findById(req.params.id)
+        if (!(!list || list.public || list.creator.toString() === user._id.toString()))
+        {
+            // Either list doesn't exist, isn't public, or isn't public & not owned by user
+            // Return not found
+            return res.status(404).json({errors: [{msg: 'List not found.'}]})
+        }
+        // Check that list doesn't exist in the User's lists already
+        const index = user.lists.map(curList => curList._id.toString()).indexOf(list._id.toString())
+        if (index !== -1) {
+            // Found this list already, don't let us add it twice.
+            return res.status(409).json({errors: [{msg: 'List already in User\'s lists.'}]})
+        }
+        user.lists.push(list)
 
-// @route  DELTE api/users
+        // Save updated user w/ lists
+        await user.save()
+
+        // Return the updated lists array
+        return res.json(user.lists)
+    } catch (error) {
+        console.error(error.message)
+        return res.status(500).send('Server error')
+    }
+})
+
+// @route  PUT api/users/remove/:id
+// @desc   Remove a List from User's Lists array
+// @access Private
+router.put('/remove/:id', auth,
+async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id)
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
+        const list = await List.findById(req.params.id)
+        if (!list)
+        {
+            // Return not found, list doesn't exist
+            return res.status(404).json({errors: [{msg: 'List not found.'}]})
+        }
+        // Check to see if list is a part of user's current lists
+        const index = user.lists.map(curList => curList._id.toString()).indexOf(list._id.toString())
+        if (index === -1) {
+            // This list isn't part of the user's lists
+            return res.status(404).json({errors: [{msg: 'List not a part of user\'s Lists.'}]})
+        }
+
+        // Remove the list from the lists array
+        user.lists.splice(index, 1)
+
+        // Save updated
+        await user.save()
+        // Return updated lists
+        return res.json(user.lists)
+    } catch (error) {
+        console.error(error.message)
+        return res.status(500).send('Server error')
+    }
+})
+
+
+// @route  DELETE api/users
 // @desc   Delete user
 // @access Private
 
