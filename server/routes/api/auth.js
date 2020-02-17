@@ -7,8 +7,9 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv') // For getting environ vars from .env file
 
-dotenv.config() // Config environ vars
+dotenv.config({path: '../.env'}) // Config environ vars
 const router = express.Router()
+
 
 // @route  POST api/auth
 // @desc   Authenticate user & retrieve token

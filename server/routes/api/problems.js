@@ -7,7 +7,7 @@ const {check, validationResult} = require('express-validator')
 const dotenv = require('dotenv')
 
 const router = express.Router()
-dotenv.config() // for environ variables
+dotenv.config({path: '../../.env'}) // for environ variables
 
 // @route  GET /api/problems/:id
 // @desc   Get a problem by id

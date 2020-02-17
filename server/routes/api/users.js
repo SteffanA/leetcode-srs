@@ -10,7 +10,7 @@ const auth = require('../../middleware/auth')
 const mongoose = require('mongoose')
 
 const router = express.Router()
-dotenv.config() // So we can read environ vars
+dotenv.config({path: '../.env'}) // So we can read environ vars
 
 // @route  POST api/users
 // @desc   Register user

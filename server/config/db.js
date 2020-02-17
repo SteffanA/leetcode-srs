@@ -1,6 +1,6 @@
 const mongoose = require('mongoose') // For DB access
 const dotenv = require('dotenv') // For environment var access
-dotenv.config() // Load our environ vars
+dotenv.config({path: '../.env'}) // Load our environ vars
 
 // Set the enviroment variable MONGO_DB access to the string value of the access point to the DB,
 // with credentials

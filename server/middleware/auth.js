@@ -1,7 +1,7 @@
 // Basic authentication middleware
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv') // For access to environmental vars
-dotenv.config() // Config environ vars
+dotenv.config({path: '../.env'}) // Config environ vars
 
 const Auth = (req, res, next) => {
     // Get the token from the header

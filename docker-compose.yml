@@ -83,4 +83,3 @@ services:
     #TODO: Add nginx port to .env
     ports:
       - ${NGINX_PORT}:80
-    

@@ -2,7 +2,7 @@ const express = require('express')
 const connectDB = require('./config/db')
 const dotenv = require('dotenv') // For getting environ vars from .env file
 // Can comment above and below out if just using default port
-dotenv.config() // Config environ vars
+dotenv.config({path: '../.env'}) // Config environ vars
 
 const app = express()
 
@@ -24,7 +24,7 @@ app.use('/api/problem_status', require('./routes/api/problemStatuses'))
 app.use('/api/submissions', require('./routes/api/submissions'))
 
 
-// Define the port to listen on - environmental variable optional
+// Define the port to listen on - environmental variable optionala
 const PORT = process.env.SERVER_PORT || 5000
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`))
