@@ -158,9 +158,15 @@ async (req, res) => {
     }
 })
 
+// TODO: Fill out these routes eventually
 
 // @route  DELETE api/users
 // @desc   Delete user
+// @access Private
+
+
+// @route  PUT api/users/changepass
+// @desc   Change a user's password
 // @access Private
 
 module.exports = router

@@ -26,6 +26,21 @@ const ProblemSchema = mongoose.Schema({
         type: String,
         required: true,
     },
+    // Difficulty of the problem
+    /*
+    1: Easy
+    2: Medium
+    3: Hard
+    */
+    difficulty: {
+        type: Number,
+        required: true,
+    },
+    // If a premium account is required for the problem
+    is_premium: {
+        type: Boolean,
+        required: true,
+    },
     //TODO:
     // The below fields aren't required, and I might change them.
     // The current setup will only really work for a single language
@@ -43,14 +58,6 @@ const ProblemSchema = mongoose.Schema({
     // Start code is the initial start code given by LC
     start_code: {
         type: String,
-    },
-    difficulty: {
-        type: Number,
-        required: true,
-    },
-    is_premium: {
-        type: Boolean,
-        required: true,
     }
 })
 
