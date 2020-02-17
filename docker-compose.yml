@@ -1,5 +1,7 @@
 version: '3.1'
 
+# Make sure you have a .env file in the same dir as the compose to set environmental variables properly.
+# Or you can hard code this file
 services:
 # Database setup
   mongo:
@@ -9,16 +11,76 @@ services:
       # Make sure our data is persistent
       - ./mongodb_data:/data/db
     ports:
-      - 27017:27017
+      # Expose the mongo db outside the container
+      - ${MONGODB_PORT}:27017
     environment:
-      MONGO_INITDB_ROOT_USERNAME: 
-      MONGO_INITDB_ROOT_PASSWORD: 
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASS}
 
+  # Optional, use this to view your DB
   mongo-express:
     image: mongo-express
     restart: always
     ports:
-      - 8081:8081
+      - ${MONGOEXPRESS_PORT}:8081
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: 
-      ME_CONFIG_MONGODB_ADMINPASSWORD: 
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGOEXPRESS_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGOEXPRESS_PASS}
+  
+# Server setup
+  server:
+    # Wait until mongo is up to make the server
+    # Technically not really needed, but can avoid potential issues
+    depends_on:
+      - mongo
+    build:
+      # Where to find the docker file for the server
+      context: ./server
+    # Keeping restart off; If it fails, prob should stay down
+    restart: "no"
+    volumes:
+      # Don't overwrite this folder
+      - /server/node_modules
+      # Redirect anything else in our server folder to the container
+      # Note that '/srv' is the working directory in the container
+      - ./server:/srv
+    environment:
+      - SERVER_PORT=${SERVER_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASS=${ADMIN_PASS}
+      - MONGODB_PASS=${MONGODB_PASS}
+      - MONGODB_USER=${MONGODB_USER}
+      # Host should be same as IP the machine this compose is run on!
+      - MONGODB_HOST=${MONGODB_HOST}
+      - MONGODB_PORT=${MONGODB_PORT}
+      - DATABASE_NAME=${DATABASE_NAME}
+    ports:
+      # Map external port to internal port. Use environ var
+      - ${SERVER_PORT}:${SERVER_PORT}
+
+# Client setup
+  client:
+    build:
+      context: ./leetcode-srs
+    restart: on-failure
+    volumes:
+      # Don't overwrite this folder
+      - /server/node_modules
+      # Redirect anything else in our frontend folder to the container
+      # Note that '/client' is the working directory in the container
+      - ./leetcode-srs:/client
+    environment:
+      # TODO: After frontend dev is finished, add anything required
+
+# nginx setup for exposing client
+  nginx:
+    # Should always be running
+    restart: always
+    build:
+      context: ./nginx
+    # Expose port outside the container
+    #TODO: Add nginx port to .env
+    ports:
+      - ${NGINX_PORT}:80
+    
