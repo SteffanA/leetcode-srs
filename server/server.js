@@ -21,6 +21,7 @@ app.use('/api/auth', require('./routes/api/auth'))
 app.use('/api/problems', require('./routes/api/problems'))
 app.use('/api/lists', require('./routes/api/lists'))
 app.use('/api/problem_status', require('./routes/api/problemStatuses'))
+app.use('/api/submissions', require('./routes/api/submissions'))
 
 
 // Define the port to listen on - environmental variable optional
