@@ -1,24 +1,22 @@
 import React, {useEffect} from 'react'
-import {Link} from 'react-router-dom'
-import PropTypes from 'prop-types'
+// import {Link} from 'react-router-dom'
+// import PropTypes from 'prop-types'
 import classes from './MainPage.module.css'
+import { connect } from 'react-redux'
 
 /*
-This component has the following functions:
-
-Display a iFrame pointing to LeetCode
-    Should be direct link to whatever problem was selected
-
-Some quick notes:
-    "question__title_slug" is the url at the end of https://leetcome.com/problems/
+Main Page is made of 3 main components:
+    a Form where you can submit a Submission into a DB for a problem
+    a list selector box where you can select the list to do, and select your next problem
+        Either select problem via 'start next' button or hand pick
 */
-const ProblemTitleBox = (props) => {
+const MainPage = (props) => {
     useEffect(() => {
         console.log("Test")
     }, [])
 
-    //TODO: Replace the second part of link with some info
-    const link = 'https://leetcode.com/problems/' + 'minimum-number-of-steps-to-make-two-strings-anagram/'
+
+    const link = 'https://leetcode.com/problems/' // + props.problem
 
     const openProblemHandler = (event) => {
         //TODO: Start the timer object's timer here.
@@ -49,15 +47,27 @@ const ProblemTitleBox = (props) => {
     */
 
     return (
-        <div className={classes.ProblemTitleBox}>
-            <strong>Welcome</strong>
-            <a href={link} target='_blank' onClick={openProblemHandler}>Start Problem</a>
+        <div className={classes.MainPage}>
+            <a href={link} target='_blank' rel="noopener noreferrer" onClick={openProblemHandler}>Start Problem</a>
         </div>
     )
 }
 
-ProblemTitleBox.propTypes = {
+const mapStateToProps = (state) => {
+    return {
+        problem: state.current_problem,
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+
+    }
+}
+
+MainPage.propTypes = {
 
 }
 
-export default ProblemTitleBox
+// export default connect(mapStateToProps, mapDispatchToProps)(MainPage)
+export default MainPage

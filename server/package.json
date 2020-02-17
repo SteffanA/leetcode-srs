@@ -19,7 +19,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server",
     "server": "nodemon server",
-    "client": "npm start --prefix client",
+    "client": "npm start --prefix ..\\leetcode-srs",
     "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "author": "Steffan Achtmann",
