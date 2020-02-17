@@ -5,6 +5,7 @@ Submissions are the result and the code associated with a LeetCode submission.
 */
 const mongoose = require('mongoose')
 
+//TODO: Would it make sense to attach the User to Submission?
 const SubmissionSchema = mongoose.Schema({
     // Text is not required
     // First impl won't auto-save, so not neccessary
