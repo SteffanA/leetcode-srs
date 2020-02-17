@@ -43,6 +43,14 @@ const ProblemSchema = mongoose.Schema({
     // Start code is the initial start code given by LC
     start_code: {
         type: String,
+    },
+    difficulty: {
+        type: Number,
+        required: true,
+    },
+    is_premium: {
+        type: Boolean,
+        required: true,
     }
 })
 

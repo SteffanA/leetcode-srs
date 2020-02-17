@@ -55,6 +55,8 @@ router.post('/', [auth, [
     check('name', 'Problem must have a name').not().isEmpty(),
     check('problem_text', 'Problem must have accompanying text').not().isEmpty(),
     check('link', 'Must include link to problem').not().isEmpty(),
+    check('difficulty', 'Problem must have a difficulty level').isNumeric(),
+    check('is_premium', 'Problem must be marked premium or not').isBoolean(),
 ]], async (req, res) => {
     // Check our request contains required fields
     const validationErrors = validationResult(req)
@@ -80,6 +82,8 @@ router.post('/', [auth, [
             link,
             test_case,
             start_code,
+            difficulty,
+            is_premium,
         } = req.body
 
         // Check if the problem already exists before saving
@@ -94,7 +98,9 @@ router.post('/', [auth, [
             problem_text: problem_text,
             link: link,
             test_case: test_case,
-            start_code: start_code
+            start_code: start_code,
+            difficulty: difficulty,
+            is_premium: is_premium
         })
 
         // Send to DB
@@ -137,6 +143,7 @@ router.put('/', [auth, [
             link,
             test_case,
             start_code,
+            difficulty,
         } = req.body
 
         // Find the problem to be updated
@@ -152,6 +159,7 @@ router.put('/', [auth, [
         if (link) {existingProblem.link = link}
         if (test_case) {existingProblem.test_case = test_case}
         if (start_code) {existingProblem.start_code = start_code}
+        if (difficulty) {existingProblem.difficulty = difficulty}
 
         // Send the update to the database
         const updatedProblem = await existingProblem.save()
