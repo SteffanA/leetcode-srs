@@ -9,7 +9,7 @@ services:
     restart: always
     volumes:
       # Make sure our data is persistent
-      - ./mongodb_data:/data/db
+      - ./Database/mongodb_data:/data/db
     ports:
       # Expose the mongo db outside the container
       - ${MONGODB_PORT}:27017
@@ -40,7 +40,7 @@ services:
     restart: "no"
     volumes:
       # Don't overwrite this folder
-      - /server/node_modules
+      - /srv/node_modules
       # Redirect anything else in our server folder to the container
       # Note that '/srv' is the working directory in the container
       - ./server:/srv
@@ -59,27 +59,27 @@ services:
       # Map external port to internal port. Use environ var
       - ${SERVER_PORT}:${SERVER_PORT}
 
-# Client setup
-  client:
-    build:
-      context: ./leetcode-srs
-    restart: on-failure
-    volumes:
-      # Don't overwrite this folder
-      - /server/node_modules
-      # Redirect anything else in our frontend folder to the container
-      # Note that '/client' is the working directory in the container
-      - ./leetcode-srs:/client
-    environment:
-      # TODO: After frontend dev is finished, add anything required
+# # Client setup
+#   client:
+#     build:
+#       context: ./leetcode-srs
+#     restart: on-failure
+#     volumes:
+#       # Don't overwrite this folder
+#       - /leetcode-srs/node_modules
+#       # Redirect anything else in our frontend folder to the container
+#       # Note that '/client' is the working directory in the container
+#       - ./leetcode-srs:/client
+#     environment:
+#       # TODO: After frontend dev is finished, add anything required
 
-# nginx setup for exposing client
-  nginx:
-    # Should always be running
-    restart: always
-    build:
-      context: ./nginx
-    # Expose port outside the container
-    #TODO: Add nginx port to .env
-    ports:
-      - ${NGINX_PORT}:80
+# # nginx setup for exposing client
+#   nginx:
+#     # Should always be running
+#     restart: always
+#     build:
+#       context: ./nginx
+#     # Expose port outside the container
+#     #TODO: Add nginx port to .env
+#     ports:
+#       - ${NGINX_PORT}:80
