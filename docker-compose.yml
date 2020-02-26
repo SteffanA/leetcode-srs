@@ -80,6 +80,5 @@ services:
 #     build:
 #       context: ./nginx
 #     # Expose port outside the container
-#     #TODO: Add nginx port to .env
 #     ports:
 #       - ${NGINX_PORT}:80
