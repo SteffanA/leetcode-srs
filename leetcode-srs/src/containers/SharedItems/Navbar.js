@@ -17,13 +17,14 @@ const Navbar = props => {
         <div className={classes.Navbar}>
             <NavLink to='/'>Main Page</NavLink>
             <NavLink activeClassName={classes.active} to={props.isAuth ? '/logout' : '/auth'}>{props.isAuth ? 'Logout' : 'Register/Login'}</NavLink>
-            <NavLink className={classes.Link} to='/edit'>Edit Lists</NavLink>
-            <NavLink className={classes.Link} to='/history'>Study History</NavLink>
+            <NavLink to='/edit'>Edit Lists</NavLink>
+            <NavLink className={classes.NavLink} to='/history'>Study History</NavLink>
         </div>
     )
 }
 
 Navbar.propTypes = {
+    isAuth: PropTypes.bool.isRequired,
 }
 
 const mapStateToProps = state => {

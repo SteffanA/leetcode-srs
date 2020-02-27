@@ -1,5 +1,7 @@
 const express = require('express')
 const connectDB = require('./config/db')
+const https = require('https') // For secure hosting
+const fs = require('fs') // For getting HTTPS cert and key
 const dotenv = require('dotenv') // For getting environ vars from .env file
 // Can comment above and below out if just using default port
 dotenv.config({path: '../.env'}) // Config environ vars
@@ -26,5 +28,18 @@ app.use('/api/submissions', require('./routes/api/submissions'))
 
 // Define the port to listen on - environmental variable optionala
 const PORT = process.env.SERVER_PORT || 5000
+const SECURE = process.env.HTTPS
 
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`))
+if (SECURE) {
+    // Create a HTTPS server
+    const cert = process.env.CERT_PATH
+    const key = process.env.CERT_KEY_PATH
+    https.createServer({
+        key: fs.readFileSync(key),
+        cert: fs.readFileSync(cert)
+    }, app)
+    .listen(PORT, () => console.log(`Secure server started on port ${PORT}`))
+}
+else {
+    app.listen(PORT, () => console.log(`Server started on port ${PORT}`))
+}

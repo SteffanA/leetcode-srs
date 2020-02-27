@@ -110,11 +110,10 @@ export const auth = (email, password, isRegister, name='') => {
                     localStorage.setItem('userId', 'name')
                 }
                 dispatch(authSuccess(response.data.token, name))
-                // dispatch(checkAuthTimeout(response.data.expiresIn))
+                dispatch(checkAuthTimeout(response.data.expiresIn))
             })
             .catch(err => {
-                //TODO: Check if this is the right stack
-                dispatch(authFail(err.response.data.errors))
+                dispatch(authFail(err))
             })
         
     }

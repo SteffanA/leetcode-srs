@@ -13,9 +13,6 @@ import * as actions from '../../store/actions/auth'
 
 
 const Auth = props => {
-    useEffect(() => {
-        console.log('In auth')
-    }, [])
 // State code
     const [loginState, setLoginState] = useState({
         // Are we registering or logging in?
@@ -130,14 +127,13 @@ const Auth = props => {
         })
 
         // Update our state
-        setLoginState(...loginState, updatedControls)
+        setLoginState({...loginState, updatedControls})
     }
 
     // A couple of helper functions to update our isRegister state based on button selected
     const updateToLogin = () => {
         setLoginState({...loginState, isRegister: false})
     }
-
     const updateToRegister = () => {
         setLoginState({...loginState, isRegister: true})
     }
