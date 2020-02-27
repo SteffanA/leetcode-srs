@@ -1,7 +1,8 @@
 import React from 'react'
-import {Link} from 'react-router-dom'
+import {NavLink} from 'react-router-dom'
 import PropTypes from 'prop-types'
 import classes from './Navbar.module.css'
+import {connect} from 'react-redux'
 
 /*
 need links to:
@@ -12,14 +13,12 @@ need links to:
     History
 */
 const Navbar = props => {
-    //TODO: Replace with props when auth setup
-    let isAuth = false
     return (
         <div className={classes.Navbar}>
-            <Link className={classes.Link} to='/'>Main Page</Link>
-            <Link className={classes.Link} to={isAuth ? '/logout' : '/login'}>{isAuth ? 'Logout' : 'Register/Login'}</Link>
-            <Link className={classes.Link} to='/edit'>Edit Lists</Link>
-            <Link className={classes.Link} to='/history'>Study History</Link>
+            <NavLink to='/'>Main Page</NavLink>
+            <NavLink activeClassName={classes.active} to={props.isAuth ? '/logout' : '/auth'}>{props.isAuth ? 'Logout' : 'Register/Login'}</NavLink>
+            <NavLink className={classes.Link} to='/edit'>Edit Lists</NavLink>
+            <NavLink className={classes.Link} to='/history'>Study History</NavLink>
         </div>
     )
 }
@@ -27,4 +26,10 @@ const Navbar = props => {
 Navbar.propTypes = {
 }
 
-export default Navbar
+const mapStateToProps = state => {
+    return {
+        isAuth: state.isAuth,    
+    }
+}
+
+export default connect(mapStateToProps)(Navbar)

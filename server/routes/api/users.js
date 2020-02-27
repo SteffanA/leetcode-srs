@@ -169,4 +169,6 @@ async (req, res) => {
 // @desc   Change a user's password
 // @access Private
 
+// TODO: Add a way to get a user's information.
+
 module.exports = router

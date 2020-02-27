@@ -11,10 +11,20 @@
   opacity: 0.9;
 }
 
-.Link {
-    color: green;
+.Navbar Link {
+  margin: 0;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  color: green;
+  text-decoration: none;
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
 }
 
-.Link:hover {
+.Navbar Link:hover,
+.Navbar Link:active
+{
     color: red;
 }
