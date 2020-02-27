@@ -28,15 +28,24 @@ app.use('/api/submissions', require('./routes/api/submissions'))
 
 // Define the port to listen on - environmental variable optionala
 const PORT = process.env.SERVER_PORT || 5000
+// Determine if server should be hosted as HTTP or HTTPS
 const SECURE = process.env.HTTPS
 
 if (SECURE) {
     // Create a HTTPS server
+    /*
+    Code assumes you have a cert with a passphrase.
+    Passing a blank passphrase should work okay as well. TODO: Test
+    You can self-sign a cert via:
+    openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
+    */
     const cert = process.env.CERT_PATH
     const key = process.env.CERT_KEY_PATH
+    const passphrase = process.env.CERT_PASSPHRASE
     https.createServer({
-        key: fs.readFileSync(key),
-        cert: fs.readFileSync(cert)
+        key: fs.readFileSync(`${key}`),
+        cert: fs.readFileSync(`${cert}`),
+        passphrase: `${passphrase}`,
     }, app)
     .listen(PORT, () => console.log(`Secure server started on port ${PORT}`))
 }
