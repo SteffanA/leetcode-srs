@@ -84,7 +84,8 @@ export const auth = (email, password, isRegister, name='') => {
             email: email,
             password: password,
         }
-        let url = process.env.REACT_APP_API_PROTOCOL + '://' + process.env.REACT_APP_API_URL + ':3000/api/'
+        // TODO: Will this url ever change? Does it change when building? Current host format should let it be okay
+        let url = 'http://localhost:3000/api/'
         // Change API endpoint and body depending on if we're registering or logging in
         if (isRegister) {
             // Name is also required when registering

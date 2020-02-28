@@ -16,10 +16,13 @@ module.exports = app => {
             },
             get secure() {
                 // Set secure based on the protocol
-                return ('http'.localeCompare(`${process.env.REACT_APP_API_PROTOCOL}`) === 0 ? false : true)
+                // Keep false for self signed certs
+                // return ('http'.localeCompare(`${process.env.REACT_APP_API_PROTOCOL}`) === 0 ? false : true)
+                return false
             },
             changeOrigin: true,
             logLevel: 'info',
+            // rejectUnauthorized: false,
         })
     )
     // Enable logging of our requests, proxied and non-proxied

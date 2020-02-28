@@ -2,7 +2,6 @@ const express = require('express')
 const connectDB = require('./config/db')
 const https = require('https') // For secure hosting
 const fs = require('fs') // For getting HTTPS cert and key
-const cors = require('cors') // For dealing with Cross Origin Requests
 const dotenv = require('dotenv') // For getting environ vars from .env file
 // Can comment above and below out if just using default port
 dotenv.config({path: '../.env'}) // Config environ vars
@@ -12,18 +11,7 @@ const app = express()
 
 // Connect to our DB
 connectDB()
-// Init our middlewares
-//CORS middleware
-app.use(cors())
-app.options('*', cors())
-var corsMiddleware = function(req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*'); //replace localhost with actual host
-    res.header('Access-Control-Allow-Methods', 'OPTIONS, GET, PUT, PATCH, POST, DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With, Authorization');
-
-    next();
-}
-app.use('/*', corsMiddleware)
+// Init our middleware
 app.use(express.json({extended: false}))
 
 // Setup the API
