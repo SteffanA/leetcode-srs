@@ -9,11 +9,21 @@ dotenv.config({path: '../.env'}) // Config environ vars
 
 // Setup our server
 const app = express()
-app.use(cors())
 
 // Connect to our DB
 connectDB()
-// Init our middleware
+// Init our middlewares
+//CORS middleware
+app.use(cors())
+app.options('*', cors())
+var corsMiddleware = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*'); //replace localhost with actual host
+    res.header('Access-Control-Allow-Methods', 'OPTIONS, GET, PUT, PATCH, POST, DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With, Authorization');
+
+    next();
+}
+app.use('/*', corsMiddleware)
 app.use(express.json({extended: false}))
 
 // Setup the API

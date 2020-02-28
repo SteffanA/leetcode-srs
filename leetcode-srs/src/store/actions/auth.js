@@ -85,18 +85,21 @@ export const auth = (email, password, isRegister, name='') => {
             password: password,
         }
         let url = process.env.REACT_APP_API_URL + 'auth'
+        url = 'http://localhost:3000/api/' + 'auth'
         // Change API endpoint and body depending on if we're registering or logging in
         if (isRegister) {
             // Name is also required when registering
             authData.name = name
-            url = process.env.REACT_APP_API_URL + 'users'
+            url = 'http://localhost:3000/api/' + 'users'
         }
         
+        console.log(url)
         // Send our request to the backend
         // TODO: Do we need to implement an API key to prevent malicious request sending? Probably.
         // Add as a param; url += ?key=API_KEY
         axios.post(url, authData)
             .then(response => {
+                console.log('success')
                 // TODO: Add expiration time to the response for auth/login
                 const expirationDate = new Date(new Date().getTime() + (3600 * 1000))
                 localStorage.setItem('token', response.data.token)
@@ -113,6 +116,8 @@ export const auth = (email, password, isRegister, name='') => {
                 dispatch(checkAuthTimeout(response.data.expiresIn))
             })
             .catch(err => {
+                console.log('err')
+                console.log(err)
                 dispatch(authFail(err))
             })
         
