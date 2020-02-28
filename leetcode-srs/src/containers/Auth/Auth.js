@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import classes from './Auth.module.css'
 import { connect } from 'react-redux'
@@ -100,9 +100,11 @@ const Auth = props => {
             //TODO: Transform this to somehow use our checkValidity function?
             if (password.value !== password2.value) {
                 // TODO - throw an error
+                console.log('pass values dont match ' + password.value + password2.value)
                 return
             }
             if (name.value === '') {
+                console.log('name value is empty')
                 // TODO: Throw an error
                 return
             }
@@ -113,19 +115,20 @@ const Auth = props => {
     }
 
     // Handle an input change on a form object
-    const inputChangedHandler = (event, controlID) => {
-        const updatedControls = updateObject(controls, {
-            // Adjust the control given via controlID
-            [controlID]: updateObject(controls[controlID], {
-                // Update the value
-                value: event.target.value,
-                // Check if validity changes
-                valid:checkValidity(event.target.value, controls[controlID].validation),
-                // Note that the element has now been touched
-                touched: true,
-            })
+    const inputChangedHandler = (event, controlKey) => {
+        // Update the control linked to the control key
+        const updatedControl = updateObject(controls[controlKey], {
+            // Update the value
+            value: event.target.value,
+            // Check if validity changes
+            valid:checkValidity(event.target.value, controls[controlKey].validation),
+            // Note that the element has now been touched
+            touched: true,
         })
-
+        //Attach updated control to our original control
+        const updatedControls = controls
+        updatedControls[controlKey] = updatedControl
+        
         // Update our state
         setLoginState({...loginState, updatedControls})
     }
@@ -170,7 +173,7 @@ const Auth = props => {
             <Input
                 key = {formElement.id}
                 elementConfig={formElement.config.elementConfig}
-                val={formElement.config.value}
+                value={formElement.config.value}
                 invalid={!formElement.config.valid}
                 shouldValidate = {formElement.config.validation}
                 touched = {formElement.config.touched}

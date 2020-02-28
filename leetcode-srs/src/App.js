@@ -9,6 +9,11 @@ import Auth from './containers/Auth/Auth'
 
 import * as actions from './store/actions/index'
 
+/*
+For debugging, try using this chrome build:
+chrome.exe --user-data-dir="C://Chrome dev session" --disable-web-security --ignore-certificate-errors
+*/
+
 const App = props => {
   // Try to login automatically on page load. Only run once
   useEffect(() => {
@@ -19,15 +24,13 @@ const App = props => {
     // {/* <Provider store={store}> */}
       <Fragment>
         <Navbar />
-        {/* <Route exact path="/" component={MainPage} /> */}
+        <Route exact path="/" component={MainPage} />
         <section className="container">
           {/* <Alert />*/}
           <Switch>
             <Route exact path="/auth" component={Auth} />
             {/*
-            <PrivateRoute exact path="/dashboard" component={Dashboard} />
-            <PrivateRoute exact path='/create-profile' component={CreateProfile} />
-            <PrivateRoute exact path='/edit-profile' component={EditProfile} />
+            <PrivateRoute exact path="/create-list" component={ListBuilder} />
           */}
           </Switch>
         </section>
