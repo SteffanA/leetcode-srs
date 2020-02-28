@@ -19,7 +19,9 @@ const Navbar = props => {
     return (
         <div className={classes.Navbar}>
             <div className={classes.Left}>
+                <div className={classes.NavLink}>Settings</div>
                 {/* Link to settings modal*/}
+                <div className={classes.NavLink}>Pick List</div>
                 {/* A pick list object under ^ */}
             </div>
             <div className={classes.Center}>
@@ -34,6 +36,7 @@ const Navbar = props => {
                 {/* Set CSS so below is ... below the above*/}
                 <NavLink className={classes.NavLink} to='/history'>History</NavLink>
             </div> 
+            <button >Test button. i should be blue.</button>
         </div>
     )
 }

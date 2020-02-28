@@ -13,13 +13,14 @@
 .Navbar NavLink {
   margin: 0;
   box-sizing: border-box;
+  border-color: black;
+  border-style: solid;
+  border-width: 2px;
   display: block;
   width: 100%;
   color: green;
   text-decoration: none;
   width: 100%;
-  box-sizing: border-box;
-  display: block;
 }
 
 .Navbar NavLink:hover,
@@ -32,4 +33,9 @@
   color: black;
   font-size: large;
   font-weight: bold;
+}
+
+
+.NavBar button {
+  color: red;
 }
