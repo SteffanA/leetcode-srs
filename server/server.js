@@ -2,14 +2,12 @@ const express = require('express')
 const connectDB = require('./config/db')
 const https = require('https') // For secure hosting
 const fs = require('fs') // For getting HTTPS cert and key
-const cors = require('cors') // For dealing with Cross Origin Requests
 const dotenv = require('dotenv') // For getting environ vars from .env file
 // Can comment above and below out if just using default port
 dotenv.config({path: '../.env'}) // Config environ vars
 
 // Setup our server
 const app = express()
-app.use(cors())
 
 // Connect to our DB
 connectDB()
