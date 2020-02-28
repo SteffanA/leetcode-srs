@@ -1,31 +1,56 @@
-import React, {Fragment} from 'react';
-import {BrowserRouter as Router, Route, Switch} from 'react-router-dom'
+import React, {Fragment, useEffect} from 'react';
+import { Switch, Route } from 'react-router-dom'
+import { connect } from 'react-redux'
 import './App.css';
+
 import MainPage from './containers/MainPage/MainPage';
 import Navbar from './containers/SharedItems/Navbar'
+import Auth from './containers/Auth/Auth'
 
+import * as actions from './store/actions/index'
 
-function App() {
+/*
+For debugging, try using this chrome build:
+chrome.exe --user-data-dir="C://Chrome dev session" --disable-web-security --ignore-certificate-errors
+*/
+
+const App = props => {
+  // Try to login automatically on page load. Only run once
+  useEffect(() => {
+    props.onTryAutoSignIn()
+  })
+
   return (
     // {/* <Provider store={store}> */}
-      <Router>
-        <Fragment>
-          <Navbar />
-          <Route exact path="/" component={MainPage} />
-          <section className="container">
-            {/* <Alert />
-            <Switch>
-              <Route exact path="/register" component={Register} />
-              <Route exact path="/login" component={Login} />
-              <PrivateRoute exact path="/dashboard" component={Dashboard} />
-              <PrivateRoute exact path='/create-profile' component={CreateProfile} />
-              <PrivateRoute exact path='/edit-profile' component={EditProfile} />
-            </Switch> */}
-          </section>
-        </Fragment>
-      </Router>
+      <Fragment>
+        <Navbar />
+        <Route exact path="/" component={MainPage} />
+        <section className="container">
+          {/* <Alert />*/}
+          <Switch>
+            <Route exact path="/auth" component={Auth} />
+            {/*
+            <PrivateRoute exact path="/create-list" component={ListBuilder} />
+          */}
+          </Switch>
+        </section>
+      </Fragment>
     // </Provider> 
   );
 }
 
-export default App;
+// The mapping of state/dispatch are for app-wide access to variables
+// For now, we just care about auth state app-wide and convience logging in user w/ token stored
+const mapStateToProps = state => {
+  return {
+    isAuth: state.auth.token !== null,
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onTryAutoSignIn: () => dispatch(actions.checkAuthState()),
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

@@ -55,7 +55,7 @@ const MainPage = (props) => {
 
 const mapStateToProps = (state) => {
     return {
-        problem: state.current_problem,
+        
     }
 }
 
@@ -69,5 +69,4 @@ MainPage.propTypes = {
 
 }
 
-// export default connect(mapStateToProps, mapDispatchToProps)(MainPage)
-export default MainPage
+export default connect(mapStateToProps, mapDispatchToProps)(MainPage)
