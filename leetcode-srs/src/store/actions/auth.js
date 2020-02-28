@@ -84,13 +84,16 @@ export const auth = (email, password, isRegister, name='') => {
             email: email,
             password: password,
         }
-        let url = process.env.REACT_APP_API_URL + 'auth'
-        url = 'http://localhost:3000/api/' + 'auth'
+        let url = process.env.REACT_APP_API_PROTOCOL + '://' + process.env.REACT_APP_API_URL + ':3000/api/'
         // Change API endpoint and body depending on if we're registering or logging in
         if (isRegister) {
             // Name is also required when registering
             authData.name = name
-            url = 'http://localhost:3000/api/' + 'users'
+            url = url + 'users'
+        }
+        else {
+            // Standard login
+            url = url + 'auth'
         }
         
         console.log(url)

@@ -10,15 +10,19 @@ module.exports = app => {
         '/api',
         createProxyMiddleware({
             target: {
-                host: 'localhost',
-                protocol: 'http:',
-                port: 5000,
+                host: `${process.env.REACT_APP_API_URL}`,
+                protocol: `${process.env.REACT_APP_API_PROTOCOL}:`,
+                port: process.env.REACT_APP_API_PORT,
             },
-            secure: false,
+            get secure() {
+                // Set secure based on the protocol
+                return ('http'.localeCompare(`${process.env.REACT_APP_API_PROTOCOL}`) === 0 ? false : true)
+            },
             changeOrigin: true,
             logLevel: 'info',
         })
     )
+    // Enable logging of our requests, proxied and non-proxied
     app.use(morgan('dev'))
 }
 
