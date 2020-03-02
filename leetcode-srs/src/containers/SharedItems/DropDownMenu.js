@@ -6,7 +6,6 @@ import classes from './DropDownMenu.module.css'
 function DropDownMenu(props) {
     const [visibility, setVisibility] = useState({
         showMenu: false,
-        visibleMenu: null,
     })
 
     const menuVisibilityHandler = (event) => {
@@ -16,31 +15,20 @@ function DropDownMenu(props) {
             // Menu is about to be set to visible.
             // Add a click handler for the document so a click outside
             // the menu will once again collapse the menu.
-            document.addEventListener('click', menuVisibilityHandler)
+            document.addEventListener('click', removeMenu)
             setVisibility({showMenu: true})
         }
         else {
-            // If we determined that we want clicks on the menu to keep it
-            // open via the 'stayOpen' prop, first check the origin of the
-            // click prior to making the menu invisible and removing the click
-            // listener.
-            if (props.stayOpen) {
-                if (visibility.visibleMenu.contains(event.target)){
-                    // This click was within the menu. Ignore it and return.
-                    return
-                }
-                // Implicit else is continue onward to close the menu
-            }
             // Menu is about to be set invisible. Remove our click
             // listener on the document
-            document.removeEventListener('click', menuVisibilityHandler)
+            document.removeEventListener('click', removeMenu)
             setVisibility({showMenu: false})
         }
     }
 
-    const backgroundClickHandler = (event) => {
+    const removeMenu = (event) => {
         event.preventDefault()
-        // If we click on the background, we should close the menu.
+        document.removeEventListener('click', removeMenu)
         setVisibility({showMenu: false})
     }
 
@@ -58,14 +46,12 @@ function DropDownMenu(props) {
 
     return (
         <Fragment>
-            <div onClick={backgroundClickHandler} className={classes.Background}/>
             <div className={classes.DropDownMenu}>
                 <button onClick={menuVisibilityHandler}>
                     Select {props.title}
                 </button>
                 {visibility.showMenu ? (
-                    <div className={classes.Menu}
-                    ref={(element) => {visibility.visibleMenu = element}}>
+                    <div className={classes.Menu}>
                         {selections}
                     </div>
                 )
@@ -80,7 +66,6 @@ function DropDownMenu(props) {
 DropDownMenu.propTypes = {
     title: PropTypes.string.isRequired,
     items: PropTypes.array.isRequired,
-    stayOpen: PropTypes.bool,
 }
 
 export default DropDownMenu
