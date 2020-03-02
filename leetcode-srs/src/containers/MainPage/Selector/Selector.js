@@ -48,7 +48,6 @@ const mapDispatchToProps = dispatch => {
     return {
         // updateList: (listId) => dispatch(actions.updateCurList(listId)),
         // updateProblem: (problemId) => dispatch(actions.updateCurProblem(problemId)),
-
     }
 }
 
