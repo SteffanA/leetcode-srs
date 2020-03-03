@@ -13,9 +13,6 @@ need links to:
     History
 */
 const Navbar = props => {
-    // useEffect(() => {
-    //     console.log('isAUth ', props.isAuth)
-    // }, [])
     return (
         <div className={classes.Navbar}>
             <div className={classes.Left}>
@@ -47,8 +44,7 @@ Navbar.propTypes = {
 
 const mapStateToProps = state => {
     return {
-        // TODO: Fix this. This shouldn't work but is currently
-        isAuth: (state.isAuth === null),    
+        isAuth: (state.auth.token !== null),    
     }
 }
 

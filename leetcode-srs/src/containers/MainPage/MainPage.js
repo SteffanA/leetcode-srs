@@ -15,9 +15,9 @@ Main Page is made of 3 main components:
         Either select problem via 'start next' button or hand pick
 */
 const MainPage = (props) => {
-    useEffect(() => {
-        console.log("Test")
-    }, [])
+    // useEffect(() => {
+    //     console.log("Test")
+    // }, [])
 
     const [elements, setelements] = useState({
         formVisible: false,

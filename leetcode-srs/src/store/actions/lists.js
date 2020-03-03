@@ -31,6 +31,7 @@ export const listGetListsSuccess = (lists, firstList) => {
         type: actions.LIST_RETRIEVE,
         lists: lists,
         firstList: firstList,
+        error: null,
     }
 }
 
@@ -46,19 +47,27 @@ export const listGetAll = () => {
         else {
             // Get the user's lists
             //TODO: Adjust the api call when we edit the list server side code
-            let url = process.env.REACT_APP_HOST_URL + '/api/lists/own'
-            axios.get(url).then(response => {
+            const url = process.env.REACT_APP_HOST_URL + '/api/lists/own'
+            const config = {
+                headers: {
+                    'x-auth-token': token,
+                    'content-type': 'json',
+                }
+            }
+            axios.get(url, config).then(response => {
                 if (!response) {
                     // No data returned.
                     dispatch(listError('No lists available.'))
                 }
                 else {
-                    firstList = response.data[0]._id
+                    const firstList = response.data[0]
                     dispatch(listGetListsSuccess(response.data, firstList))
                 }
                 
             }).catch(error => {
                 console.log(error)
+                // TODO: When this works as intended, causes infinite loop. Need to determine why.
+                // Infinite loop is of exclusively the LIST_ERROR call
                 dispatch(listError(error.msg))
             })
         }
@@ -66,9 +75,9 @@ export const listGetAll = () => {
     
 }
 
-export const listSetCurrent = (listId) => {
+export const listSetCurrent = (list) => {
     return {
         type: actions.LIST_SET_CURRENT,
-        curList: listId,
+        curList: list,
     }
 }

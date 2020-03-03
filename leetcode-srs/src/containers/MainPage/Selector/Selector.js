@@ -1,9 +1,9 @@
-import React from 'react'
+import React, {useEffect}  from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 
 import DropDownMenu from '../../SharedItems/DropDownMenu'
-// import * as actions from '../../store/actions/listandproblems'
+import * as listActions from '../../../store/actions/lists'
 
 
 /*
@@ -13,6 +13,19 @@ Select a list from a drop down menu of lists associated with them
 Select a problem from the above selected-list
 */
 const Selector = props => {
+    // Destructure props when neccessary
+    const {
+        auth,
+        getLists
+    } = props
+
+    // When this component mounts, try to get the lists
+    useEffect(() => {
+        if (auth) {
+            getLists()
+            console.log('got lists')
+        }
+    }, [auth, getLists])
 
 // JSX Elements
     let menuItems = null
@@ -20,36 +33,39 @@ const Selector = props => {
     // If we're authenticated, we should display
     // the user's lists and problems for list
     // in a seperate drop down menu for each.
-    if (props.auth) {
-        // TODO: This is tets code; replace with real stuff
-        // We need to get all the lists a user has (eventually limit)
-        // and transform into an array to pass to the list
-        // Or, we could pass as is and update the drop down? idk
-        menuItems = [ 
-            'problem 1',
-            'problem 2',
-            'problem 3'
-        ]
+    if (props.lists) {
+        menuItems = props.lists.map((list) => {
+            return {name: list.name, id: list._id}
+        })
+    }
+    
+    let title = 'No Lists'
+    if (props.curList) {
+        title = props.curList
     }
 
     return (
         <div>
-            <DropDownMenu items={menuItems} title='Test'/>
+            <DropDownMenu items={menuItems} title={title.name}/>
         </div>
     )
 }
 
 const mapStateToProps = (state) => {
     return {
-        problem: state.curProblem,
-        list: state.curList,
-        auth: state.auth.token === null,
+        // problem: state.problems.curProblem,
+        lists: state.lists.usersLists,
+        curList: state.lists.curList,
+        loading: state.lists.loading, // TODO: Needed?
+        error: state.lists.error,
+        auth: state.auth.token !== null,
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        // updateList: (listId) => dispatch(actions.updateCurList(listId)),
+        getLists: () => dispatch(listActions.listGetAll()),
+        setCurrentList: (id) => dispatch(listActions.listSetCurrent(id)),
         // updateProblem: (problemId) => dispatch(actions.updateCurProblem(problemId)),
     }
 }
@@ -57,6 +73,8 @@ const mapDispatchToProps = dispatch => {
 
 Selector.propTypes = {
     auth: PropTypes.bool.isRequired,
+    getLists: PropTypes.func.isRequired,
+    setCurrentList: PropTypes.func.isRequired,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Selector)

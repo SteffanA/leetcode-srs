@@ -34,6 +34,7 @@ const listGetLists = (state, action) => {
 
 // Update state to note we encounterd an error
 const listError = (state, action) => {
+    console.log(action)
     return updateObject(state, {error: action.error, loading: false})
 }
 
