@@ -1,4 +1,4 @@
-import React, {Fragment, useState} from 'react'
+import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 
 import classes from './DropDownMenu.module.css'
@@ -38,28 +38,26 @@ function DropDownMenu(props) {
     // Make a button for each item passed
     if (props.items) {
         selections = props.items.map(item => (
-            <button>
+            <button key={item}>
                 {item}
             </button>
         ))
     }
 
     return (
-        <Fragment>
-            <div className={classes.DropDownMenu}>
-                <button onClick={menuVisibilityHandler}>
-                    Select {props.title}
-                </button>
-                {visibility.showMenu ? (
-                    <div className={classes.Menu}>
-                        {selections}
-                    </div>
-                )
-                :
-                null
-                }
-            </div>
-        </Fragment>
+        <div className={classes.DropDownMenu}>
+            <button onClick={menuVisibilityHandler}>
+                Select {props.title}
+            </button>
+            {visibility.showMenu ? (
+                <div className={classes.Menu}>
+                    {selections}
+                </div>
+            )
+            :
+            null
+            }
+        </div>
     )
 }
 

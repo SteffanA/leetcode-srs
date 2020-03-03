@@ -9,6 +9,15 @@ const mongoose = require('mongoose')
 
 const router = express.Router()
 
+//TODO: Make a route for:
+/*
+1) Not copying, but adding a public list to user account
+    such that they can see it, but not edit
+2) Remove lists from 'favorited' lists w/o deleting actual list
+
+Maybe add a can-edit field
+or; on backend and front-end, check if owner == cur user
+*/
 
 // @route  GET api/lists
 // @desc   Get all public Lists

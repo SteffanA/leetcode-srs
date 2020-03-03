@@ -22,6 +22,9 @@ const Selector = props => {
     // in a seperate drop down menu for each.
     if (props.auth) {
         // TODO: This is tets code; replace with real stuff
+        // We need to get all the lists a user has (eventually limit)
+        // and transform into an array to pass to the list
+        // Or, we could pass as is and update the drop down? idk
         menuItems = [ 
             'problem 1',
             'problem 2',
