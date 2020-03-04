@@ -19,7 +19,7 @@ const authSuccess = (state, action) => {
     console.log('auth successful. token set to ', action.token)
     return updateObject(state, {
         error: null,
-        loading: true,
+        loading: false,
         token: action.token,
         userId: action.userId,
     })

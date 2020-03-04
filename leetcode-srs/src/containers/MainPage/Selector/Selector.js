@@ -83,7 +83,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        getLists: () => dispatch(listActions.listGetAll()),
+        getLists: () => dispatch(listActions.listsGetAll()),
         // updateProblem: (problemId) => dispatch(actions.updateCurProblem(problemId)),
     }
 }

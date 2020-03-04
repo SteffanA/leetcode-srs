@@ -15,21 +15,21 @@ Should all be done in a reducer/action?
 const listStart = () => {
     console.log('starting list process')
     return {
-        type: actions.LIST_START,
+        type: actions.LISTS_START,
     }
 }
 
 // Mark our list action as having an error and store it
 const listError = (error) => {
     return {
-        type: actions.LIST_ERROR,
+        type: actions.LISTS_ERROR,
         error: error,
     }
 }
 
-const listGetListsSuccess = (lists, firstList) => {
+const listsGetListsSuccess = (lists, firstList) => {
     return {
-        type: actions.LIST_RETRIEVE,
+        type: actions.LISTS_RETRIEVE,
         lists: lists,
         firstList: firstList,
         error: null,
@@ -38,7 +38,7 @@ const listGetListsSuccess = (lists, firstList) => {
 
 // BEGIN EXPORTS
 
-export const listGetAll = () => {
+export const listsGetAll = () => {
     return dispatch => {
         // Start the list process
         dispatch(listStart())
@@ -65,7 +65,7 @@ export const listGetAll = () => {
                 }
                 else {
                     const firstList = response.data[0]
-                    dispatch(listGetListsSuccess(response.data, firstList))
+                    dispatch(listsGetListsSuccess(response.data, firstList))
                 }
                 
             }).catch(error => {
@@ -81,7 +81,7 @@ export const listGetAll = () => {
 // Update the current list
 export const listSetCurrent = (list) => {
     return {
-        type: actions.LIST_SET_CURRENT,
+        type: actions.LISTS_SET_CURRENT,
         curList: list,
     }
 }

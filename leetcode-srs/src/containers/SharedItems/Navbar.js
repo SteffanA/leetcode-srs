@@ -33,7 +33,7 @@ const Navbar = props => {
                 {/* Set CSS so below is ... below the above*/}
                 <NavLink className={classes.NavLink} to='/history'>History</NavLink>
             </div> 
-            <button >Test button. i should be blue.</button>
+            {/* TODO: Use this to fix css module stuff <button >Test button. i should be blue.</button>*/}
         </div>
     )
 }
