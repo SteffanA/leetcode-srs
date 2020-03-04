@@ -24,9 +24,10 @@ export const checkAuthTimeout = (expiresIn) => {
     return dispatch => {
         console.log('Expires in: ' + expiresIn)
         // TODO: Fix the broken logout handler
+        // TODO: Is this even required...? Seems to handle expired token okay
         // setTimeout(() => {
         //     dispatch(logout())
-        // }, expiresIn)
+        // }, expiresIn*1000)
     }
 }
 
