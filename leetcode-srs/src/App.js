@@ -6,6 +6,7 @@ import './App.css';
 import MainPage from './containers/MainPage/MainPage';
 import Navbar from './containers/SharedItems/Navbar'
 import Auth from './containers/Auth/Auth'
+import Logout from './containers/Auth/Logout'
 
 import * as actions from './store/actions/index'
 
@@ -29,6 +30,7 @@ const App = props => {
           {/* <Alert />*/}
           <Switch>
             <Route exact path="/auth" component={Auth} />
+            <Route exact path="/logout" component={Logout} />
             {/*
             <PrivateRoute exact path="/create-list" component={ListBuilder} />
           */}
