@@ -3,6 +3,7 @@ import {updateObject} from '../../utility/utility'
 
 const initialState = {
     curList: null,
+    curListName: null, // We could grab out of curList, but this is better perf
     usersLists: null,
     error: null,
     loading: false,
@@ -18,7 +19,8 @@ const listStart = (state, action) => {
 // Set the current list (presumably to one of the ones in userLists)
 const listSetCurrent = (state, action) => {
     return updateObject(state, {
-        curList: action.selectedList
+        curList: action.curList[0],
+        curListName: action.curList[0].name,
     })
 }
 
@@ -26,6 +28,7 @@ const listSetCurrent = (state, action) => {
 const listGetLists = (state, action) => {
     return updateObject(state, {
         curList: action.firstList,
+        curListName: action.firstList.name,
         usersLists: action.lists,
         error: null,
         loading: false,
@@ -34,6 +37,7 @@ const listGetLists = (state, action) => {
 
 // Update state to note we encounterd an error
 const listError = (state, action) => {
+    console.log(action)
     return updateObject(state, {error: action.error, loading: false})
 }
 

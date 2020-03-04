@@ -12,10 +12,8 @@ need links to:
     Edit
     History
 */
+// TODO: The auth workflow is a bit messed up - use the login/logout button to test
 const Navbar = props => {
-    // useEffect(() => {
-    //     console.log('isAUth ', props.isAuth)
-    // }, [])
     return (
         <div className={classes.Navbar}>
             <div className={classes.Left}>
@@ -47,8 +45,7 @@ Navbar.propTypes = {
 
 const mapStateToProps = state => {
     return {
-        // TODO: Fix this. This shouldn't work but is currently
-        isAuth: (state.isAuth === null),    
+        isAuth: (state.auth.token !== null),    
     }
 }
 

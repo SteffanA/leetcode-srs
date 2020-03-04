@@ -1,12 +1,23 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
+import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 
+import * as listActions from '../../store/actions/lists'
 import classes from './DropDownMenu.module.css'
 
 function DropDownMenu(props) {
     const [visibility, setVisibility] = useState({
         showMenu: false,
     })
+
+    const {
+        title
+    } = props
+
+    useEffect(() => {
+        // We need to update this if the title changes
+        console.log('new title: ', title)
+    }, [title])
 
     const menuVisibilityHandler = (event) => {
         event.preventDefault()
@@ -32,14 +43,29 @@ function DropDownMenu(props) {
         setVisibility({showMenu: false})
     }
 
+    // Set the current list when a list is selected from the drop down
+    const setCurList = (id) => {
+        // Find the matching list from curLists based on the passed ID
+        const matchingList = props.lists.filter(list => (list._id.localeCompare(id) === 0))
+        if (!matchingList) {
+            // I don't see how this can happen - but let's handle it
+            console.log('List not found.')
+        }
+        else {
+            // Update the cur list
+            console.log('updating to ', matchingList)
+            props.updateCurList(matchingList)
+        }
+    }
+
     // Set up the selections this drop down menu will provide
     let selections = null
 
     // Make a button for each item passed
     if (props.items) {
         selections = props.items.map(item => (
-            <button key={item}>
-                {item}
+            <button key={item.id} onClick={() => setCurList(item.id)}>
+                {item.name}
             </button>
         ))
     }
@@ -61,9 +87,23 @@ function DropDownMenu(props) {
     )
 }
 
+const mapStateToProps = state => {
+    return {
+        lists: state.lists.usersLists,
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        updateCurList: (list) => dispatch(listActions.listSetCurrent(list)),
+    }
+}
+
+
 DropDownMenu.propTypes = {
     title: PropTypes.string.isRequired,
     items: PropTypes.array.isRequired,
+    updateCurList: PropTypes.func.isRequired,
 }
 
-export default DropDownMenu
+export default connect(mapStateToProps, mapDispatchToProps)(DropDownMenu)

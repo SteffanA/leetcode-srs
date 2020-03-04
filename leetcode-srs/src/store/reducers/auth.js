@@ -16,6 +16,7 @@ const authStart = (state, action) => {
 // Successful authentication action - reset error & loading
 // Update token and ID information
 const authSuccess = (state, action) => {
+    console.log('auth successful. token set to ', action.token)
     return updateObject(state, {
         error: null,
         loading: true,

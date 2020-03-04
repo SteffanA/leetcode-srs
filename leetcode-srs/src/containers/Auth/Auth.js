@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import classes from './Auth.module.css'
 import { connect } from 'react-redux'
@@ -13,6 +13,9 @@ import * as actions from '../../store/actions/auth'
 
 
 const Auth = props => {
+    useEffect(() => {
+        console.log(props)
+    }, [props])
 // State code
     const [loginState, setLoginState] = useState({
         // Are we registering or logging in?
@@ -111,6 +114,7 @@ const Auth = props => {
         }
 
         // We can use the same function for login and register.
+        console.log('about to auth')
         props.auth(email.value, password.value, isRegister, name.value)
     }
 
