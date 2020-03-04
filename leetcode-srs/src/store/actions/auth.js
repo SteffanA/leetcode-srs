@@ -22,9 +22,11 @@ export const authSuccess = (token, name) => {
 // Logout our user when token expires
 export const checkAuthTimeout = (expiresIn) => {
     return dispatch => {
-        setTimeout(() => {
-            dispatch(logout())
-        }, expiresIn * 1000)
+        console.log('Expires in: ' + expiresIn)
+        // TODO: Fix the broken logout handler
+        // setTimeout(() => {
+        //     dispatch(logout())
+        // }, expiresIn)
     }
 }
 

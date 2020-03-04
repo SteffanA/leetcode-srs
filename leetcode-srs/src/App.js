@@ -18,7 +18,7 @@ const App = props => {
   // Try to login automatically on page load. Only run once
   useEffect(() => {
     props.onTryAutoSignIn()
-  })
+  }, [])
 
   return (
     // {/* <Provider store={store}> */}

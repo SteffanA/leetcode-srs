@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 // import {Link} from 'react-router-dom'
-// import PropTypes from 'prop-types'
+import PropTypes from 'prop-types'
 import classes from './MainPage.module.css'
 import { connect } from 'react-redux'
 
@@ -15,9 +15,9 @@ Main Page is made of 3 main components:
         Either select problem via 'start next' button or hand pick
 */
 const MainPage = (props) => {
-    useEffect(() => {
-        console.log("Test")
-    }, [])
+    // useEffect(() => {
+    //     console.log("Test")
+    // }, [])
 
     const [elements, setelements] = useState({
         formVisible: false,
@@ -48,7 +48,7 @@ const MainPage = (props) => {
 
     return (
         <div className={classes.MainPage}>
-            <Selector/>
+            {props.isAuth && <Selector/>}
             
             <a href={link} target='_blank' rel="noopener noreferrer" onClick={openProblemHandler}>Start Problem</a>
         </div>
@@ -58,7 +58,8 @@ const MainPage = (props) => {
 const mapStateToProps = (state) => {
     return {
         curProblem: state.curProblem, // currently selected problem
-        curList: state.curList, // currently selected list
+        curList: state.lists.curList, // currently selected list
+        isAuth: state.auth.token !== null,
     }
 }
 
@@ -69,7 +70,9 @@ const mapDispatchToProps = (dispatch) => {
 }
 
 MainPage.propTypes = {
-
+    curProblem: PropTypes.object,
+    curList: PropTypes.object,
+    isAuth: PropTypes.bool.isRequired,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(MainPage)
