@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 
@@ -9,6 +9,15 @@ function DropDownMenu(props) {
     const [visibility, setVisibility] = useState({
         showMenu: false,
     })
+
+    const {
+        title
+    } = props
+
+    useEffect(() => {
+        // We need to update this if the title changes
+        console.log('new title: ', title)
+    }, [title])
 
     const menuVisibilityHandler = (event) => {
         event.preventDefault()
@@ -37,18 +46,7 @@ function DropDownMenu(props) {
     // Set the current list when a list is selected from the drop down
     const setCurList = (id) => {
         // Find the matching list from curLists based on the passed ID
-        let matchingList = null
-        console.log(props.lists)
-        console.log(id)
-        let list = null
-        for (list in props.lists) {
-            console.log(list)
-            if (list._id.localeCompare(id) === 0) {
-                // Found our matching list.
-                matchingList = list
-                break
-            }
-        }
+        const matchingList = props.lists.filter(list => (list._id.localeCompare(id) === 0))
         if (!matchingList) {
             // I don't see how this can happen - but let's handle it
             console.log('List not found.')
@@ -97,7 +95,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        updateCurList: (list) => listActions.listSetCurrent(list),
+        updateCurList: (list) => dispatch(listActions.listSetCurrent(list)),
     }
 }
 
@@ -105,6 +103,7 @@ const mapDispatchToProps = dispatch => {
 DropDownMenu.propTypes = {
     title: PropTypes.string.isRequired,
     items: PropTypes.array.isRequired,
+    updateCurList: PropTypes.func.isRequired,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(DropDownMenu)

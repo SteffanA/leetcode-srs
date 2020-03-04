@@ -12,21 +12,22 @@ Should all be done in a reducer/action?
 */
 
 // Start up the List retrieve processes
-export const listStart = () => {
+const listStart = () => {
+    console.log('starting list process')
     return {
         type: actions.LIST_START,
     }
 }
 
 // Mark our list action as having an error and store it
-export const listError = (error) => {
+const listError = (error) => {
     return {
         type: actions.LIST_ERROR,
         error: error,
     }
 }
 
-export const listGetListsSuccess = (lists, firstList) => {
+const listGetListsSuccess = (lists, firstList) => {
     return {
         type: actions.LIST_RETRIEVE,
         lists: lists,
@@ -35,9 +36,12 @@ export const listGetListsSuccess = (lists, firstList) => {
     }
 }
 
+// BEGIN EXPORTS
 
 export const listGetAll = () => {
     return dispatch => {
+        // Start the list process
+        dispatch(listStart())
         // Get the user's token from local storage
         const token = localStorage.getItem('token')
         if (!token) {
@@ -72,9 +76,9 @@ export const listGetAll = () => {
             })
         }
     }
-    
 }
 
+// Update the current list
 export const listSetCurrent = (list) => {
     return {
         type: actions.LIST_SET_CURRENT,
