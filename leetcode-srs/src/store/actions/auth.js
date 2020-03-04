@@ -22,9 +22,11 @@ export const authSuccess = (token, name) => {
 // Logout our user when token expires
 export const checkAuthTimeout = (expiresIn) => {
     return dispatch => {
-        setTimeout(() => {
-            dispatch(logout())
-        }, expiresIn * 1000)
+        console.log('Expires in: ' + expiresIn)
+        // TODO: Fix the broken logout handler
+        // setTimeout(() => {
+        //     dispatch(logout())
+        // }, expiresIn)
     }
 }
 
@@ -84,8 +86,7 @@ export const auth = (email, password, isRegister, name='') => {
             email: email,
             password: password,
         }
-        // TODO: Will this url ever change? Does it change when building? Current host format should let it be okay
-        let url = 'http://localhost:3000/api/'
+        let url = process.env.REACT_APP_HOST_URL + '/api/'
         // Change API endpoint and body depending on if we're registering or logging in
         if (isRegister) {
             // Name is also required when registering

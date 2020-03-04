@@ -7,13 +7,19 @@ import { createStore, applyMiddleware, compose, combineReducers } from 'redux'
 import {BrowserRouter as Router} from 'react-router-dom'
 import thunk from 'redux-thunk'
 import authReducer from './store/reducers/auth'
+import listsReducer from './store/reducers/lists'
 
 //TODO: Use the dotenv-webpack plugin to utilize a webpack for environ vars in this project
 const rootReducer = combineReducers({
   auth: authReducer,
+  lists: listsReducer,
 })
 
-const store = createStore(rootReducer, compose(
+const composeEnhancers = (window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ &&
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ trace: true, traceLimit: 25 })) 
+    || compose;
+
+const store = createStore(rootReducer, composeEnhancers(
     applyMiddleware(thunk)
 ))
 

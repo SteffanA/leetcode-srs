@@ -23,8 +23,22 @@
   width: 100%;
 }
 
-.Navbar NavLink:hover,
-.Navbar NavLink:active
+.NavLink {
+  margin: 0;
+  box-sizing: border-box;
+  border-color: black;
+  border-style: solid;
+  border-width: 2px;
+  text-align: center;
+  display: block;
+  width: 100%;
+  color: green;
+  text-decoration: none;
+  width: 100%;
+}
+
+.NavLink:hover,
+.NavLink:active
 {
     color: red;
 }
@@ -33,6 +47,16 @@
   color: black;
   font-size: large;
   font-weight: bold;
+  box-sizing: border-box;
+  border-color: black;
+  border-style: solid;
+  border-width: 2px;
+  text-align: center;
+  display: block;
+  width: 100%;
+  color: green;
+  text-decoration: none;
+  width: 100%;
 }
 
 
