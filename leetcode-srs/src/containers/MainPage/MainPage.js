@@ -48,7 +48,7 @@ const MainPage = (props) => {
 
     return (
         <div className={classes.MainPage}>
-            {props.isAuth ? <Selector/> : null}
+            {props.isAuth && <Selector/>}
             
             <a href={link} target='_blank' rel="noopener noreferrer" onClick={openProblemHandler}>Start Problem</a>
         </div>

@@ -12,6 +12,7 @@ need links to:
     Edit
     History
 */
+// TODO: The auth workflow is a bit messed up - use the login/logout button to test
 const Navbar = props => {
     return (
         <div className={classes.Navbar}>
