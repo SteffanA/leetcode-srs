@@ -17,6 +17,10 @@ const router = express.Router()
 
 Maybe add a can-edit field
 or; on backend and front-end, check if owner == cur user
+
+
+Wait, this is all actually done as a part of the user.
+Remove this TODO later, but commit this update so we know why.
 */
 
 // @route  GET api/lists
@@ -354,6 +358,54 @@ async (req, res) => {
         return res.json(updatedList)
     } catch (error) {
         console.error(error.message)
+        return res.status(500).send('Server Error')
+    }
+})
+
+// @route  GET /api/lists/:id/problems
+// @desc   Retrieve all problems in a given list
+// @access Private/Public.
+router.get('/:id/problems', [auth], 
+async (req, res) => {
+    try {
+        // Get the list with the given ID
+        const list = await List.findById(req.params.id)
+        if (!list) {
+            // Couldn't find a list with given ID
+            return res.status(404).json({errors: [{msg: 'List not found.'}]})
+        }
+        // If list is a private list, ensure User owns the list
+        if (!list.public) {
+            // TODO: DO we need to actually get user, or is req ID okay?
+            // const user = await User.findById(req.user.id)
+            // if (!user) {
+            //     console.log('Orphaned list found! Please manually delete ', list._id)
+            //     return res.status(401).json({errors: [{msg: 'Access to List denied.'}]})
+            // }
+            if (list.creator !== req.user.id) {
+                return res.status(401).json({errors: [{msg: 'Access to List denied.'}]})
+            }
+            // Implicit else is we're okay to access; continue onwards
+        }
+
+        // For each problem in the list, get the problem object and
+        // store it in an array
+        problems = []
+        for (let problemID in list.problems) {
+            // TODO: Is this going to work?
+            const problem = await Problem.findById(problemID)
+            if (!problem) {
+                console.log('Could not find problem with ID ', problemID, ' that is a part of a list')
+            }
+            else {
+                problems.push(problem)
+            }
+        }
+
+        // Return our array of problems
+        return res.json(problems)
+    } catch (error) {
+        console.log(error.message)
         return res.status(500).send('Server Error')
     }
 })

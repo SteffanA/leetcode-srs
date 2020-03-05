@@ -85,3 +85,5 @@ export const listSetCurrent = (list) => {
         curList: list,
     }
 }
+
+// TODO: Add a clear lists thing to execute on logout

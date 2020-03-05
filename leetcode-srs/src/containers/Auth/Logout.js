@@ -6,10 +6,13 @@ import * as actions from '../../store/actions/auth'
 
 // This container exists just to logout a user when they click logout
 const Logout = props => {
+    const {
+        logout
+    } = props
     // Run logout once
     useEffect(() => {
-        props.logout()
-    }, [])
+        logout()
+    }, [logout])
 
     // Redirect user back to home page.
     return (

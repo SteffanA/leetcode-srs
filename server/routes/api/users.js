@@ -158,6 +158,8 @@ async (req, res) => {
     }
 })
 
+
+
 // TODO: Fill out these routes eventually
 
 // @route  DELETE api/users
@@ -169,6 +171,25 @@ async (req, res) => {
 // @desc   Change a user's password
 // @access Private
 
-// TODO: Add a way to get a user's information.
+
+// @route  GET /api/users/:id
+// @desc   Retrieve a user's details
+// @access Private
+router.get('/:id', [auth], 
+async (req, res) => {
+    try {
+        // Get the User by the passed auth ID
+        const user = await User.findById(req.user.id)
+        // Ensure we could find them
+        if (!user) {
+            return res.status(404).json({errors: [{msg: 'User not found.'}]})
+        }
+        // Return the user as JSON
+        return res.json(user)
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).send('Server Error')
+    }
+})
 
 module.exports = router

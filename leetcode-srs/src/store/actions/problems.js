@@ -80,3 +80,5 @@ export const problemSetCurrent = (problem) => {
         curProblem: problem,
     }
 }
+
+// TODO: Add a clear problems thing to execute on logout
