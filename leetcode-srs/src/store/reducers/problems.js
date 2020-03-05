@@ -11,7 +11,7 @@ const initialState = {
 
 // Start up problem retrieval process
 const problemsStart = (state, action) => {
-    updateObject(state, {
+    return updateObject(state, {
         error: null,
         loading: true,
     })
@@ -19,7 +19,7 @@ const problemsStart = (state, action) => {
 
 // Mark our problem action as having an error and store it
 const problemsError = (state, action) => {
-    updateObject(state, {
+    return updateObject(state, {
         error: action.error,
         loading: false,
     })
@@ -27,7 +27,7 @@ const problemsError = (state, action) => {
 
 // Update our state to reflect the problems in current list.
 const problemsRetrieve = (state, action) => {
-    updateObject(state, {
+    return updateObject(state, {
         curProblem: action.firstProblem,
         curProblemName: action.firstProblem.name,
         curProblems: action.problems,
@@ -38,7 +38,7 @@ const problemsRetrieve = (state, action) => {
 
 // Set the current problem to one from the current list
 const problemsSetCurrent = (state, action) => {
-    updateObject(state, {
+    return updateObject(state, {
         curProblem: action.curProblem,
         curProblemName: action.curProblem.name,
         loading: false,

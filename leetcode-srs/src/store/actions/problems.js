@@ -41,13 +41,11 @@ export const problemsGetAllForList = (list) => {
         const token = localStorage.getItem('token')
         if (!token) {
             // If there's no token, we can't get problems
-            dispatch(listError('User not logged in!'))
+            dispatch(problemError('User not logged in!'))
         }
         else {
             // Get the problem's for a particular list.
-            //TODO: Adjust the api call when we add call to get all problems for a list
-            // Includes all of below.
-            const url = process.env.REACT_APP_HOST_URL + '/api/lists/own'
+            const url = process.env.REACT_APP_HOST_URL + '/api/lists/' + list._id +'/problems'
             const config = {
                 headers: {
                     'x-auth-token': token,
@@ -57,18 +55,18 @@ export const problemsGetAllForList = (list) => {
             axios.get(url, config).then(response => {
                 if (!response) {
                     // No data returned.
-                    dispatch(listError('No lists available.'))
+                    dispatch(problemError('No problems available.'))
                 }
                 else {
-                    const firstList = response.data[0]
-                    dispatch(listsGetListsSuccess(response.data, firstList))
+                    const firstProblem = response.data[0]
+                    dispatch(problemsGetProblemsSuccess(response.data, firstProblem))
                 }
                 
             }).catch(error => {
                 console.log(error)
                 // TODO: When this works as intended, causes infinite loop. Need to determine why.
                 // Infinite loop is of exclusively the LIST_ERROR call
-                dispatch(listError(error.msg))
+                dispatch(problemError(error.msg))
             })
         }
     }
