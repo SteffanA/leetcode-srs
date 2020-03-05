@@ -175,7 +175,7 @@ async (req, res) => {
 // @route  GET /api/users/:id
 // @desc   Retrieve a user's details
 // @access Private
-router.get('/:id', [auth], 
+router.get('/', [auth], 
 async (req, res) => {
     try {
         // Get the User by the passed auth ID
@@ -185,6 +185,7 @@ async (req, res) => {
             return res.status(404).json({errors: [{msg: 'User not found.'}]})
         }
         // Return the user as JSON
+        //TODO: Wipe password and __v from returned res lol
         return res.json(user)
     } catch (error) {
         console.log(error.message)

@@ -286,9 +286,6 @@ async (req, res) => {
             return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
         }
         // Get problem
-        if (!mongoose.Types.ObjectId.isValid(req.params.problem_id)) {
-            return res.status(404).send({errors: [{msg: 'Problem not found.'}]})
-        }
         const problem = await Problem.findOne({id: req.params.problem_id})
         // Ensure problem exists
         if (!problem) {
@@ -336,9 +333,6 @@ async (req, res) => {
             return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
         }
         // Get problem
-        if (!mongoose.Types.ObjectId.isValid(req.params.problem_id)) {
-            return res.status(404).send({errors: [{msg: 'Problem not found.'}]})
-        }
         const problem = await Problem.findOne({id: req.params.problem_id})
         // Ensure problem exists
         if (!problem) {
@@ -364,11 +358,14 @@ async (req, res) => {
 
 // @route  GET /api/lists/:id/problems
 // @desc   Retrieve all problems in a given list
-// @access Private/Public.
+// @access Private
 router.get('/:id/problems', [auth], 
 async (req, res) => {
     try {
         // Get the list with the given ID
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
         const list = await List.findById(req.params.id)
         if (!list) {
             // Couldn't find a list with given ID
@@ -376,6 +373,8 @@ async (req, res) => {
         }
         // If list is a private list, ensure User owns the list
         if (!list.public) {
+            // TODO: Test this bit
+            console.log('Not public')
             // TODO: DO we need to actually get user, or is req ID okay?
             // const user = await User.findById(req.user.id)
             // if (!user) {
@@ -391,24 +390,23 @@ async (req, res) => {
         // For each problem in the list, get the problem object and
         // store it in an array
         problems = []
-        for (let problemID in list.problems) {
-            // TODO: Is this going to work?
-            const problem = await Problem.findById(problemID)
+
+        for (let prob of list.problems) {
+            const problem = await Problem.findById(prob._id)
             if (!problem) {
-                console.log('Could not find problem with ID ', problemID, ' that is a part of a list')
+                // console.log('Could not find problem w/ id ', prob._id)
             }
             else {
+                // console.log(problem)
                 problems.push(problem)
             }
         }
 
-        // Return our array of problems
-        return res.json(problems)
+        return await res.json(problems)
     } catch (error) {
         console.log(error.message)
         return res.status(500).send('Server Error')
     }
 })
-
 
 module.exports = router
