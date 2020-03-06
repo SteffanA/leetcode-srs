@@ -16,7 +16,7 @@ function DropDownMenu(props) {
 
     useEffect(() => {
         // We need to update this if the title changes
-        console.log('new title: ', title)
+        // console.log('new title: ', title)
     }, [title])
 
     const menuVisibilityHandler = (event) => {
@@ -45,16 +45,14 @@ function DropDownMenu(props) {
 
     // Set the current list when a list is selected from the drop down
     const setCurItem = (id) => {
-        // Find the matching list from curLists based on the passed ID
-        console.log(items)
+        // Find the matching item from props items based on the passed ID
         const matchingItem = items.filter(item => (item.id.localeCompare(id) === 0))
         if (!matchingItem) {
             // I don't see how this can happen - but let's handle it
             console.log('Matching item not found - how did this happen?')
         }
         else {
-            // Update the cur list
-            console.log('updating to ', matchingItem.name)
+            // Update the cur item
             updateCurItem(matchingItem)
         }
     }

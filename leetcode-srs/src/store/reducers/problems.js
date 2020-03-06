@@ -52,12 +52,24 @@ const problemsSetCurrent = (state, action) => {
     })
 }
 
+// Reset the problems state back to default
+const problemsClear = (state, action) => {
+    return updateObject(state, {
+        curProblem: null,
+        curProblemName: null,
+        curProblems: null,
+        error: null,
+        loading: false,
+    })
+}
+
 export const problemReducer = (state=initialState, action) => {
     switch(action.type) {
         case actions.PROBLEMS_START: return problemsStart(state, action)
         case actions.PROBLEMS_ERROR: return problemsError(state, action)
         case actions.PROBLEMS_RETRIEVE: return problemsRetrieve(state, action)
         case actions.PROBLEMS_SET_CURRENT: return problemsSetCurrent(state, action)
+        case actions.PROBLEMS_CLEAR: return problemsClear(state, action)
         default: return state
     }
 }

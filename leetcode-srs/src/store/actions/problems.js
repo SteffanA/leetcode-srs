@@ -69,17 +69,12 @@ export const problemsGetAllForList = (list) => {
                     dispatch(problemError('No problems available.'))
                 }
                 else {
-                    console.log('Got problems as ', response.data)
-                    let firstProblem = null
-                    if (response.data.length > 0) {
-                        console.log(response.data.length, ' is greater than 0 i guess')
-                        firstProblem = response.data[0]
-                    }
+                    const firstProblem = response.data[0]
                     dispatch(problemsGetProblemsSuccess(response.data, firstProblem))
                 }
                 
             }).catch(error => {
-                console.log('problem get error of' , error, ' from ', url)
+                console.log('getProblems error of' , error, ' from ', url)
                 // TODO: When this works as intended, causes infinite loop. Need to determine why.
                 // Infinite loop is of exclusively the LIST_ERROR call; this seemed to have been called fine.
                 dispatch(problemError(error.msg))
@@ -92,5 +87,11 @@ export const problemSetCurrent = (problem) => {
     return {
         type: actions.PROBLEMS_SET_CURRENT,
         curProblem: problem,
+    }
+}
+
+export const problemsClear = () => {
+    return {
+        type: actions.PROBLEMS_CLEAR,
     }
 }

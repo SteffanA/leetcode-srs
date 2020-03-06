@@ -85,3 +85,10 @@ export const listSetCurrent = (list) => {
         curList: list,
     }
 }
+
+// Clear out any information regarding lists
+export const listClear = () => {
+    return {
+        type: actions.LISTS_CLEAR,
+    }
+}

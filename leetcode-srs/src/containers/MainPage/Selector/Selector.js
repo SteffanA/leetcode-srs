@@ -1,4 +1,4 @@
-import React, {useEffect, useRef}  from 'react'
+import React, {useEffect}  from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import useDeepCompareEffect from 'use-deep-compare-effect'
@@ -15,9 +15,6 @@ Select a list from a drop down menu of lists associated with them
 Select a problem from the above selected-list
 */
 const Selector = props => {
-
-    const listName = useRef()
-
     // Destructure props when neccessary
     const {
         auth,
