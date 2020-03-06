@@ -27,9 +27,16 @@ const problemsError = (state, action) => {
 
 // Update our state to reflect the problems in current list.
 const problemsRetrieve = (state, action) => {
+    // This little bit of hacky-ness is b/c not all lists have to
+    // have any problems associated with it.
+    // This action works w/o the fix, but will throw an error.
+    let firstProbName = null
+    if (action.firstProblem) {
+        firstProbName = action.firstProblem.name
+    }
     return updateObject(state, {
         curProblem: action.firstProblem,
-        curProblemName: action.firstProblem.name,
+        curProblemName: firstProbName,
         curProblems: action.problems,
         error: null,
         loading: false,
@@ -45,16 +52,12 @@ const problemsSetCurrent = (state, action) => {
     })
 }
 
-const reducer = (state=initialState, action) => {
+export const problemReducer = (state=initialState, action) => {
     switch(action.type) {
         case actions.PROBLEMS_START: return problemsStart(state, action)
         case actions.PROBLEMS_ERROR: return problemsError(state, action)
         case actions.PROBLEMS_RETRIEVE: return problemsRetrieve(state, action)
         case actions.PROBLEMS_SET_CURRENT: return problemsSetCurrent(state, action)
-        default:
-            console.log('Hit default problem reducer case')
-            return state
+        default: return state
     }
 }
-
-export default reducer

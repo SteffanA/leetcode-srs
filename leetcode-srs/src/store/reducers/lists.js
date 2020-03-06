@@ -42,16 +42,12 @@ const listError = (state, action) => {
     return updateObject(state, {error: action.error, loading: false})
 }
 
-const reducer = (state=initialState, action) => {
+export const listReducer = (state=initialState, action) => {
     switch (action.type) {
         case actions.LISTS_START: return listStart(state, action)
         case actions.LISTS_ERROR: return listError(state, action)
         case actions.LISTS_RETRIEVE: return listGetLists(state, action)
         case actions.LISTS_SET_CURRENT: return listSetCurrent(state, action)
-        default:
-            console.log('Hit default lists reducer') 
-            return state
+        default: return state
     }
 }
-
-export default reducer

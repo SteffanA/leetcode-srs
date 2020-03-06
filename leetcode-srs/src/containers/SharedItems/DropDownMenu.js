@@ -1,8 +1,6 @@
 import React, {useState, useEffect} from 'react'
-import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 
-import * as listActions from '../../store/actions/lists'
 import classes from './DropDownMenu.module.css'
 
 function DropDownMenu(props) {
@@ -11,7 +9,9 @@ function DropDownMenu(props) {
     })
 
     const {
-        title
+        title,
+        updateCurItem,
+        items
     } = props
 
     useEffect(() => {
@@ -44,17 +44,18 @@ function DropDownMenu(props) {
     }
 
     // Set the current list when a list is selected from the drop down
-    const setCurList = (id) => {
+    const setCurItem = (id) => {
         // Find the matching list from curLists based on the passed ID
-        const matchingList = props.lists.filter(list => (list._id.localeCompare(id) === 0))
-        if (!matchingList) {
+        console.log(items)
+        const matchingItem = items.filter(item => (item.id.localeCompare(id) === 0))
+        if (!matchingItem) {
             // I don't see how this can happen - but let's handle it
-            console.log('List not found.')
+            console.log('Matching item not found - how did this happen?')
         }
         else {
             // Update the cur list
-            console.log('updating to ', matchingList)
-            props.updateCurList(matchingList)
+            console.log('updating to ', matchingItem.name)
+            updateCurItem(matchingItem)
         }
     }
 
@@ -62,9 +63,9 @@ function DropDownMenu(props) {
     let selections = null
 
     // Make a button for each item passed
-    if (props.items) {
-        selections = props.items.map(item => (
-            <button key={item.id} onClick={() => setCurList(item.id)}>
+    if (items) {
+        selections = items.map(item => (
+            <button key={item.id} onClick={() => setCurItem(item.id)}>
                 {item.name}
             </button>
         ))
@@ -87,23 +88,11 @@ function DropDownMenu(props) {
     )
 }
 
-const mapStateToProps = state => {
-    return {
-        lists: state.lists.usersLists,
-    }
-}
-
-const mapDispatchToProps = dispatch => {
-    return {
-        updateCurList: (list) => dispatch(listActions.listSetCurrent(list)),
-    }
-}
-
 
 DropDownMenu.propTypes = {
     title: PropTypes.string.isRequired,
     items: PropTypes.array.isRequired,
-    updateCurList: PropTypes.func.isRequired,
+    updateCurItem: PropTypes.func.isRequired,
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(DropDownMenu)
+export default DropDownMenu
