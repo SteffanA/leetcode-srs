@@ -46,14 +46,17 @@ function DropDownMenu(props) {
     // Set the current list when a list is selected from the drop down
     const setCurItem = (id) => {
         // Find the matching item from props items based on the passed ID
-        const matchingItem = items.filter(item => (item.id.localeCompare(id) === 0))
-        if (!matchingItem) {
+        const matchingItems = items.filter(item => (item.id.localeCompare(id) === 0))
+        if (!matchingItems) {
             // I don't see how this can happen - but let's handle it
             console.log('Matching item not found - how did this happen?')
         }
         else {
+            console.log('Matching item is: ', matchingItems)
             // Update the cur item
-            updateCurItem(matchingItem)
+            // Note filter returns an array; there should only be 1 matching element
+            // so we'll grab the first
+            updateCurItem(matchingItems[0])
         }
     }
 

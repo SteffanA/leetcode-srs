@@ -19,8 +19,8 @@ const listStart = (state, action) => {
 // Set the current list (presumably to one of the ones in userLists)
 const listSetCurrent = (state, action) => {
     return updateObject(state, {
-        curList: action.curList[0],
-        curListName: action.curList[0].name,
+        curList: action.curList,
+        curListName: action.curList.name,
         loading: false,
     })
 }

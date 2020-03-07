@@ -75,8 +75,9 @@ export const problemsGetAllForList = (list) => {
                 
             }).catch(error => {
                 console.log('getProblems error of' , error, ' from ', url)
-                // TODO: When this works as intended, causes infinite loop. Need to determine why.
-                // Infinite loop is of exclusively the LIST_ERROR call; this seemed to have been called fine.
+                // Clear out the problems if we failed to retreive any. If we're swapping between lists,
+                // this might happen and we don't want to display problems associated w/ another list.
+                dispatch(problemsClear())
                 dispatch(problemError(error.msg))
             })
         }
@@ -84,6 +85,7 @@ export const problemsGetAllForList = (list) => {
 }
 
 export const problemSetCurrent = (problem) => {
+    console.log('setting current problem to: ', problem)
     return {
         type: actions.PROBLEMS_SET_CURRENT,
         curProblem: problem,

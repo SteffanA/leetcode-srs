@@ -36,12 +36,23 @@ const Selector = props => {
             getLists()
             console.log('got lists')
         }
-        // TODO: Is this going to work? We can't add curList as dep since
-        // then we'll constantly refresh this useEffect I think. Need to re-test
         console.log('Updating selector')
     }, [auth, lists, getLists])
-    // TODO: The above isn't refreshing the problems when we have a new listName
 
+
+    // TODO: Why does swapping between lists no longer refresh the problems?
+    /*
+    How to cause:
+        Select list w/ problems
+        Select problem besides default
+        Select a list w/ same name
+    
+        Trace:
+        List -> get problem -> update selector.
+        match list -> get problem -> update selector
+        match prob.
+        match list -> get prob -> update selector -> getProb error of 401.
+    */
     useDeepCompareEffect(() =>{
         if (curList) {
             getProblems(curList)

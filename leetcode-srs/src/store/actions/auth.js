@@ -53,6 +53,7 @@ export const checkAuthState = () => {
         // Check if we have a stored token
         const token = localStorage.getItem('token')
         if (!token) {
+            console.log('No token logout')
             // Logout if no token; no effect if not logged in
             dispatch(logoutHandler())
         }
