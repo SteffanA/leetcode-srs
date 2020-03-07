@@ -41,13 +41,22 @@ export const problemsGetAllForList = (list) => {
         const token = localStorage.getItem('token')
         if (!token) {
             // If there's no token, we can't get problems
-            dispatch(listError('User not logged in!'))
+            dispatch(problemError('User not logged in!'))
         }
         else {
+            console.log(list)
             // Get the problem's for a particular list.
-            //TODO: Adjust the api call when we add call to get all problems for a list
-            // Includes all of below.
-            const url = process.env.REACT_APP_HOST_URL + '/api/lists/own'
+            // TODO: Figure out why the _id changes to id and remove this hack
+            let url = process.env.REACT_APP_HOST_URL + '/api/lists/'
+            if (list.id) {
+                url = url + list.id +'/problems'
+            }
+            else if (list._id) {
+                url = url + list._id +'/problems'
+            }
+            else {
+                dispatch(problemError('No problem ID!'))
+            }
             const config = {
                 headers: {
                     'x-auth-token': token,
@@ -57,28 +66,34 @@ export const problemsGetAllForList = (list) => {
             axios.get(url, config).then(response => {
                 if (!response) {
                     // No data returned.
-                    dispatch(listError('No lists available.'))
+                    dispatch(problemError('No problems available.'))
                 }
                 else {
-                    const firstList = response.data[0]
-                    dispatch(listsGetListsSuccess(response.data, firstList))
+                    const firstProblem = response.data[0]
+                    dispatch(problemsGetProblemsSuccess(response.data, firstProblem))
                 }
                 
             }).catch(error => {
-                console.log(error)
-                // TODO: When this works as intended, causes infinite loop. Need to determine why.
-                // Infinite loop is of exclusively the LIST_ERROR call
-                dispatch(listError(error.msg))
+                console.log('getProblems error of' , error, ' from ', url)
+                // Clear out the problems if we failed to retreive any. If we're swapping between lists,
+                // this might happen and we don't want to display problems associated w/ another list.
+                dispatch(problemsClear())
+                dispatch(problemError(error.msg))
             })
         }
     }
 }
 
 export const problemSetCurrent = (problem) => {
+    console.log('setting current problem to: ', problem)
     return {
         type: actions.PROBLEMS_SET_CURRENT,
         curProblem: problem,
     }
 }
 
-// TODO: Add a clear problems thing to execute on logout
+export const problemsClear = () => {
+    return {
+        type: actions.PROBLEMS_CLEAR,
+    }
+}

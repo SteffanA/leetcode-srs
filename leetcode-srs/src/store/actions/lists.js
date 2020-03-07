@@ -70,8 +70,8 @@ export const listsGetAll = () => {
                 
             }).catch(error => {
                 console.log(error)
-                // TODO: When this works as intended, causes infinite loop. Need to determine why.
-                // Infinite loop is of exclusively the LIST_ERROR call
+                // Clear out the old lists if we failed to get any
+                dispatch(listClear())
                 dispatch(listError(error.msg))
             })
         }
@@ -86,4 +86,9 @@ export const listSetCurrent = (list) => {
     }
 }
 
-// TODO: Add a clear lists thing to execute on logout
+// Clear out any information regarding lists
+export const listClear = () => {
+    return {
+        type: actions.LISTS_CLEAR,
+    }
+}
