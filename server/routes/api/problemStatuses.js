@@ -205,14 +205,14 @@ async (req, res) => {
         problem_status.interval = 1
         problem_status.results.success = 0
         problem_status.results.incorrect = 0
+
+        //DEFERRED: Need to actually delete all submissions from database
+        //Should we reset submissions? Might be worth having even
         // const submissions = problem_status.submissions
         // problem_status.submissions = []
 
-        //TODO: Need to actually delete all submissions from database
-        // TODO: Should we reset submissions? Might be worth having even
         // if we reset our progress. Let's keep for now.
-        // TODO: Check if below 1) Works and 2) Is the best practice
-        // for (let submission in submissions) {
+        // for (let submission of submissions) {
         //     await submission.remove()
         // }
 

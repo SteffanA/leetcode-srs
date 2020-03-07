@@ -12,7 +12,7 @@ import json # For converting from/to JSON
 from dotenv import load_dotenv # For getting environmental variables from .env file
 from os import getenv # For getting environmental variables
 
-# TODO: Maybe make this get the JSON through a call to LC api directly vs a file w/ results
+# DEFERRED: Maybe make this get the JSON through a call to LC api directly vs a file w/ results
 class helper:
     def __init__(self):
         # Setup environmental variables
