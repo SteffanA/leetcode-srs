@@ -59,7 +59,9 @@ export const checkAuthState = () => {
         }
         else {
             // We have a token stored; check if it's still valid
-            const expirationDate = new Date(localStorage.getItem('expirationDate'))
+            // TODO: This is all definitely wrong now; we need to fix.
+            const expirationDate = Date.now()+(localStorage.getItem('expirationDate')*1000)
+            console.log('expire data ', expirationDate)
             // Check if token has already expired
             if (expirationDate > new Date()) {
                 // Still valid, let's login with it
@@ -67,10 +69,11 @@ export const checkAuthState = () => {
                 // Mark us successfully logged in
                dispatch(authSuccess(token, name))
                // Start our auth timeout timer
-               dispatch(checkAuthTimeout(expirationDate.getTime() - new Date().getTime()))
+               dispatch(checkAuthTimeout(expirationDate - Date.now()))
             }
             else {
                 // Expired
+                console.log('Expired token, logging out.')
                 dispatch(logoutHandler())
             }
         }

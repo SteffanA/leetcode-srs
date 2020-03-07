@@ -52,7 +52,6 @@ function DropDownMenu(props) {
             console.log('Matching item not found - how did this happen?')
         }
         else {
-            console.log('Matching item is: ', matchingItems)
             // Update the cur item
             // Note filter returns an array; there should only be 1 matching element
             // so we'll grab the first

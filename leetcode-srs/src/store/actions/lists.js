@@ -55,8 +55,14 @@ export const listsGetAll = () => {
                     dispatch(listError('No lists available.'))
                 }
                 else {
-                    const firstList = response.data[0]
-                    dispatch(listsGetListsSuccess(response.data, firstList))
+                    // So for all other calls where we update the cur list, we have it such that
+                    // the object has id, not _id as a field.  We can take our response's first object
+                    // and use that to set the cur list as a 'unified' format firstList
+                    const unifiedFirstList = {
+                        id: response.data[0]._id,
+                        name: response.data[0].name
+                    }
+                    dispatch(listsGetListsSuccess(response.data, unifiedFirstList))
                 }
                 
             }).catch(error => {

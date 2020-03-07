@@ -44,21 +44,8 @@ export const problemsGetAllForList = (list) => {
             dispatch(problemError('User not logged in!'))
         }
         else {
-            console.log(list)
             // Get the problem's for a particular list.
-            // TODO: Figure out why the _id changes to id and remove this hack
-            let url = process.env.REACT_APP_HOST_URL + '/api/lists/'
-            if (list.id) {
-                console.log('list had id (vs _id')
-                url = url + list.id +'/problems'
-            }
-            else if (list._id) {
-                console.log('list had _id (vs id')
-                url = url + list._id +'/problems'
-            }
-            else {
-                dispatch(problemError('No problem ID!'))
-            }
+            let url = process.env.REACT_APP_HOST_URL + '/api/lists/' + list.id + '/problems'
             const config = {
                 headers: {
                     'x-auth-token': token,

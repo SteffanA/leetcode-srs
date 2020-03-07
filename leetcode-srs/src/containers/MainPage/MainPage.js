@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 // import {Link} from 'react-router-dom'
 import PropTypes from 'prop-types'
 import classes from './MainPage.module.css'
@@ -18,23 +18,43 @@ const MainPage = (props) => {
     const [elements, setelements] = useState({
         formVisible: false,
         timerVisible: false,
-        currentProblemStub: '',
     })
 
+    // Store our currentProblemStub such that it persists
+    const currentProblemStub = useRef('')
+
+    // Deconstruct the state
     const {
         formVisible,
         timerVisible,
-        currentProblemStub
     } = elements
+
+    // Deconstruct our props
+    const {
+        curProblem
+    } = props
+
+    // Update the problem stub whenever the curProblem changes
+    useEffect(() => {
+        console.log('Updating main page')
+        console.log(curProblem)
+        if (curProblem) {
+            console.log(curProblem)
+            console.log(curProblem.link)
+            currentProblemStub.current = curProblem.link
+        }
+    }, [curProblem])
+
+    
 
 
     const link = 'https://leetcode.com/problems/' + currentProblemStub
     let form = null
 
     const openProblemHandler = (event) => {
-        // Open the submission form
-
-        // Open the timer box and start the timer
+        // Show the form and the timer box
+        setelements({...elements, formVisible: true, timerVisible: true})
+        // Start the timer
         console.log('Problem started')
     }
 
@@ -60,7 +80,7 @@ const MainPage = (props) => {
 
 const mapStateToProps = (state) => {
     return {
-        curProblem: state.curProblem, // currently selected problem
+        curProblem: state.problems.curProblem, // currently selected problem
         curList: state.lists.curList, // currently selected list
         isAuth: state.auth.token !== null,
     }
