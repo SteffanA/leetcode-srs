@@ -16,28 +16,31 @@ chrome.exe --user-data-dir="C://Chrome dev session" --disable-web-security --ign
 */
 
 const App = props => {
+  // Deconstruct props as required
+  const {
+    onTryAutoSignIn
+  } = props
+
   // Try to login automatically on page load. Only run once
   useEffect(() => {
-    props.onTryAutoSignIn()
-  }, [])
+    onTryAutoSignIn()
+  }, [onTryAutoSignIn])
 
   return (
-    // {/* <Provider store={store}> */}
-      <Fragment>
-        <Navbar />
-        <Route exact path="/" component={MainPage} />
-        <section className="container">
-          {/* <Alert />*/}
-          <Switch>
-            <Route exact path="/auth" component={Auth} />
-            <Route exact path="/logout" component={Logout} />
-            {/*
-            <PrivateRoute exact path="/create-list" component={ListBuilder} />
-          */}
-          </Switch>
-        </section>
-      </Fragment>
-    // </Provider> 
+    <Fragment>
+      <Navbar />
+      <Route exact path="/" component={MainPage} />
+      <section className="container">
+        {/* <Alert />*/}
+        <Switch>
+          <Route exact path="/auth" component={Auth} />
+          <Route exact path="/logout" component={Logout} />
+          {/*
+          <PrivateRoute exact path="/create-list" component={ListBuilder} />
+        */}
+        </Switch>
+      </section>
+    </Fragment>
   );
 }
 

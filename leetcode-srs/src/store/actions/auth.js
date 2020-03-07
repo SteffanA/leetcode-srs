@@ -1,17 +1,19 @@
 import * as actionTypes from './actionTypes'
 import axios from 'axios'
+import { problemsClear } from './problems'
+import { listClear } from './lists'
 
 // Functions for our auth actions are here
 
 // Signal to reducer that auth has started
-export const authStart = () => {
+const authStart = () => {
     return {
         type: actionTypes.AUTH_START,
     }
 }
 
 // Send success action and payload to reducer
-export const authSuccess = (token, name) => {
+const authSuccess = (token, name) => {
     return {
         type: actionTypes.AUTH_SUCCESS,
         token: token,
@@ -20,11 +22,11 @@ export const authSuccess = (token, name) => {
 }
 
 // Logout our user when token expires
-export const checkAuthTimeout = (expiresIn) => {
+const checkAuthTimeout = (expiresIn) => {
     return dispatch => {
         console.log('Expires in: ' + expiresIn)
-        // TODO: Fix the broken logout handler
         // TODO: Is this even required...? Seems to handle expired token okay
+        // Un-commenting it breaks autologin; need to understand why
         // setTimeout(() => {
         //     dispatch(logout())
         // }, expiresIn*1000)
@@ -32,18 +34,14 @@ export const checkAuthTimeout = (expiresIn) => {
 }
 
 // Handle user logout & signal reducer
-export const logout = () => {
-    // Remove local storage info
-    localStorage.removeItem('token')
-    localStorage.removeItem('expirationDate')
-    localStorage.removeItem('userId')
+const logout = () => {
     return {
         type: actionTypes.AUTH_LOGOUT,
     }
 }
 
 // Signal to our reducer that auth has failed
-export const authFail = (error) => {
+const authFail = (error) => {
     return {
         type: actionTypes.AUTH_FAIL,
         error: error,
@@ -55,8 +53,9 @@ export const checkAuthState = () => {
         // Check if we have a stored token
         const token = localStorage.getItem('token')
         if (!token) {
+            console.log('No token logout')
             // Logout if no token; no effect if not logged in
-            dispatch(logout())
+            dispatch(logoutHandler())
         }
         else {
             // We have a token stored; check if it's still valid
@@ -72,7 +71,7 @@ export const checkAuthState = () => {
             }
             else {
                 // Expired
-                dispatch(logout())
+                dispatch(logoutHandler())
             }
         }
     }   
@@ -105,27 +104,33 @@ export const auth = (email, password, isRegister, name='') => {
         // Add as a param; url += ?key=API_KEY
         axios.post(url, authData)
             .then(response => {
-                console.log('success')
-                // TODO: Add expiration time to the response for auth/login
-                const expirationDate = new Date(new Date().getTime() + (3600 * 1000))
                 localStorage.setItem('token', response.data.token)
-                localStorage.setItem('expirationDate', expirationDate)
-                // TODO: Have the register and the login return a name field in addition to token.
-                if (isRegister) {
-                    localStorage.setItem('userId', name)
-                }
-                else {
-                    // TODO: Delete me
-                    localStorage.setItem('userId', 'name')
-                }
-                dispatch(authSuccess(response.data.token, name))
-                dispatch(checkAuthTimeout(response.data.expiresIn))
+                localStorage.setItem('expirationDate', response.data.timeout)
+                localStorage.setItem('userId', response.data.username)
+                dispatch(authSuccess(response.data.token, response.data.username))
+                dispatch(checkAuthTimeout(response.data.timeout))
             })
             .catch(err => {
-                console.log('err')
-                console.log(err)
+                console.log('auth error of ', err)
                 dispatch(authFail(err))
             })
         
+    }
+}
+
+// Logout handler handles all cleanup work we need to execute when
+// logging out, followed by dispatching our logout action
+export const logoutHandler = () => {
+    return dispatch => {
+        // Remove local storage info
+        localStorage.removeItem('token')
+        localStorage.removeItem('expirationDate')
+        localStorage.removeItem('userId')
+        // Remove any list information
+        dispatch(listClear())
+        // Remove any problem information
+        dispatch(problemsClear())
+        // Log us out
+        dispatch(logout())
     }
 }

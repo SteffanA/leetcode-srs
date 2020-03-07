@@ -52,14 +52,15 @@ router.post('/', [
                 id: user.id
             }
         }
+        const username = user.name
         jwt.sign(
             payload, // pass user ID payload
             process.env.JWT_SECRET, // pass our secret
             {expiresIn: timeout}, // pass timeout
             (err, token) => { // send token to client on callback
                 if (err) {throw err}
-                // No error, return the token
-                return res.json({ token })
+                // No error, return the token, token lifespan, and username
+                return res.json({ token, timeout, username })
             }
         )
         console.log('User authenticated.')

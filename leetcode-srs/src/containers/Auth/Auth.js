@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import classes from './Auth.module.css'
 import { connect } from 'react-redux'
@@ -13,9 +13,6 @@ import * as actions from '../../store/actions/auth'
 
 
 const Auth = props => {
-    useEffect(() => {
-        console.log(props)
-    }, [props])
 // State code
     const [loginState, setLoginState] = useState({
         // Are we registering or logging in?
@@ -193,8 +190,6 @@ const Auth = props => {
     }
 
 // Return output
-    // TODO: Does the setting of the state work on our click action?
-    // Will the state be set always before submitHandler is executed?
     return (
         <div className={classes.Auth}>
             {redirect}

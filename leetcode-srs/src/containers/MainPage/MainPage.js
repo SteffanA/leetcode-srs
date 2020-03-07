@@ -1,12 +1,12 @@
-import React, {useEffect, useState} from 'react'
+import React, {useState} from 'react'
 // import {Link} from 'react-router-dom'
 import PropTypes from 'prop-types'
 import classes from './MainPage.module.css'
 import { connect } from 'react-redux'
 
 import Selector from './Selector/Selector'
-import Button from '../UI/Button/Button'
-import Input from '../UI/Input/Input'
+// import Button from '../UI/Button/Button'
+// import Input from '../UI/Input/Input'
 
 /*
 Main Page is made of 3 main components:
@@ -15,18 +15,20 @@ Main Page is made of 3 main components:
         Either select problem via 'start next' button or hand pick
 */
 const MainPage = (props) => {
-    // useEffect(() => {
-    //     console.log("Test")
-    // }, [])
-
     const [elements, setelements] = useState({
         formVisible: false,
         timerVisible: false,
         currentProblemStub: '',
     })
 
+    const {
+        formVisible,
+        timerVisible,
+        currentProblemStub
+    } = elements
 
-    const link = 'https://leetcode.com/problems/' // + props.problem
+
+    const link = 'https://leetcode.com/problems/' + currentProblemStub
     let form = null
 
     const openProblemHandler = (event) => {
@@ -49,7 +51,8 @@ const MainPage = (props) => {
     return (
         <div className={classes.MainPage}>
             {props.isAuth && <Selector/>}
-            
+            {formVisible && null}
+            {timerVisible && null}
             <a href={link} target='_blank' rel="noopener noreferrer" onClick={openProblemHandler}>Start Problem</a>
         </div>
     )

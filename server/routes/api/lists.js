@@ -9,16 +9,6 @@ const mongoose = require('mongoose')
 
 const router = express.Router()
 
-//TODO: Make a route for:
-/*
-1) Not copying, but adding a public list to user account
-    such that they can see it, but not edit
-2) Remove lists from 'favorited' lists w/o deleting actual list
-
-Maybe add a can-edit field
-or; on backend and front-end, check if owner == cur user
-*/
-
 // @route  GET api/lists
 // @desc   Get all public Lists
 // @access Public
@@ -101,6 +91,7 @@ router.get('/private/:id', auth, async (req, res) => {
 // @access Private
 router.post('/', [auth, [
     check('name', 'Lists must be named.').not().isEmpty(),
+    check('public', 'Public must be set true or false').isBoolean(),
 ]], async (req, res) => {
     const validationErrors = validationResult(req)
     if (!validationErrors.isEmpty()) {
@@ -110,7 +101,6 @@ router.post('/', [auth, [
 
     // Request was validated, let's create our list
     try {
-        //TODO: Eventually, should limit # of lists per user. 100?
         // Since we can make multiple lists with the same name, no need to check unqiueness
         // Likewise for problems contained within
         const {
@@ -120,7 +110,15 @@ router.post('/', [auth, [
 
         // Get the current user to make them the creator
         const user = await User.findById(req.user.id)
-        // TODO: Should we check to ensure public is a bool?
+
+        const numberOfLists = user.lists.length
+        console.log(user)
+        console.log(numberOfLists)
+        if (numberOfLists >= 100) {
+            // Prevent a user from owning more than 100 lists
+            return res.status(401).json({errors: [{msg: 'You cannot have more than 100 lists.'}]})
+        }
+
         const newList = new List({
             name,
             public,
@@ -128,6 +126,10 @@ router.post('/', [auth, [
         })
 
         const list = await newList.save()
+        // Add this list to the User's lists
+        user.lists.push(list._id)
+        await user.save()
+
         return res.json(list)
     } catch (error) {
         console.error(error.message)
@@ -169,6 +171,9 @@ async (req, res) => {
 
         // Save the copy list
         const newList = await copyList.save()
+        user.lists.push(newList._id)
+        await user.save()
+
         return res.json(newList)
     } catch (error) {
         console.error(error.message)
@@ -282,9 +287,6 @@ async (req, res) => {
             return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
         }
         // Get problem
-        if (!mongoose.Types.ObjectId.isValid(req.params.problem_id)) {
-            return res.status(404).send({errors: [{msg: 'Problem not found.'}]})
-        }
         const problem = await Problem.findOne({id: req.params.problem_id})
         // Ensure problem exists
         if (!problem) {
@@ -332,9 +334,6 @@ async (req, res) => {
             return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
         }
         // Get problem
-        if (!mongoose.Types.ObjectId.isValid(req.params.problem_id)) {
-            return res.status(404).send({errors: [{msg: 'Problem not found.'}]})
-        }
         const problem = await Problem.findOne({id: req.params.problem_id})
         // Ensure problem exists
         if (!problem) {
@@ -358,5 +357,45 @@ async (req, res) => {
     }
 })
 
+// @route  GET /api/lists/:id/problems
+// @desc   Retrieve all problems in a given list
+// @access Private
+router.get('/:id/problems', [auth], 
+async (req, res) => {
+    try {
+        // Get the list with the given ID
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
+        const list = await List.findById(req.params.id)
+        if (!list) {
+            // Couldn't find a list with given ID
+            return res.status(404).json({errors: [{msg: 'List not found.'}]})
+        }
+        // If list is a private list, ensure User owns the list
+        if (!list.public) {
+            if (list.creator.toString().localeCompare(req.user.id) !== 0) {
+                return res.status(401).json({errors: [{msg: 'Access to List denied.'}]})
+            }
+            // Implicit else is we're okay to access; continue onwards
+        }
+
+        // For each problem in the list, get the problem object and
+        // store it in an array
+        problems = []
+
+        for (let prob of list.problems) {
+            const problem = await Problem.findById(prob._id)
+            if (problem) {
+                problems.push(problem)
+            }
+        }
+
+        return await res.json(problems)
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).send('Server Error')
+    }
+})
 
 module.exports = router
