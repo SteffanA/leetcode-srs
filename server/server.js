@@ -19,7 +19,6 @@ app.get('/', (req, res) => res.send('API running.'))
 
 // Define our routes
 app.use('/api/users', require('./routes/api/users'))
-//TODO: Define the rest of the routes after they're built
 app.use('/api/auth', require('./routes/api/auth'))
 app.use('/api/problems', require('./routes/api/problems'))
 app.use('/api/lists', require('./routes/api/lists'))

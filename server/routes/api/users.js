@@ -158,10 +158,57 @@ async (req, res) => {
     }
 })
 
+// @route  GET /api/users/:id
+// @desc   Retrieve a user's details
+// @access Private
+router.get('/', [auth], 
+async (req, res) => {
+    try {
+        // Get the User by the passed auth ID
+        const user = await User.findById(req.user.id).select(['-password', '-__v', '-_id'])
+        // Ensure we could find them
+        if (!user) {
+            return res.status(404).json({errors: [{msg: 'User not found.'}]})
+        }
+        // Return the user as JSON
+        return res.json(user)
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).send('Server Error')
+    }
+})
 
+
+// @route  GET /api/users/lists
+// @desc   Retrieve a user's lists
+// @access Private
+router.get('/lists', [auth], 
+async (req, res) => {
+    try {
+        // Get the User by the passed auth ID
+        const user = await User.findById(req.user.id)
+        // Ensure we could find them
+        if (!user) {
+            return res.status(404).json({errors: [{msg: 'User not found.'}]})
+        }
+
+        // Get all the List objects from the stored IDs and add to array
+        const lists = []
+        for (let listID of user.lists) {
+            const list = await List.findById(listID)
+            lists.push(list)
+        }
+        // Return the user's lists as JSON
+        return res.json(lists)
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).send('Server Error')
+    }
+})
 
 // TODO: Fill out these routes eventually
 
+// TODO: Remember to remove submissions on deletion!
 // @route  DELETE api/users
 // @desc   Delete user
 // @access Private
@@ -172,25 +219,5 @@ async (req, res) => {
 // @access Private
 
 
-// @route  GET /api/users/:id
-// @desc   Retrieve a user's details
-// @access Private
-router.get('/', [auth], 
-async (req, res) => {
-    try {
-        // Get the User by the passed auth ID
-        const user = await User.findById(req.user.id)
-        // Ensure we could find them
-        if (!user) {
-            return res.status(404).json({errors: [{msg: 'User not found.'}]})
-        }
-        // Return the user as JSON
-        //TODO: Wipe password and __v from returned res lol
-        return res.json(user)
-    } catch (error) {
-        console.log(error.message)
-        return res.status(500).send('Server Error')
-    }
-})
 
 module.exports = router

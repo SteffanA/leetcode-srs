@@ -2,14 +2,6 @@ import * as actions from './actionTypes'
 import axios from 'axios'
 
 // Functions for our list-related actions live here
-// TODO: What do we need?
-/*
-Get lists
-update existing lists
-create new lists
-
-Should all be done in a reducer/action?
-*/
 
 // Start up the List retrieve processes
 const listStart = () => {
@@ -50,8 +42,7 @@ export const listsGetAll = () => {
         }
         else {
             // Get the user's lists
-            //TODO: Adjust the api call when we edit the list server side code
-            const url = process.env.REACT_APP_HOST_URL + '/api/lists/own'
+            const url = process.env.REACT_APP_HOST_URL + '/api/users/lists'
             const config = {
                 headers: {
                     'x-auth-token': token,

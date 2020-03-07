@@ -39,20 +39,7 @@ const Selector = props => {
         console.log('Updating selector')
     }, [auth, lists, getLists])
 
-
-    // TODO: Why does swapping between lists no longer refresh the problems?
-    /*
-    How to cause:
-        Select list w/ problems
-        Select problem besides default
-        Select a list w/ same name
-    
-        Trace:
-        List -> get problem -> update selector.
-        match list -> get problem -> update selector
-        match prob.
-        match list -> get prob -> update selector -> getProb error of 401.
-    */
+    // Update our problems whenever the curList changes
     useDeepCompareEffect(() =>{
         if (curList) {
             getProblems(curList)

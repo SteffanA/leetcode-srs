@@ -9,20 +9,6 @@ const mongoose = require('mongoose')
 
 const router = express.Router()
 
-//TODO: Make a route for:
-/*
-1) Not copying, but adding a public list to user account
-    such that they can see it, but not edit
-2) Remove lists from 'favorited' lists w/o deleting actual list
-
-Maybe add a can-edit field
-or; on backend and front-end, check if owner == cur user
-
-
-Wait, this is all actually done as a part of the user.
-Remove this TODO later, but commit this update so we know why.
-*/
-
 // @route  GET api/lists
 // @desc   Get all public Lists
 // @access Public
@@ -105,6 +91,7 @@ router.get('/private/:id', auth, async (req, res) => {
 // @access Private
 router.post('/', [auth, [
     check('name', 'Lists must be named.').not().isEmpty(),
+    check('public', 'Public must be set true or false').isBoolean(),
 ]], async (req, res) => {
     const validationErrors = validationResult(req)
     if (!validationErrors.isEmpty()) {
@@ -114,7 +101,6 @@ router.post('/', [auth, [
 
     // Request was validated, let's create our list
     try {
-        //TODO: Eventually, should limit # of lists per user. 100?
         // Since we can make multiple lists with the same name, no need to check unqiueness
         // Likewise for problems contained within
         const {
@@ -124,7 +110,15 @@ router.post('/', [auth, [
 
         // Get the current user to make them the creator
         const user = await User.findById(req.user.id)
-        // TODO: Should we check to ensure public is a bool?
+
+        const numberOfLists = user.lists.length
+        console.log(user)
+        console.log(numberOfLists)
+        if (numberOfLists >= 100) {
+            // Prevent a user from owning more than 100 lists
+            return res.status(401).json({errors: [{msg: 'You cannot have more than 100 lists.'}]})
+        }
+
         const newList = new List({
             name,
             public,
@@ -132,6 +126,10 @@ router.post('/', [auth, [
         })
 
         const list = await newList.save()
+        // Add this list to the User's lists
+        user.lists.push(list._id)
+        await user.save()
+
         return res.json(list)
     } catch (error) {
         console.error(error.message)
@@ -173,6 +171,9 @@ async (req, res) => {
 
         // Save the copy list
         const newList = await copyList.save()
+        user.lists.push(newList._id)
+        await user.save()
+
         return res.json(newList)
     } catch (error) {
         console.error(error.message)
@@ -373,15 +374,7 @@ async (req, res) => {
         }
         // If list is a private list, ensure User owns the list
         if (!list.public) {
-            // TODO: Test this bit
-            console.log('Not public')
-            // TODO: DO we need to actually get user, or is req ID okay?
-            // const user = await User.findById(req.user.id)
-            // if (!user) {
-            //     console.log('Orphaned list found! Please manually delete ', list._id)
-            //     return res.status(401).json({errors: [{msg: 'Access to List denied.'}]})
-            // }
-            if (list.creator !== req.user.id) {
+            if (list.creator.toString().localeCompare(req.user.id) !== 0) {
                 return res.status(401).json({errors: [{msg: 'Access to List denied.'}]})
             }
             // Implicit else is we're okay to access; continue onwards
@@ -393,11 +386,7 @@ async (req, res) => {
 
         for (let prob of list.problems) {
             const problem = await Problem.findById(prob._id)
-            if (!problem) {
-                // console.log('Could not find problem w/ id ', prob._id)
-            }
-            else {
-                // console.log(problem)
+            if (problem) {
                 problems.push(problem)
             }
         }

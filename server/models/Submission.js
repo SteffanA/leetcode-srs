@@ -5,7 +5,10 @@ Submissions are the result and the code associated with a LeetCode submission.
 */
 const mongoose = require('mongoose')
 
-//TODO: Would it make sense to attach the User to Submission?
+//Would it make sense to attach the User to Submission?
+// I think no.. only way to make Submission is via a user
+// So as long as we can remember to delete all submissions when we delete a user,
+// we shouldn't have any issues of dangling submissions.
 const SubmissionSchema = mongoose.Schema({
     // Text is not required
     // First impl won't auto-save, so not neccessary

@@ -25,8 +25,8 @@ const authSuccess = (token, name) => {
 const checkAuthTimeout = (expiresIn) => {
     return dispatch => {
         console.log('Expires in: ' + expiresIn)
-        // TODO: Fix the broken logout handler
         // TODO: Is this even required...? Seems to handle expired token okay
+        // Un-commenting it breaks autologin; need to understand why
         // setTimeout(() => {
         //     dispatch(logout())
         // }, expiresIn*1000)
@@ -104,25 +104,14 @@ export const auth = (email, password, isRegister, name='') => {
         // Add as a param; url += ?key=API_KEY
         axios.post(url, authData)
             .then(response => {
-                console.log('success')
-                // TODO: Add expiration time to the response for auth/login
-                const expirationDate = new Date(new Date().getTime() + (3600 * 1000))
                 localStorage.setItem('token', response.data.token)
-                localStorage.setItem('expirationDate', expirationDate)
-                // TODO: Have the register and the login return a name field in addition to token.
-                if (isRegister) {
-                    localStorage.setItem('userId', name)
-                }
-                else {
-                    // TODO: Delete me
-                    localStorage.setItem('userId', 'name')
-                }
-                dispatch(authSuccess(response.data.token, name))
-                dispatch(checkAuthTimeout(response.data.expiresIn))
+                localStorage.setItem('expirationDate', response.data.timeout)
+                localStorage.setItem('userId', response.data.username)
+                dispatch(authSuccess(response.data.token, response.data.username))
+                dispatch(checkAuthTimeout(response.data.timeout))
             })
             .catch(err => {
-                console.log('err')
-                console.log(err)
+                console.log('auth error of ', err)
                 dispatch(authFail(err))
             })
         

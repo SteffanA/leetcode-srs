@@ -190,8 +190,6 @@ const Auth = props => {
     }
 
 // Return output
-    // TODO: Does the setting of the state work on our click action?
-    // Will the state be set always before submitHandler is executed?
     return (
         <div className={classes.Auth}>
             {redirect}

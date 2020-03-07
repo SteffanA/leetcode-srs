@@ -8,8 +8,6 @@ const initialState = {
     error: null,
     loading: false,
 }
-//TODO: Need to maybe update state or split this reducer when doing
-// more than just getting lists
 
 // Start a list getting process
 const listStart = (state, action) => {
