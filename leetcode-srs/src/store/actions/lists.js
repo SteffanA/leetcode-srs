@@ -19,11 +19,21 @@ const listError = (error) => {
     }
 }
 
+// Successfully retrieved lists from the backend
 const listsGetListsSuccess = (lists, firstList) => {
     return {
         type: actions.LISTS_RETRIEVE,
         lists: lists,
         firstList: firstList,
+        error: null,
+    }
+}
+
+// Successfully added a new list
+const listsPostListSuccess = (newList) => {
+    return {
+        type: actions.LISTS_ADD_NEW,
+        list: newList,
         error: null,
     }
 }
@@ -87,5 +97,36 @@ export const listSetCurrent = (list) => {
 export const listClear = () => {
     return {
         type: actions.LISTS_CLEAR,
+    }
+}
+
+
+// Create a new List and export it to our database
+export const listsCreateNewList = (name, isPublic) => {
+    return dispatch => {
+        // Start the lists process
+        dispatch(listStart())
+        const token = localStorage.getItem('token')
+        if (!token) {
+            // If there's no token, we can't get lists
+            dispatch(listError('User not logged in!'))
+        }
+        const url = process.env.REACT_APP_HOST_URL + '/api/lists'
+            const config = {
+                headers: {
+                    'x-auth-token': token,
+                    'content-type': 'json',
+            }
+        }
+        const body = {
+            name: name,
+            public: isPublic,
+        }
+        axios.post(url, config, body).then(response => {
+            dispatch(listsPostListSuccess(response.data))
+        }).catch(err => {
+            console.log(err)
+            dispatch(listError(err.msg))
+        })
     }
 }

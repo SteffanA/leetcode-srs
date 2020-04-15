@@ -16,10 +16,8 @@ const Navbar = props => {
     return (
         <div className={classes.Navbar}>
             <div className={classes.Left}>
-                <div className={classes.NavLink}>Settings</div>
+                {props.isAuth && <div className={classes.NavLink}>Settings</div>}
                 {/* Link to settings modal*/}
-                <div className={classes.NavLink}>Pick List</div>
-                {/* A pick list object under ^ */}
             </div>
             <div className={classes.Center}>
                 <NavLink to='/' className={classes.Title}>
@@ -27,11 +25,12 @@ const Navbar = props => {
                 </NavLink>
                 {/* Under title link to next problem*/}
                 {/* Under title link to List's create list*/}
+                {props.isAuth && <NavLink to='/create-lists'>Create/Edit {props.user}'s Lists</NavLink>}
             </div>
             <div className={classes.Right}>
                 <NavLink activeClassName={classes.active} to={props.isAuth ? '/logout' : '/auth'}>{props.isAuth ? 'Logout' : 'Register/Login'}</NavLink>
                 {/* Set CSS so below is ... below the above*/}
-                <NavLink className={classes.NavLink} to='/history'>History</NavLink>
+    {props.isAuth && <NavLink className={classes.NavLink} to='/history'>History</NavLink> }
             </div> 
             {/* TODO: Use this to fix css module stuff <button >Test button. i should be blue.</button>*/}
         </div>
@@ -44,7 +43,8 @@ Navbar.propTypes = {
 
 const mapStateToProps = state => {
     return {
-        isAuth: (state.auth.token !== null),    
+        isAuth: (state.auth.token !== null),
+        user: state.auth.userId,  
     }
 }
 
