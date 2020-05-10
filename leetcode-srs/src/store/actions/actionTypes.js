@@ -10,6 +10,7 @@ export const LISTS_ERROR = 'LIST_ERROR'
 export const LISTS_RETRIEVE = 'LIST_RETRIEVE'
 export const LISTS_SET_CURRENT = 'LIST_SET_CURRENT'
 export const LISTS_CLEAR = 'LISTS_CLEAR'
+export const LISTS_ADD_NEW = 'LISTS_ADD_NEW'
 
 // For Problems
 export const PROBLEMS_START = 'PROBLEMS_START'

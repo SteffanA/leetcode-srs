@@ -1,12 +1,14 @@
 import React, {Fragment, useEffect} from 'react';
 import { Switch, Route } from 'react-router-dom'
 import { connect } from 'react-redux'
+import PrivateRoute from './containers/SharedItems/PrivateRoute'
 import './App.css';
 
 import MainPage from './containers/MainPage/MainPage';
 import Navbar from './containers/SharedItems/Navbar'
 import Auth from './containers/Auth/Auth'
 import Logout from './containers/Auth/Logout'
+import ListEditor from './containers/ListEditor/ListEditor'
 
 import * as actions from './store/actions/index'
 
@@ -35,9 +37,7 @@ const App = props => {
         <Switch>
           <Route exact path="/auth" component={Auth} />
           <Route exact path="/logout" component={Logout} />
-          {/*
-          <PrivateRoute exact path="/create-list" component={ListBuilder} />
-        */}
+          <PrivateRoute exact path="/create-lists" component={ListEditor} />
         </Switch>
       </section>
     </Fragment>

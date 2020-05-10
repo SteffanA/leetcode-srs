@@ -51,6 +51,23 @@ const listClear = (state, action) => {
     })
 }
 
+// Add a newly created list to our user's lists
+// and make curList our newly added list
+const listAddNewList = (state, action) => {
+    return updateObject(state, {
+        // Use the unified format of id and name
+        curList: {
+            id: action.list._id,
+            name: action.list.name
+        },
+        curListName: action.list.name,
+        // Update the array of user's lists
+        usersLists: state.usersLists.push(action.list),
+        error: null,
+        loading: false,
+    })
+}
+
 export const listReducer = (state=initialState, action) => {
     switch (action.type) {
         case actions.LISTS_START: return listStart(state, action)
@@ -58,6 +75,7 @@ export const listReducer = (state=initialState, action) => {
         case actions.LISTS_RETRIEVE: return listGetLists(state, action)
         case actions.LISTS_SET_CURRENT: return listSetCurrent(state, action)
         case actions.LISTS_CLEAR: return listClear(state, action)
+        case actions.LISTS_ADD_NEW: return listAddNewList(state, action)
         default: return state
     }
 }

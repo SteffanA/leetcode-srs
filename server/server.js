@@ -12,7 +12,7 @@ const app = express()
 // Connect to our DB
 connectDB()
 // Init our middleware
-app.use(express.json({extended: false}))
+app.use(express.json({extended: true}))
 
 // Setup the API
 app.get('/', (req, res) => res.send('API running.'))

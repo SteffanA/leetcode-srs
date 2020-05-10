@@ -10,7 +10,7 @@ const input = (props) => {
     }
 
     // Use this to make this Input more generic
-    switch(props.elementtype) {
+    switch(props.elementType) {
         case('input'):
             inputElement = <input className={inputClasses.join(' ')} 
                 {...props.elementConfig} 
