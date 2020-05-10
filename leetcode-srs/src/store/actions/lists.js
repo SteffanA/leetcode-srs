@@ -1,5 +1,6 @@
 import * as actions from './actionTypes'
-import axios from 'axios'
+import axios from '../../axios-interceptor' //TODO: Revert to base axios
+// TODO: Setup env for debug usage of interceptor or base
 
 // Functions for our list-related actions live here
 
@@ -112,17 +113,20 @@ export const listsCreateNewList = (name, isPublic) => {
             dispatch(listError('User not logged in!'))
         }
         const url = process.env.REACT_APP_HOST_URL + '/api/lists'
-            const config = {
-                headers: {
-                    'x-auth-token': token,
-                    'content-type': 'json',
+        const body = {
+            "name": name,
+            "public": isPublic.localeCompare('public') === 0 ? true : false,
+        }
+
+        const config = {
+            headers: {
+                'x-auth-token': token,
+                'content-type': 'application/json',
             }
         }
-        const body = {
-            name: name,
-            public: isPublic,
-        }
-        axios.post(url, config, body).then(response => {
+
+        axios.post(url, body, config
+        ).then(response => {
             dispatch(listsPostListSuccess(response.data))
         }).catch(err => {
             console.log(err)

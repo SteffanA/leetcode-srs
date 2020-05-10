@@ -94,7 +94,6 @@ router.post('/', [auth, [
     check('public', 'Public must be set true or false').isBoolean(),
 ]], async (req, res) => {
     const validationErrors = validationResult(req)
-    console.log('Got a request for lists of ' + req)
     if (!validationErrors.isEmpty()) {
         // Failed a validation check, return our errors.
         return res.status(400).json({errors: validationErrors.array()})
@@ -113,9 +112,8 @@ router.post('/', [auth, [
         const user = await User.findById(req.user.id)
 
         const numberOfLists = user.lists.length
-        console.log(user)
-        console.log(numberOfLists)
         if (numberOfLists >= 100) {
+            console.log('User already has ' + numberOfLists + ' lists.')
             // Prevent a user from owning more than 100 lists
             return res.status(401).json({errors: [{msg: 'You cannot have more than 100 lists.'}]})
         }
@@ -131,6 +129,7 @@ router.post('/', [auth, [
         user.lists.push(list._id)
         await user.save()
 
+        console.log('Added new list for ' + user.name)
         return res.json(list)
     } catch (error) {
         console.error(error.message)
