@@ -50,19 +50,22 @@ const ListEditor = props => {
                 elementType: 'select',
                 elementConfig: {
                     // TODO: This isn't working right
-                    type: 'public',
                     options: [
-                        'Private',
-                        'Public'
+                        {
+                            value: 'private',
+                            displayValue: 'Private',
+                        },
+                        {
+                            value: 'public',
+                            displayValue: 'Public',
+                        },
                     ]
                 },
-                validation: {
-                    required: true,
-                },
-                valid: true,
-                touched: false,
-            }
+                value: 'private', //default
+                valid: true, //no validation required
+            },
         },
+        formValid: true, //TODO: Delete this if not used
     })
 
     // Deconstruct our listState
@@ -88,9 +91,13 @@ const ListEditor = props => {
             isPublic
         } = newListControls
 
-        // TODO: Setup so we add new list to DB
+        // Grab our values from our controls
+        const newListName = name.value
+        const newListPublicity = isPublic.value
+
+        // Send new list to DB
         console.log('Sending new list to DB')
-        
+        props.createList(newListName, newListPublicity)
     }
 
     // Handle an input change on a form element
@@ -121,9 +128,10 @@ const ListEditor = props => {
         })
     }
 
-    const createNewListForm = formElements.map(formElement => (
+    const createNewListFormElements = formElements.map(formElement => (
         <Input
             key= {formElement.id}
+            elementType = {formElement.config.elementType}
             elementConfig={formElement.config.elementConfig}
             value={formElement.config.value}
             invalid={!formElement.config.valid}
@@ -133,16 +141,20 @@ const ListEditor = props => {
         />
     ))
 
-    return (
-        <div>
-            <form onSubmit={newListSubmitHandler}>
-                {createNewListForm}
-                <Button 
+    let newListForm = (
+        <form onSubmit={newListSubmitHandler}>
+            {createNewListFormElements}
+            <Button 
                 btnType="Success"
                 clicked={null}>
                     Create New List
                 </Button>
-            </form>
+        </form>
+    )
+
+    return (
+        <div>
+            {newListForm}
         </div>
     )
 }

@@ -126,7 +126,7 @@ export const listsCreateNewList = (name, isPublic) => {
             dispatch(listsPostListSuccess(response.data))
         }).catch(err => {
             console.log(err)
-            dispatch(listError(err.msg))
+            dispatch(listError(err)) //TODO: Transform back to err.message. Use this for debugging only
         })
     }
 }

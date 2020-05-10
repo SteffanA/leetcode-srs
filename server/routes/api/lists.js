@@ -94,6 +94,7 @@ router.post('/', [auth, [
     check('public', 'Public must be set true or false').isBoolean(),
 ]], async (req, res) => {
     const validationErrors = validationResult(req)
+    console.log('Got a request for lists of ' + req)
     if (!validationErrors.isEmpty()) {
         // Failed a validation check, return our errors.
         return res.status(400).json({errors: validationErrors.array()})
