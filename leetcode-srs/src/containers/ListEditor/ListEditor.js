@@ -5,6 +5,7 @@ import * as listActions from '../../store/actions/lists'
 
 import Input from '../UI/Input/Input'
 import Button from '../UI/Button/Button'
+//import PageTabs from '../UI/PageTabs/PageTabs'
 
 import { checkValidity, updateObject} from '../../utility/utility'
 
@@ -152,8 +153,18 @@ const ListEditor = props => {
         </form>
     )
 
+    // Tabs for which form to display
+    const availableTabs = [
+        'Create new list',
+        'Edit existing list',
+    ]
+
+    const test = ''
+
+
     return (
         <div>
+            {/* <PageTabs sections={availableTabs} current={test}/> */}
             {newListForm}
         </div>
     )
