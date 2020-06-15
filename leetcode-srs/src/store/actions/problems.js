@@ -73,6 +73,40 @@ export const problemsGetAllForList = (list) => {
     }
 }
 
+export const problemsGetAll = () => {
+    return dispatch => {
+         // Start the problem process
+         dispatch(problemStart)
+         // Get all problems
+         // TODO: Make this only return, say problems 1-50. Add as var
+         // TODO: In future, exclude problems already part of current list
+         // (since this'll be used to show problems we can add to cur list)
+         let url = process.env.REACT_APP_HOST_URL + '/api/problems/'
+         const config = {
+             headers: {
+                 'content-type': 'json',
+             }
+         }
+         axios.get(url, config).then(response => {
+             if (!response) {
+                 // No data returned.
+                 dispatch(problemError('No problems available.'))
+             }
+             else {
+                 const firstProblem = response.data[0]
+                 dispatch(problemsGetProblemsSuccess(response.data, firstProblem))
+             }
+             
+         }).catch(error => {
+             console.log('getProblems error of' , error, ' from ', url)
+             // Clear out the problems if we failed to retreive any. If we're swapping between lists,
+             // this might happen and we don't want to display problems associated w/ another list.
+             dispatch(problemsClear())
+             dispatch(problemError(error.msg))
+         })
+    }
+}
+
 export const problemSetCurrent = (problem) => {
     console.log('setting current problem to: ', problem)
     return {
