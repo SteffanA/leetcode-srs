@@ -7,12 +7,14 @@ export const ProblemViewer = (props) => {
 
     const {
         problems,
-        getAllProblems
+        getAllProblems,
+        getProblemSubset
     } = props
 
     useEffect(() => {
-        getAllProblems()
-    }, [getAllProblems])
+        // getAllProblems()
+        getProblemSubset(0, 50)
+    }, [getAllProblems, getProblemSubset])
 
     
 
@@ -52,6 +54,7 @@ const mapDispatchToProps = (dispatch) => {
     return {
         // Get problems
         getAllProblems: () => dispatch(problemActions.problemsGetAll()),
+        getProblemSubset: (start, end) => dispatch(problemActions.problemsGetSome(start, end))
     }
 }
 

@@ -35,8 +35,40 @@ router.get('/:id', async (req, res) => {
 // @access Public
 router.get('/', async (req, res) => {
     try {
-        const problems = await Problem.find()
+        start = null
+        end = null
+        if (req.params.start) {
+            console.log('Have a query start of ' + start)
+            start = req.params('start')
+        }
+        if (req.params.end) {
+            console.log('Have a query end of ' + end)
+            end = req.params('end')
+        }
+        // NOTE: We're finding based on id, NOT _id! _id is the DB id, whereas id is the leetcode
+        // problem ID!
+        let problems = null
+        // TODO: Figure out if there's a way to pass null into gte/lte w/o causing problems
+        // such that this logic can be condensed to a single query again
+        if (start && end){
+            console.log('start end find')
+            problems = await Problem.find().where('id').gte(start).lte(end)
+        }
+        else if (start) {
+            console.log('start find')
+            problems = await Problem.find().where('id').gte(start)
+        }
+        else if (end) {
+            console.log('end find')
+            problems = await Problem.find().where('id').lte(end)
+        }
+        else {
+            console.log('everything find')
+            problems = await Problem.find()
+        }
+        
         if (!problems) {
+            console.log('No problems')
             return res.status(404).json({errors: [{msg: 'No problems found.'}]})
         }
 
@@ -46,6 +78,23 @@ router.get('/', async (req, res) => {
         return res.status(500).send('Server error.')
     }
 })
+
+// @route  GET /api/problems/specific
+// @desc   Get all problems between the passed query range
+// @access Public
+// router.get('/', async (req, res) => {
+//     try {
+//         const problems = await Problem.find()
+//         if (!problems) {
+//             return res.status(404).json({errors: [{msg: 'No problems found.'}]})
+//         }
+
+//         return res.json(problems)
+//     } catch (error) {
+//         console.error(error.message)
+//         return res.status(500).send('Server error.')
+//     }
+// })
 
 // @route  POST /api/problems
 // @desc   Add a new LeetCode problem to the database
