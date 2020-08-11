@@ -37,13 +37,13 @@ router.get('/', async (req, res) => {
     try {
         start = null
         end = null
-        if (req.params.start) {
+        if (req.query.start) {
+            start = req.query.start
             console.log('Have a query start of ' + start)
-            start = req.params('start')
         }
-        if (req.params.end) {
+        if (req.query.end) {
+            end = req.query.end
             console.log('Have a query end of ' + end)
-            end = req.params('end')
         }
         // NOTE: We're finding based on id, NOT _id! _id is the DB id, whereas id is the leetcode
         // problem ID!

@@ -14,6 +14,7 @@ export const ProblemViewer = (props) => {
     useEffect(() => {
         // getAllProblems()
         getProblemSubset(0, 50)
+        console.log('Outputting problems getSubset')
     }, [getAllProblems, getProblemSubset])
 
     
