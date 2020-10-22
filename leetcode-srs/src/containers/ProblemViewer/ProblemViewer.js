@@ -2,6 +2,10 @@ import React, { Component, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import * as problemActions from '../../store/actions/problems'
+import classes from './ProblemViewer.module.css'
+import Input from '../UI/Input/Input'
+import Button from '../UI/Button/Button'
+
 
 export const ProblemViewer = (props) => {
 
@@ -15,6 +19,13 @@ export const ProblemViewer = (props) => {
         searchTerm,
         setSearchTerm
     ] = useState('Search for a Problem')
+
+    // Map the difficulty of a problem from a number to a String
+    const difficultyMapping = {
+        '1' : 'Easy',
+        '2' : 'Medium',
+        '3' : 'Hard'
+    }
 
     useEffect(() => {
         // getAllProblems()
@@ -34,19 +45,52 @@ export const ProblemViewer = (props) => {
 
     }
 
+    const createLink = (stub) => {
+        return 'https://leetcode.com/problems/' + stub
+    }
+
+    const addProblemToList = (id) => {
+        console.log('Adding problem with id ' + id + ' to list')
+        return
+    }
+
+    const cur_prob_button = (id) => {
+        return (
+            <Button
+                btnType="Success"
+                clicked={() => addProblemToList(id)}>
+                    Add to List
+            </Button>
+        )
+    }
+
     let probs = null
     if (problems) {
         probs = problems.map(prob => {
             return (
-            <div key={prob._id}> 
-                {prob.id} {prob.name}  {prob.difficulty}  {prob.link} {prob.problem_text}
-            </div>
+                <tr key={prob._id}>
+                    <td> 
+                        {prob.id} 
+                    </td>
+                    <td>
+                        <a href={createLink(prob.link)}>{prob.name}</a>
+                    </td>
+                    <td>
+                        <b>{difficultyMapping[prob.difficulty]}</b>
+                    </td>
+                    <td>
+                        {prob.problem_text}
+                    </td>
+                    <td>
+                        {cur_prob_button(prob._id)}
+                    </td>
+                </tr>
             )
             }
 
         )
     }
-    
+
 
     return (
         <div>
@@ -57,7 +101,16 @@ export const ProblemViewer = (props) => {
                 </label>
                 <input type="submit" value="Submit" onSubmit={handleSubmit}/>
             </form>
-            {probs}
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Problem</th>
+                    <th>Difficulty</th>
+                    <th>Problem Text</th>
+                    <th>Add to Current List</th>
+                </tr>
+                {probs}
+            </table>
         </div>
     )
 }
