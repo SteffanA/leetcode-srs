@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useState, useRef} from 'react'
+import React, {useEffect, useState, useRef, useCallback} from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import * as problemActions from '../../store/actions/problems'
@@ -8,6 +8,7 @@ import Button from '../UI/Button/Button'
 // TODO: The page is currently being refreshed with a query url schema upon form submission
 // Why is this, and how can I prevent it? preventDefault on the form button does nothing
 
+// TODO: Move the trace update to a common func library
 // Function stolen from stack overflow to trace what prop changed
 // to cause a page refresh
 function useTraceUpdate(props) {
@@ -28,12 +29,8 @@ function useTraceUpdate(props) {
 
 export const ProblemViewer = (props) => {
     /* Props and hooks */
-    // TODO: Move the trace update to a common func library
-    // also, remove it when finished
-    // useTraceUpdate(props)
     const {
         problems,
-        getAllProblems,
         getProblemSubset,
         getSearchResults
     } = props
@@ -54,23 +51,32 @@ export const ProblemViewer = (props) => {
     useEffect(() => {
         if (problems == null) {
             // TODO: This is awful, figure out the good solution
-            if (searchTerm == null || searchTerm == '' || searchTerm == 'Search for a Problem') {
+            if (searchTerm === null || searchTerm === '' || searchTerm === 'Search for a Problem') {
                 getProblemSubset(0, 50)
             }
             else {
                 getSearchResults(searchTerm)
             }
-            console.log(problems)
         }
         else {
-            console.log('problems exist')
-            console.log(problems)
+            console.debug('ProblemViewer: problems already exist')
+            console.debug(problems)
         }
-        console.log('Page refreshed')
-    }, [problems, getProblemSubset])
+        console.log('Problem viewer refreshed')
+    }, [problems, getProblemSubset, getSearchResults, searchTerm])
 
-    // Forward declare our function so use effect can run appropriately
-    let handleSubmit = (event) => {}
+    // Declare our function earlier than the others so useEffect can run appropriately
+    // Handle submission of a search term for a problem
+    // We will replace the problems displayed on the page with the results
+    const handleSubmit = useCallback(
+        (event) => {
+            event.preventDefault()
+            console.log('calling handle submit')
+            console.log('Search term is ' + searchTerm)
+            getSearchResults(searchTerm)
+        },
+        [searchTerm, getSearchResults]
+    )
 
     // Use this to override any enter key press on the page
     useEffect(() => {
@@ -96,20 +102,7 @@ export const ProblemViewer = (props) => {
         setSearchTerm(event.target.value)
     }
 
-    // Handle submission of a search term for a problem
-    // We will replace the problems displayed on the page with the results
-    handleSubmit = (event) => {
-        event.preventDefault()
-        console.log('calling handle submit')
-        console.log('Search term is ' + searchTerm)
-        getSearchResults(searchTerm)
-    }
     
-    // Auto-highlight the text in the search box as a QOL feature
-    const selectText = (event) => {
-        event.target.select()
-    }
-
     // If we have more results than we allow on a page
     // use this to load the next
     // TODO: For now, if len of problems < 50, resubmit result but 50-100, etc
@@ -173,14 +166,9 @@ export const ProblemViewer = (props) => {
             <form>
                 <label>
                     Search for a problem:
-                    <input type="text" name="name" value={searchTerm} onFocus={selectText} onChange={handleChange}/>
+                    <Input elementType='input' name="name" value={searchTerm} changed={handleChange}/>
                 </label>
-                <input type="submit" value="Submit" onSubmit={handleSubmit}/>
-                {/* <Button
-                    btnType="Success"
-                    clicked={handleSubmit}>
-                        Search
-                </Button> */}
+                <Input elementType="submit" value="Submit" clicked={handleSubmit}/>
             </form>
             <table>
                 <tbody>
@@ -229,7 +217,6 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         // Get problems
-        getAllProblems: () => dispatch(problemActions.problemsGetAll()),
         getProblemSubset: (start, end) => dispatch(problemActions.problemsGetSome(start, end)),
         getSearchResults: (term) => dispatch(problemActions.problemsGetSearch(term))
     }
