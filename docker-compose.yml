@@ -37,7 +37,11 @@ services:
       # Where to find the docker file for the server
       context: ./server
     # Keeping restart off; If it fails, prob should stay down
-    restart: "no"
+    # TODO: The restart function ahs been changed to always since there's
+    # a bug that makes it crash.  Once a fix has been determined,
+    # turn this back to off to help with figuring out any other
+    # bugs that may last a long time.
+    restart: always
     volumes:
       # Don't overwrite this folder
       - /srv/node_modules
