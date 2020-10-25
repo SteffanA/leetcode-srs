@@ -6,8 +6,11 @@ import * as listActions from '../../store/actions/lists'
 import Input from '../UI/Input/Input'
 import Button from '../UI/Button/Button'
 //import PageTabs from '../UI/PageTabs/PageTabs'
+import Selector from '../MainPage/Selector/Selector'
 
 import { checkValidity, updateObject} from '../../utility/utility'
+import Modal from 'react-modal'
+import ProblemViewer from '../ProblemViewer/ProblemViewer'
 
 
 /*
@@ -31,6 +34,8 @@ Idea for the list editing
     Change button text/action based on if ID for problem already in selected list
     Show contents of list via problem name in small window on right side
 */
+
+Modal.setAppElement('#root')
 
 const ListEditor = props => {
 
@@ -90,6 +95,8 @@ const ListEditor = props => {
         console.log('In list editor')
     }, [])
 
+    const [modalIsOpen, setIsOpen] = useState(false)
+
     
 // Functions
 
@@ -128,6 +135,24 @@ const ListEditor = props => {
         
         // Update our state
         setListState({...listState, updatedControls})
+    }
+
+    // CModal functions copied from example
+    const openModal = (event) => {
+        event.preventDefault()
+        setIsOpen(true)
+        console.log('opened modal')
+    }
+
+    const afterOpenModal = () => {
+        // references are now sync'd and can be accessed.
+        // subtitle.style.color = '#f00';
+        console.log('After open modal')
+    }
+    
+    const closeModal = () => {
+        setIsOpen(false);
+        console.log('Modal is closed')
     }
 
 // JSX
@@ -176,6 +201,21 @@ const ListEditor = props => {
         <div>
             {/* <PageTabs sections={availableTabs} current={test}/> */}
             {newListForm}
+            <Selector showLists={true} showProblems={false}/>
+            <Button btnType="Success" clicked={openModal}>Edit Selected List</Button>
+            <Modal
+                isOpen={modalIsOpen}
+                onAfterOpen={afterOpenModal}
+                onRequestClose={closeModal}
+                contentLabel="Example Modal"
+            >
+                <div>
+                    <Button btnType="Danger" clicked={closeModal}>Exit List Editor</Button>
+                </div>
+                <div>
+                    <ProblemViewer curList={null}/>
+                </div>
+            </Modal>
         </div>
     )
 }

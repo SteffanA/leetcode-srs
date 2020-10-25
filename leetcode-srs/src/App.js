@@ -40,11 +40,11 @@ const App = props => {
       <Navbar />
       <Route exact path="/" component={MainPage} />
       <section className="container">
-        {/* <Alert />*/}
         <Switch>
           <Route exact path="/auth" component={Auth} />
           <Route exact path="/logout" component={Logout} />
           <PrivateRoute exact path="/create-lists" component={ListEditor} />
+          {/* TODO: Remove this route*/}
           <Route exact path="/view-problems" component={ProblemViewer} />
         </Switch>
       </section>
