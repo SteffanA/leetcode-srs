@@ -73,7 +73,7 @@ const MainPage = (props) => {
             {props.isAuth && <Selector/>}
             {formVisible && null}
             {timerVisible && null}
-            <a href={link} target='_blank' rel="noopener noreferrer" onClick={openProblemHandler}>Start Problem</a>
+            {props.isAuth && curProblem && <a href={link} target='_blank' rel="noopener noreferrer" onClick={openProblemHandler}>Start Problem</a>}
         </div>
     )
 }

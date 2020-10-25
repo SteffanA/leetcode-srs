@@ -9,6 +9,7 @@ import Navbar from './containers/SharedItems/Navbar'
 import Auth from './containers/Auth/Auth'
 import Logout from './containers/Auth/Logout'
 import ListEditor from './containers/ListEditor/ListEditor'
+import ProblemViewer from './containers/ProblemViewer/ProblemViewer'
 
 import * as actions from './store/actions/index'
 
@@ -20,13 +21,19 @@ chrome.exe --user-data-dir="C://Chrome dev session" --disable-web-security --ign
 const App = props => {
   // Deconstruct props as required
   const {
+    isAuth,
     onTryAutoSignIn
   } = props
 
   // Try to login automatically on page load. Only run once
   useEffect(() => {
-    onTryAutoSignIn()
-  }, [onTryAutoSignIn])
+    if (!isAuth) {
+      onTryAutoSignIn()
+    }
+    else {
+      console.log('IS auth already has a positive value')
+    }
+  }, [isAuth, onTryAutoSignIn])
 
   return (
     <Fragment>
@@ -38,6 +45,7 @@ const App = props => {
           <Route exact path="/auth" component={Auth} />
           <Route exact path="/logout" component={Logout} />
           <PrivateRoute exact path="/create-lists" component={ListEditor} />
+          <Route exact path="/view-problems" component={ProblemViewer} />
         </Switch>
       </section>
     </Fragment>

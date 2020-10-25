@@ -9,6 +9,55 @@ const dotenv = require('dotenv')
 const router = express.Router()
 dotenv.config({path: '../../.env'}) // for environ variables
 
+// @route  GET /api/problems/
+// @desc   Get all problems
+// @access Public
+router.get('/', async (req, res) => {
+    try {
+        start = null
+        end = null
+        if (req.query.start) {
+            start = req.query.start
+            console.log('Have a query start of ' + start)
+        }
+        if (req.query.end) {
+            end = req.query.end
+            console.log('Have a query end of ' + end)
+        }
+        // NOTE: We're finding based on id, NOT _id! _id is the DB id, whereas id is the leetcode
+        // problem ID!
+        let problems = null
+        // TODO: Figure out if there's a way to pass null into gte/lte w/o causing problems
+        // such that this logic can be condensed to a single query again
+        if (start && end){
+            console.log('start end find')
+            problems = await Problem.find().where('id').gte(start).lte(end)
+        }
+        else if (start) {
+            console.log('start find')
+            problems = await Problem.find().where('id').gte(start)
+        }
+        else if (end) {
+            console.log('end find')
+            problems = await Problem.find().where('id').lte(end)
+        }
+        else {
+            console.log('everything find')
+            problems = await Problem.find()
+        }
+        
+        if (!problems) {
+            console.log('No problems')
+            return res.status(404).json({errors: [{msg: 'No problems found.'}]})
+        }
+
+        return res.json(problems)
+    } catch (error) {
+        console.error(error.message)
+        return res.status(500).send('Server error.')
+    }
+})
+
 // @route  GET /api/problems/:id
 // @desc   Get a problem by id
 // @access Public
@@ -30,22 +79,30 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-// @route  GET /api/problems/
-// @desc   Get all problems
+// @route  GET /api/problems/name/:search
+// @desc   Get problems that match the search term
 // @access Public
-router.get('/', async (req, res) => {
+router.get('/name/:search', async (req, res) => {
     try {
-        const problems = await Problem.find()
-        if (!problems) {
-            return res.status(404).json({errors: [{msg: 'No problems found.'}]})
-        }
-
-        return res.json(problems)
+        // Try to get the problem checking if the problem's name contains the search term
+        // Note /regex/flag is a notation we can use for constant regex expressions too
+        // /req.params.search/i
+        // TODO: Figure out how/if RegExp objects can be used in mongo searchs
+        // re = RegExp('\\b(' + req.params.search + ')\\b', 'i')
+        const problems = await Problem.find({$or:
+            [
+                {name: {$regex: req.params.search, $options: 'i'}},
+                {problem_text: {$regex: req.params.search, $options: 'i'}},
+            ]}
+            ).sort({id: 1})
+        console.log('Got problems for term ' + req.params.search)
+        return res.json({problems})
     } catch (error) {
         console.error(error.message)
         return res.status(500).send('Server error.')
     }
 })
+
 
 // @route  POST /api/problems
 // @desc   Add a new LeetCode problem to the database

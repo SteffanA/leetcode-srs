@@ -50,6 +50,7 @@ const ProblemSchema = mongoose.Schema({
     // Issue is if the test case or start code changes, wouldn't know w/o problem report.
     // Same issue applies to problem_text.
     // Could be resolved by doing a scan and DB update once a month or something.
+    // TODO: Add some automated method of running an update on the DB
 
     // Test case is the example test case given by LC
     test_case: {
@@ -60,5 +61,8 @@ const ProblemSchema = mongoose.Schema({
         type: String,
     }
 })
+
+// Add support for a text search via an index
+ProblemSchema.index({name: 'text', problem_text: 'text'})
 
 module.exports = Problem = mongoose.model('problem', ProblemSchema)
