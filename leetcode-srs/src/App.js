@@ -21,13 +21,19 @@ chrome.exe --user-data-dir="C://Chrome dev session" --disable-web-security --ign
 const App = props => {
   // Deconstruct props as required
   const {
+    isAuth,
     onTryAutoSignIn
   } = props
 
   // Try to login automatically on page load. Only run once
   useEffect(() => {
-    onTryAutoSignIn()
-  }, [onTryAutoSignIn])
+    if (!isAuth) {
+      onTryAutoSignIn()
+    }
+    else {
+      console.log('IS auth already has a positive value')
+    }
+  }, [isAuth, onTryAutoSignIn])
 
   return (
     <Fragment>

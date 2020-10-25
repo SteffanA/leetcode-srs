@@ -30,9 +30,12 @@ const Navbar = props => {
             <div className={classes.Right}>
                 <NavLink activeClassName={classes.active} to={props.isAuth ? '/logout' : '/auth'}>{props.isAuth ? 'Logout' : 'Register/Login'}</NavLink>
                 {/* Set CSS so below is ... below the above*/}
-    {props.isAuth && <NavLink className={classes.NavLink} to='/history'>History</NavLink> }
+                {props.isAuth && <NavLink className={classes.NavLink} to='/history'>History</NavLink> }
             </div> 
             {/* TODO: Use this to fix css module stuff <button >Test button. i should be blue.</button>*/}
+            <div>
+                {props.isAuth && <NavLink className={classes.NavLink} to='/view-problems'>View Problems</NavLink>}
+            </div>
         </div>
     )
 }

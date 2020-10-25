@@ -95,7 +95,7 @@ router.get('/name/:search', async (req, res) => {
                 {problem_text: {$regex: req.params.search, $options: 'i'}},
             ]}
             ).sort({id: 1})
-
+        console.log('Got problems for term ' + req.params.search)
         return res.json({problems})
     } catch (error) {
         console.error(error.message)

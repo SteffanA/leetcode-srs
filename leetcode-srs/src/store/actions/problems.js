@@ -59,11 +59,13 @@ export const problemsGetAllForList = (list) => {
                 }
                 else {
                     const firstProblem = response.data[0]
+                    console.info('Successful get')
+                    console.info(response.data)
                     dispatch(problemsGetProblemsSuccess(response.data, firstProblem))
                 }
                 
             }).catch(error => {
-                console.log('getProblems error of' , error, ' from ', url)
+                console.debug('getProblems error of' , error, ' from ', url)
                 // Clear out the problems if we failed to retrieve any. If we're swapping between lists,
                 // this might happen and we don't want to display problems associated w/ another list.
                 dispatch(problemsClear())
@@ -98,7 +100,7 @@ export const problemsGetAll = () => {
              }
              
          }).catch(error => {
-             console.log('getProblems error of' , error, ' from ', url)
+             console.debug('getProblems error of' , error, ' from ', url)
              // Clear out the problems if we failed to retrieve any. If we're swapping between lists,
              // this might happen and we don't want to display problems associated w/ another list.
              dispatch(problemsClear())
@@ -115,13 +117,12 @@ export const problemsGetSome = (start, end) => {
          // TODO: Make this only return, say problems 1-50. Add as var
          // TODO: In future, exclude problems already part of current list
          // (since this'll be used to show problems we can add to cur list)
-         let url = process.env.REACT_APP_HOST_URL + '/api/problems/' + '?start=' + start + '&end=' + end
+         let url = process.env.REACT_APP_HOST_URL + '/api/problems/?start=' + start + '&end=' + end
          const config = {
              headers: {
                  'content-type': 'json',
              }
          }
-         console.log(url)
          axios.get(url, config).then(response => {
              if (!response) {
                  // No data returned.
@@ -133,7 +134,7 @@ export const problemsGetSome = (start, end) => {
              }
              
          }).catch(error => {
-             console.log('getProblems error of' , error, ' from ', url)
+             console.debug('getProblems error of' , error, ' from ', url)
              // Clear out the problems if we failed to retrieve any. If we're swapping between lists,
              // this might happen and we don't want to display problems associated w/ another list.
              dispatch(problemsClear())
@@ -156,19 +157,21 @@ export const problemsGetSearch = (term) => {
                  'content-type': 'json',
              }
          }
-         console.log(url)
+         console.info('Getting problem with url ' + url)
          axios.get(url, config).then(response => {
              if (!response) {
                  // No data returned.
                  dispatch(problemError('No problems available.'))
              }
              else {
-                 const firstProblem = response.data[0]
-                 dispatch(problemsGetProblemsSuccess(response.data, firstProblem))
+                 console.debug('Successfully got problems from search for term ' + term)
+                 console.debug(response.data.problems)
+                 const firstProblem = response.data.problems[0]
+                 dispatch(problemsGetProblemsSuccess(response.data.problems, firstProblem))
              }
              
          }).catch(error => {
-             console.log('getProblems error of' , error, ' from ', url)
+             console.debug('getProblems error of' , error, ' from ', url)
              // Clear out the problems if we failed to retrieve any. If we're swapping between lists,
              // this might happen and we don't want to display problems associated w/ another list.
              dispatch(problemsClear())
@@ -178,7 +181,7 @@ export const problemsGetSearch = (term) => {
 }
 
 export const problemSetCurrent = (problem) => {
-    console.log('setting current problem to: ', problem)
+    console.debug('setting current problem to: ', problem)
     return {
         type: actions.PROBLEMS_SET_CURRENT,
         curProblem: problem,

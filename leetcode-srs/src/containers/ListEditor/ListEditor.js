@@ -22,6 +22,16 @@ This component is used to:
 // want a search input to search through our problems by title
     // Eventually could add tag searching since we have tags too
 
+// TODO: Change the URL from create-lists to manage-lists
+//          Actually... maybe split into two different pages, but on create-list submission, redirect to
+//          the edit-list form with the just-made list pre-selected
+/*
+Idea for the list editing
+    Take the problem viewer, add new row for add to list/remove from list
+    Change button text/action based on if ID for problem already in selected list
+    Show contents of list via problem name in small window on right side
+*/
+
 const ListEditor = props => {
 
 // Hooks and deconstructions
