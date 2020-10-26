@@ -40,7 +40,17 @@ export const ProblemViewer = (props) => {
     const [
         searchTerm,
         setSearchTerm
-    ] = useState('Search for a Problem')
+    ] = useState('')
+
+    // Keep track of the current search term query
+    // This may be slightly different than the search term,
+    // as this is set based on user input, and is sent to the
+    // searchTerm on a delay so the searchTerm isn't constantly
+    // updating as the user types
+    const [
+        query,
+        setQuery
+    ] = useState("Search for a Problem")
 
     // Keep track of any problems that have been updated to be included
     // or removed from a list
@@ -49,26 +59,23 @@ export const ProblemViewer = (props) => {
         setUpdatedProblems
     ] = useState(new Map())
 
-    // Map the difficulty of a problem from a number to a String
-    const difficultyMapping = {
-        '1' : 'Easy',
-        '2' : 'Medium',
-        '3' : 'Hard'
-    }
 
-    // Another early define
+    // Define this func earlier than other function so it can be utilized in
+    // the useEffect hook below
+    // This will setup the initial mapping of the problems displayed
+    // and if they are in the current list or not
     const setInitialProblemStates = () => {
         // Set the current problem state
         // Create a copy of the current state that we can pass to the update hook
         const updatedVersion = new Map(currentProblemsAndState)
-        for (let problem in problems) {
+        problems.forEach((problem) => {
             // Only update the state if the problem is newly seen
             // otherwise keep whatever updates the user made on the page already
-            if (!updatedVersion.has(problem.id)) {
-                console.log('setting problem ' + problem + ' with id ' + problem.id)
-                updatedVersion.set(problem.id, true)
+            if (!updatedVersion.has(problem._id)) {
+                console.log('setting problem ' + problem + ' with id ' + problem._id)
+                updatedVersion.set(problem._id, null)
             }
-        }
+        })
         setUpdatedProblems(updatedVersion)
     }
 
@@ -112,10 +119,12 @@ export const ProblemViewer = (props) => {
                 getSearchResults(searchTerm)
             }
         },
-        [searchTerm, getSearchResults]
+        [searchTerm, getSearchResults, getProblemSubset]
     )
 
     // Use this to override any enter key press on the page
+    // This will prevent page reloads when we submit our form (text box & submit button)
+    // in addition to allowing easy refreshes of results
     useEffect(() => {
         const listener = event => {
         if (event.code === "Enter" || event.code === "NumpadEnter") {
@@ -129,14 +138,25 @@ export const ProblemViewer = (props) => {
         };
     }, [handleSubmit]);
 
+    // Setup our hook so that we only update the search term after a 
+    // given period
+    useEffect (() => {
+        const timeOutId = setTimeout(() => {
+            console.log('Auto updating and querying with ' + query)
+            setSearchTerm(query)
+            // Auto-update the results
+            // Use query since the search term may not be set in time
+            // for getSearchResults to execute on the right text
+            getSearchResults(query)
+        }, 1000)
+        return () => clearTimeout(timeOutId)
+    }, [setSearchTerm, query, getSearchResults])
+
     /* Submission and change handlers */
 
     const handleChange = (event) => {
-        // TODO: Set this up so it triggers auto-submit after say, 3sec of no change
-        // TODO: I think there was also some code in a prior practice project
-        // that prevented this from being called 129084x when typing something out?
         console.info('Calling handle change, setting search term to ' + event.target.value)
-        setSearchTerm(event.target.value)
+        setQuery(event.target.value)
     }
 
     // Save any changes to the list that were made
@@ -145,8 +165,25 @@ export const ProblemViewer = (props) => {
         event.preventDefault()
         alert('Changes saved!')
         // Take the list of problems and write out the changes
+        // The API will expect an array of JSON objects containing IDs
+        // and whether to add or remove the problem.
+        const updatedProblems = []
+        currentProblemsAndState.forEach((update, id) => {
+            console.log('Mapping problem w/ key ' + id + ' and val ' + update)
+            // A null update state indicates the state of the problem in the list didn't
+            // change
+            // TODO: Is there a cleaner way to handle this? Perhaps a touched field in the
+            // updatedStates map?  Could change to a JSON object vs a Map object
+            if (update !== null) {
+                updatedProblems.push({
+                    "id" : id,
+                    "add" : update 
+                })
+            }
+        })
+        console.log('Final array:')
+        console.log(updatedProblems)
         // TODO: Should also call this on modal exit, if possible
-        // Also uncertain if closing modal on save is cleaner or not
     }
 
     
@@ -195,12 +232,19 @@ export const ProblemViewer = (props) => {
                 }
                 clicked={() => invertProblemState(problem_id)}>
                     {
-                        currentProblemsAndState.get(problem_id) && "Remove From List"
+                        (currentProblemsAndState.get(problem_id) && "Remove From List")
                         ||
-                        !currentProblemsAndState.get(problem_id) && "Add To List"
+                        (!currentProblemsAndState.get(problem_id) && "Add To List")
                     }
             </Button>
         )
+    }
+
+    // Map the difficulty of a problem from a number to a String
+    const difficultyMapping = {
+        '1' : 'Easy',
+        '2' : 'Medium',
+        '3' : 'Hard'
     }
 
     let probs = null
@@ -213,7 +257,7 @@ export const ProblemViewer = (props) => {
                     <td><a href={createLink(prob.link)}>{prob.name}</a></td>
                     <td><b>{difficultyMapping[prob.difficulty]}</b></td>
                     <td>{prob.problem_text}</td>
-                    <td>{getAppropriateButton(prob.id)}</td>
+                    <td>{getAppropriateButton(prob._id)}</td>
                 </tr>
             )
             }
@@ -227,7 +271,7 @@ export const ProblemViewer = (props) => {
             <form>
                 <label>
                     Search for a problem:
-                    <Input elementType='input' name="name" value={searchTerm} changed={handleChange}/>
+                    <Input elementType='input' name="name" value={query} changed={handleChange}/>
                 </label>
                 <Input elementType="submit" value="Submit" clicked={handleSubmit}/>
             </form>

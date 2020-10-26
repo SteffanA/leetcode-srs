@@ -213,6 +213,7 @@ const ListEditor = props => {
                     <Button btnType="Danger" clicked={closeModal}>Exit List Editor</Button>
                 </div>
                 <div>
+                    <h1>Editing List: {props.curListName}</h1>
                     <ProblemViewer curList={null}/>
                 </div>
             </Modal>
