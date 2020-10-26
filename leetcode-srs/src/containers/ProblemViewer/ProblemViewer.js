@@ -67,17 +67,28 @@ export const ProblemViewer = (props) => {
     const setInitialProblemStates = () => {
         // Set the current problem state
         // Create a copy of the current state that we can pass to the update hook
+        if (problems === null) {
+            // Exit early
+            return
+        }
         const updatedVersion = new Map(currentProblemsAndState)
         problems.forEach((problem) => {
             // Only update the state if the problem is newly seen
             // otherwise keep whatever updates the user made on the page already
             if (!updatedVersion.has(problem._id)) {
                 console.log('setting problem ' + problem + ' with id ' + problem._id)
-                updatedVersion.set(problem._id, null)
+                // Map the problem ID to a tuple of touched, adding
+                // If touched is true, we've updated this value
+                // If adding is true, we're adding this problem to the list
+                // (as opposed to removing it from the list)
+                updatedVersion.set(problem._id, [false, false])
             }
         })
         setUpdatedProblems(updatedVersion)
     }
+
+    const TOUCHED_INDEX = 0
+    const ADDING_INDEX = 0
 
 
     useEffect(() => {
@@ -168,16 +179,16 @@ export const ProblemViewer = (props) => {
         // The API will expect an array of JSON objects containing IDs
         // and whether to add or remove the problem.
         const updatedProblems = []
-        currentProblemsAndState.forEach((update, id) => {
-            console.log('Mapping problem w/ key ' + id + ' and val ' + update)
+        currentProblemsAndState.forEach((state, id) => {
+            console.log('Mapping problem w/ key ' + id + ' and val ' + state)
             // A null update state indicates the state of the problem in the list didn't
             // change
             // TODO: Is there a cleaner way to handle this? Perhaps a touched field in the
             // updatedStates map?  Could change to a JSON object vs a Map object
-            if (update !== null) {
+            if (state !== null && state[TOUCHED_INDEX] !== false) {
                 updatedProblems.push({
                     "id" : id,
-                    "add" : update 
+                    "add" : state[ADDING_INDEX]
                 })
             }
         })
@@ -212,9 +223,17 @@ export const ProblemViewer = (props) => {
     // add it to a list based on what the current state already is
     const invertProblemState = (problem_id) => {
         console.log('Updating problem with id ' + problem_id + ' in list with id ' +
-             curList.id + 'to ' + !currentProblemsAndState.get(problem_id))
+             curList.id + 'to ' + !currentProblemsAndState.get(problem_id)[ADDING_INDEX])
         let updatedState = new Map(currentProblemsAndState)
-        updatedState.set(problem_id, !currentProblemsAndState.get(problem_id))
+        let newVals = new Array(2)
+        /* Why do we invert touched index in addition to state?
+        The reason is because if we change the state, the change it back,
+        it's as if we never changed anything, and we can avoid an attempt
+        to change something that doesn't need to be changed on the backend.
+        */
+        newVals[TOUCHED_INDEX] = !(currentProblemsAndState.get(problem_id)[TOUCHED_INDEX])
+        newVals[ADDING_INDEX] =!(currentProblemsAndState.get(problem_id)[ADDING_INDEX] )
+        updatedState.set(problem_id, newVals)
         setUpdatedProblems(updatedState)
     }
 
@@ -223,21 +242,28 @@ export const ProblemViewer = (props) => {
     // Create an add-to-list or remove-from-list button depending
     // on if the problem passed is already inside the 
     const getAppropriateButton = (problem_id) => {
-        return (
-            <Button
-                btnType={
-                    (!currentProblemsAndState.get(problem_id) && "Success")
-                    ||
-                    (currentProblemsAndState.get(problem_id) && "Danger")
-                }
-                clicked={() => invertProblemState(problem_id)}>
-                    {
-                        (currentProblemsAndState.get(problem_id) && "Remove From List")
-                        ||
-                        (!currentProblemsAndState.get(problem_id) && "Add To List")
-                    }
-            </Button>
-        )
+        const cur_state = currentProblemsAndState.get(problem_id)
+        // If the problem isn't in the curState, or if it is but isn't in the list
+        // Create an add-to-list button
+        if ( (cur_state === undefined) || !(cur_state[ADDING_INDEX]) ) {
+            return(
+                <Button
+                    btnType="Success"
+                    clicked={() => invertProblemState(problem_id)}>
+                        Add to List
+                </Button>
+            )
+        }
+        // Else create a remove from list button
+        else {
+            return(
+                <Button
+                    btnType="Danger"
+                    clicked={() => invertProblemState(problem_id)}>
+                        Remove From List
+                </Button>
+            )
+        }
     }
 
     // Map the difficulty of a problem from a number to a String
