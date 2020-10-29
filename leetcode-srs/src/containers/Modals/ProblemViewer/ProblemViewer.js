@@ -1,10 +1,11 @@
 import React, {useEffect, useState, useRef, useCallback} from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import * as problemActions from '../../store/actions/problems'
+import * as problemActions from '../../../store/actions/problems'
+import * as listActions from '../../../store/actions/lists'
 import classes from './ProblemViewer.module.css'
-import Input from '../UI/Input/Input'
-import Button from '../UI/Button/Button'
+import Input from '../../UI/Input/Input'
+import Button from '../../UI/Button/Button'
 // TODO: The page is currently being refreshed with a query url schema upon form submission
 // Why is this, and how can I prevent it? preventDefault on the form button does nothing
 
@@ -30,17 +31,20 @@ function useTraceUpdate(props) {
 export const ProblemViewer = (props) => {
     /* Props and hooks */
     const {
-        curList, // passed ID of the list being edited
-        problems,
+        curList,
+        curProblems,
+        listErrors,
         getProblemSubset,
-        getSearchResults
+        getSearchResults,
+        updateListProblems
     } = props
 
     // Keep track of the term being searched for
+    // TODO: Should we store the last search term across the app via Redux?
     const [
         searchTerm,
         setSearchTerm
-    ] = useState('')
+    ] = useState('Search for a Problem')
 
     // Keep track of the current search term query
     // This may be slightly different than the search term,
@@ -67,12 +71,17 @@ export const ProblemViewer = (props) => {
     const setInitialProblemStates = () => {
         // Set the current problem state
         // Create a copy of the current state that we can pass to the update hook
-        if (problems === null) {
+        if (curProblems === null) {
             // Exit early
             return
         }
         const updatedVersion = new Map(currentProblemsAndState)
-        problems.forEach((problem) => {
+        console.log('Cur list in set initial problem state')
+        console.log(curList)
+        const cur_problem_map = new Map(curList.problems)
+        console.log('generated map:')
+        console.log(cur_problem_map)
+        curProblems.forEach((problem) => {
             // Only update the state if the problem is newly seen
             // otherwise keep whatever updates the user made on the page already
             if (!updatedVersion.has(problem._id)) {
@@ -82,17 +91,22 @@ export const ProblemViewer = (props) => {
                 // If adding is true, we're adding this problem to the list
                 // (as opposed to removing it from the list)
                 updatedVersion.set(problem._id, [false, false])
+                // TODO: Important! Need to do ^ as a default, but update adding based
+                // on cur list's contents if this problem is in the list!
             }
         })
         setUpdatedProblems(updatedVersion)
     }
 
-    const TOUCHED_INDEX = 0
-    const ADDING_INDEX = 0
+    // Constants definining the index of states within the currentProblemsAndState 
+    // mapped arrays
+    const TOUCHED_INDEX = 0 // Has problem been touched (made to add or remove)
+    const ADDING_INDEX = 0 // Should this problem be added (or removed if false)
 
 
     useEffect(() => {
-        if (problems == null) {
+        // TODO: Why curProblems??? isnt this our problems from the list???
+        if (curProblems === null) {
             // TODO: This is awful, figure out the good solution
             if (searchTerm === null || searchTerm === '' || searchTerm === 'Search for a Problem') {
                 console.debug('Page refresh: getting subset')
@@ -105,12 +119,12 @@ export const ProblemViewer = (props) => {
         }
         else {
             console.debug('ProblemViewer: problems already exist')
-            console.debug(problems)
+            console.debug(curProblems)
         }
         console.log('Problem viewer refreshed')
         // Setup the problem states for any new-in-view problems
         setInitialProblemStates()
-    }, [problems, getProblemSubset, getSearchResults, searchTerm])
+    }, [curProblems, getProblemSubset, getSearchResults, searchTerm])
 
     // Declare our function earlier than the others so useEffect can run appropriately
     // Handle submission of a search term for a problem
@@ -174,17 +188,13 @@ export const ProblemViewer = (props) => {
     const saveChanges = (event) => {
         // TODO: We're going to want to have a batch update API call 
         event.preventDefault()
-        alert('Changes saved!')
         // Take the list of problems and write out the changes
         // The API will expect an array of JSON objects containing IDs
         // and whether to add or remove the problem.
         const updatedProblems = []
         currentProblemsAndState.forEach((state, id) => {
             console.log('Mapping problem w/ key ' + id + ' and val ' + state)
-            // A null update state indicates the state of the problem in the list didn't
-            // change
-            // TODO: Is there a cleaner way to handle this? Perhaps a touched field in the
-            // updatedStates map?  Could change to a JSON object vs a Map object
+            // A null update state indicates the state of the problem in the list didn't change
             if (state !== null && state[TOUCHED_INDEX] !== false) {
                 updatedProblems.push({
                     "id" : id,
@@ -194,7 +204,22 @@ export const ProblemViewer = (props) => {
         })
         console.log('Final array:')
         console.log(updatedProblems)
+        // Send the request to update our list
+        console.log(curList)
+        updateListProblems(updatedProblems, curList.id)
+        // Check for any errors after our request finishes
+        if (listErrors !== null) {
+            alert('Save failed! Please try again later.')
+            return
+        }
+        alert('Changes saved!')
         // TODO: Should also call this on modal exit, if possible
+            // Ehh... maybe not, what if user decides not to update, don't need
+            // to force them to undo everything...
+        // Reset the currentProblemsAndState mapping, since 'touched' and non touched
+        // vars are going to be different now.
+        setUpdatedProblems(new Map())
+        setInitialProblemStates() 
     }
 
     
@@ -274,9 +299,9 @@ export const ProblemViewer = (props) => {
     }
 
     let probs = null
-    if (problems) {
-        console.debug(problems)
-        probs = problems.map(prob => {
+    if (curProblems) {
+        console.debug(curProblems)
+        probs = curProblems.map(prob => {
             return (
                 <tr key={prob._id}>
                     <td> {prob.id} </td>
@@ -336,7 +361,7 @@ export const ProblemViewer = (props) => {
 }
 
 ProblemViewer.propTypes = {
-    problems: PropTypes.array,
+    curProblems: PropTypes.array,
     getAllProblems: PropTypes.func,
     getProblemSubset: PropTypes.func,
     getSearchResults: PropTypes.func,
@@ -345,8 +370,10 @@ ProblemViewer.propTypes = {
 
 const mapStateToProps = (state) => {
     return {
-        problems: state.problems.curProblems,
+        curProblems: state.problems.curProblems,
         curList: state.lists.curList, // currently selected list
+        // curProblemsInList: state.lists.
+        listErrors: state.lists.error,
     }
 }
 
@@ -354,8 +381,8 @@ const mapDispatchToProps = (dispatch) => {
     return {
         // Get problems
         getProblemSubset: (start, end) => dispatch(problemActions.problemsGetSome(start, end)),
-        getSearchResults: (term) => dispatch(problemActions.problemsGetSearch(term))
-        // updateListProblems: (problem_list) => dispatch()
+        getSearchResults: (term) => dispatch(problemActions.problemsGetSearch(term)),
+        updateListProblems: (problemList, curList) => dispatch(listActions.listsUpdateProblems(problemList, curList)),
     }
 }
 

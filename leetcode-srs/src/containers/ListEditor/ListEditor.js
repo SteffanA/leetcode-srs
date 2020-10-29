@@ -10,7 +10,7 @@ import Selector from '../MainPage/Selector/Selector'
 
 import { checkValidity, updateObject} from '../../utility/utility'
 import Modal from 'react-modal'
-import ProblemViewer from '../ProblemViewer/ProblemViewer'
+import ProblemViewer from '../Modals/ProblemViewer/ProblemViewer'
 
 
 /*
@@ -199,7 +199,6 @@ const ListEditor = props => {
 
     return (
         <div>
-            {/* <PageTabs sections={availableTabs} current={test}/> */}
             {newListForm}
             <Selector showLists={true} showProblems={false}/>
             <Button btnType="Success" clicked={openModal}>Edit Selected List</Button>
@@ -214,7 +213,7 @@ const ListEditor = props => {
                 </div>
                 <div>
                     <h1>Editing List: {props.curListName}</h1>
-                    <ProblemViewer curList={null}/>
+                    <ProblemViewer/>
                 </div>
             </Modal>
         </div>
@@ -236,10 +235,6 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         createList: (name, isPublic) => dispatch(listActions.listsCreateNewList(name, isPublic)),
-        // get problems
-        // get list's problems
-        // add problem to list
-        // remove problem from list
     }
 }
 

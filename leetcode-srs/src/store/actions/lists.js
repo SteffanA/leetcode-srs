@@ -39,6 +39,14 @@ const listsPostListSuccess = (newList) => {
     }
 }
 
+// Successfully updated the current list's problems
+const listsUpdatedProblemsSuccess = () => {
+    return {
+        type: actions.LISTS_UPDATE_PROBLEMS,
+        error: null,
+    }
+}
+
 // BEGIN EXPORTS
 
 export const listsGetAll = () => {
@@ -77,7 +85,7 @@ export const listsGetAll = () => {
                 }
                 
             }).catch(error => {
-                console.log(error)
+                console.debug(error)
                 // Clear out the old lists if we failed to get any
                 dispatch(listClear())
                 dispatch(listError(error.msg))
@@ -129,8 +137,45 @@ export const listsCreateNewList = (name, isPublic) => {
         ).then(response => {
             dispatch(listsPostListSuccess(response.data))
         }).catch(err => {
-            console.log(err)
-            dispatch(listError(err)) //TODO: Transform back to err.message. Use this for debugging only
+            console.debug(err)
+            dispatch(listError(err.message)) 
+        })
+    }
+}
+
+export const listsUpdateProblems = (updatedProblems, curListID) => {
+    return dispatch => {
+        // Start the lists process
+        dispatch(listStart())
+
+        const token = localStorage.getItem('token')
+        if (!token) {
+            // If there's no token, we can't get lists
+            dispatch(listError('User not logged in!'))
+        }
+        // Check if we have any problems to actually update
+        if (updatedProblems === null || updatedProblems.length== 0) {
+            // Exit early
+            dispatch(listsUpdateProblems())
+        }
+        const url = process.env.REACT_APP_HOST_URL + '/api/lists/bulk/' + curListID
+        const config = {
+            headers: {
+                'x-auth-token': token,
+                'content-type': 'application/json',
+            }
+        }
+        const body = {
+            "problems" : updatedProblems
+        }
+        axios.put(url, body, config
+        ).then(response => {
+            // Update the current list object to reflect the results
+            console.log(response)
+            dispatch(listsUpdateProblems())
+        }).catch(err => {
+            console.debug(err)
+            dispatch(listError(err.message))
         })
     }
 }

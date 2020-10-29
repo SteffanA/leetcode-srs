@@ -416,11 +416,9 @@ async (req, res) => {
             // Add to list
             if (adding) {
                 // Ensure not already in list
-                console.log('test print')
                 const inList = list.problems.find((curProb) => {
                     return curProb._id.toString() === problem._id.toString()
                 })
-                console.log('second test')
                 if (inList) {
                     // Already a part of the list, can't add twice.
                     failed_updates.push('Problem already part of list: ID ' + id)
