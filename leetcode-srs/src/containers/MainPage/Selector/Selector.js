@@ -7,6 +7,7 @@ import DropDownMenu from '../../SharedItems/DropDownMenu'
 import * as listActions from '../../../store/actions/lists'
 import * as problemActions from '../../../store/actions/problems'
 
+// TODO: This component can probably have its props cleaned up
 
 /*
 This component allows the user to:

@@ -8,7 +8,7 @@ import Input from '../UI/Input/Input'
 import Button from '../UI/Button/Button'
 import Spinner from '../UI/Spinner/Spinner'
 
-import { checkValidity, updateObject } from '../../utility/utility'
+import { checkValidity, updateObject } from '../../shared/utility'
 import * as actions from '../../store/actions/auth'
 
 

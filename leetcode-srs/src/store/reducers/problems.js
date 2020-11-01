@@ -1,5 +1,5 @@
 import * as actions from '../actions/actionTypes'
-import {updateObject} from '../../utility/utility'
+import { updateObject } from '../../shared/utility'
 
 const initialState = {
     curProblem: null,

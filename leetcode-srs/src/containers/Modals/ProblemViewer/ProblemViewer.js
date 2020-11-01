@@ -1,6 +1,8 @@
-import React, {useEffect, useState, useRef, useCallback} from 'react'
+import React, {useEffect, useState, useCallback} from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
+import {getProblemSearchResults, getSubsetOfProblems} from '../../../shared/api_calls/problems'
+import {createLink} from '../../../shared/utility'
 import * as problemActions from '../../../store/actions/problems'
 import * as listActions from '../../../store/actions/lists'
 import classes from './ProblemViewer.module.css'
@@ -9,24 +11,6 @@ import Button from '../../UI/Button/Button'
 // TODO: The page is currently being refreshed with a query url schema upon form submission
 // Why is this, and how can I prevent it? preventDefault on the form button does nothing
 
-// TODO: Move the trace update to a common func library
-// Function stolen from stack overflow to trace what prop changed
-// to cause a page refresh
-function useTraceUpdate(props) {
-  const prev = useRef(props);
-  useEffect(() => {
-    const changedProps = Object.entries(props).reduce((ps, [k, v]) => {
-      if (prev.current[k] !== v) {
-        ps[k] = [prev.current[k], v];
-      }
-      return ps;
-    }, {});
-    if (Object.keys(changedProps).length > 0) {
-      console.debug('Changed props:', changedProps);
-    }
-    prev.current = props;
-  });
-}
 
 export const ProblemViewer = (props) => {
     /* Props and hooks */
@@ -34,9 +18,8 @@ export const ProblemViewer = (props) => {
         curList,
         curProblems,
         listErrors,
-        getProblemSubset,
-        getSearchResults,
-        updateListProblems
+        updateListProblems,
+        getProblemsForList
     } = props
 
     // Keep track of the term being searched for
@@ -63,6 +46,13 @@ export const ProblemViewer = (props) => {
         setUpdatedProblems
     ] = useState(new Map())
 
+    // Keep track of what problems we've gathered via the
+    // API calls
+    const [
+        curProblemResults,
+        setProblemResults
+    ] = useState([])
+
 
     // Define this func earlier than other function so it can be utilized in
     // the useEffect hook below
@@ -71,17 +61,26 @@ export const ProblemViewer = (props) => {
     const setInitialProblemStates = () => {
         // Set the current problem state
         // Create a copy of the current state that we can pass to the update hook
-        if (curProblems === null) {
+        if (curProblemResults === null) {
             // Exit early
             return
         }
         const updatedVersion = new Map(currentProblemsAndState)
         console.log('Cur list in set initial problem state')
         console.log(curList)
-        const cur_problem_map = new Map(curList.problems)
-        console.log('generated map:')
-        console.log(cur_problem_map)
-        curProblems.forEach((problem) => {
+        // Add all problems currently in the list to a set for easy lookup
+        const current_lists_problems = new Set()
+        // Ensure curProblems isn't null
+        if (curProblems) {
+            curProblems.forEach((problem) => {
+                current_lists_problems.add(problem._id)
+            })
+        }
+        console.log('cur problems are: ')
+        console.log(curProblems)
+        console.log('generated set:')
+        console.log(current_lists_problems)
+        curProblemResults.forEach((problem) => {
             // Only update the state if the problem is newly seen
             // otherwise keep whatever updates the user made on the page already
             if (!updatedVersion.has(problem._id)) {
@@ -90,9 +89,15 @@ export const ProblemViewer = (props) => {
                 // If touched is true, we've updated this value
                 // If adding is true, we're adding this problem to the list
                 // (as opposed to removing it from the list)
-                updatedVersion.set(problem._id, [false, false])
-                // TODO: Important! Need to do ^ as a default, but update adding based
-                // on cur list's contents if this problem is in the list!
+                if (!current_lists_problems.has(problem._id)) {
+                    // Default - not in list
+                    updatedVersion.set(problem._id, [false, false])
+                }
+                else {
+                    console.log(problem.name + ' is already in list')
+                    // already in list, set adding to True so we setup for removal
+                    updatedVersion.set(problem._id, [false, true])
+                }
             }
         })
         setUpdatedProblems(updatedVersion)
@@ -101,50 +106,57 @@ export const ProblemViewer = (props) => {
     // Constants definining the index of states within the currentProblemsAndState 
     // mapped arrays
     const TOUCHED_INDEX = 0 // Has problem been touched (made to add or remove)
-    const ADDING_INDEX = 0 // Should this problem be added (or removed if false)
+    const ADDING_INDEX = 1 // Should this problem be added (or removed if false)
 
-
+    // Load problems on startup into the table
     useEffect(() => {
-        // TODO: Why curProblems??? isnt this our problems from the list???
-        if (curProblems === null) {
-            // TODO: This is awful, figure out the good solution
-            if (searchTerm === null || searchTerm === '' || searchTerm === 'Search for a Problem') {
-                console.debug('Page refresh: getting subset')
-                getProblemSubset(0, 50)
+        // TODO: If we enter an invalid result, we infinitely page refresh
+        // Need to fix this pretty badly.
+        if (curProblemResults === null || curProblemResults.length === 0) {
+            // Helper function to allow us to execute async in the hook
+            const getProblems = async (searchTerm) => {
+                let results = null
+                // TODO: This is awful, figure out the good solution
+                if (searchTerm === null || searchTerm === '' || searchTerm === 'Search for a Problem') {
+                    console.debug('Page refresh: getting subset')
+                    results = await getSubsetOfProblems(0, 50)
+                }
+                else {
+                    console.debug('Page refresh: getting res for ' + searchTerm)
+                    results = await getProblemSearchResults(searchTerm)
+                }
+                setProblemResults(results)
             }
-            else {
-                console.debug('Page refresh: getting res for ' + searchTerm)
-                getSearchResults(searchTerm)
-            }
+            getProblems(searchTerm)
         }
         else {
             console.debug('ProblemViewer: problems already exist')
-            console.debug(curProblems)
+            console.debug(curProblemResults)
         }
         console.log('Problem viewer refreshed')
         // Setup the problem states for any new-in-view problems
         setInitialProblemStates()
-    }, [curProblems, getProblemSubset, getSearchResults, searchTerm])
+    }, [curProblemResults, getSubsetOfProblems, searchTerm, getProblemSearchResults, setProblemResults])
 
     // Declare our function earlier than the others so useEffect can run appropriately
     // Handle submission of a search term for a problem
     // We will replace the problems displayed on the page with the results
     const handleSubmit = useCallback(
-        (event) => {
+        async (event) => {
             event.preventDefault()
-            console.log('calling handle submit')
-            console.log('Search term is ' + searchTerm)
             // TODO: Not sure if this is a great approach to take,
             // considering it's not out of the realm of possibility for
             // an actual LC problem to be called this.
+            // TODO: Does this actually get called? Look into Code Coverage
             if (searchTerm === 'Search for a Problem') {
-                getProblemSubset(0,50)
+                getSubsetOfProblems(0,50)
             }
             else {
-                getSearchResults(searchTerm)
+                const results = await getProblemSearchResults(searchTerm)
+                setProblemResults(results)
             }
         },
-        [searchTerm, getSearchResults, getProblemSubset]
+        [searchTerm, getProblemSearchResults, getSubsetOfProblems]
     )
 
     // Use this to override any enter key press on the page
@@ -153,7 +165,6 @@ export const ProblemViewer = (props) => {
     useEffect(() => {
         const listener = event => {
         if (event.code === "Enter" || event.code === "NumpadEnter") {
-            console.log("Enter key was pressed. Run your function.");
             handleSubmit(event)
         }
         };
@@ -166,34 +177,32 @@ export const ProblemViewer = (props) => {
     // Setup our hook so that we only update the search term after a 
     // given period
     useEffect (() => {
-        const timeOutId = setTimeout(() => {
+        const timeOutId = setTimeout(async () => {
             console.log('Auto updating and querying with ' + query)
             setSearchTerm(query)
             // Auto-update the results
             // Use query since the search term may not be set in time
-            // for getSearchResults to execute on the right text
-            getSearchResults(query)
+            // for getProblemSearchResults to execute on the right text
+            const results = await getProblemSearchResults(query)
+            setProblemResults(results)
         }, 1000)
         return () => clearTimeout(timeOutId)
-    }, [setSearchTerm, query, getSearchResults])
+    }, [setSearchTerm, query, getProblemSearchResults])
 
     /* Submission and change handlers */
 
     const handleChange = (event) => {
-        console.info('Calling handle change, setting search term to ' + event.target.value)
         setQuery(event.target.value)
     }
 
     // Save any changes to the list that were made
-    const saveChanges = (event) => {
-        // TODO: We're going to want to have a batch update API call 
+    const saveChanges = async (event) => {
         event.preventDefault()
         // Take the list of problems and write out the changes
         // The API will expect an array of JSON objects containing IDs
         // and whether to add or remove the problem.
         const updatedProblems = []
         currentProblemsAndState.forEach((state, id) => {
-            console.log('Mapping problem w/ key ' + id + ' and val ' + state)
             // A null update state indicates the state of the problem in the list didn't change
             if (state !== null && state[TOUCHED_INDEX] !== false) {
                 updatedProblems.push({
@@ -202,20 +211,17 @@ export const ProblemViewer = (props) => {
                 })
             }
         })
-        console.log('Final array:')
-        console.log(updatedProblems)
         // Send the request to update our list
-        console.log(curList)
-        updateListProblems(updatedProblems, curList.id)
+        await updateListProblems(updatedProblems, curList.id)
         // Check for any errors after our request finishes
         if (listErrors !== null) {
             alert('Save failed! Please try again later.')
             return
         }
         alert('Changes saved!')
-        // TODO: Should also call this on modal exit, if possible
-            // Ehh... maybe not, what if user decides not to update, don't need
-            // to force them to undo everything...
+
+        // Update problems now
+        await getProblemsForList(curList)
         // Reset the currentProblemsAndState mapping, since 'touched' and non touched
         // vars are going to be different now.
         setUpdatedProblems(new Map())
@@ -238,11 +244,6 @@ export const ProblemViewer = (props) => {
     //     console.log('load prev')
     // }
 
-    // Simple helper to generate a link for a problem from a stub
-    // TODO: Move this function to some general helper class and import it
-    const createLink = (stub) => {
-        return 'https://leetcode.com/problems/' + stub
-    }
 
     // Update a selected problem state to either remove or
     // add it to a list based on what the current state already is
@@ -299,9 +300,9 @@ export const ProblemViewer = (props) => {
     }
 
     let probs = null
-    if (curProblems) {
-        console.debug(curProblems)
-        probs = curProblems.map(prob => {
+    if (curProblemResults) {
+        console.debug(curProblemResults)
+        probs = curProblemResults.map(prob => {
             return (
                 <tr key={prob._id}>
                     <td> {prob.id} </td>
@@ -363,26 +364,21 @@ export const ProblemViewer = (props) => {
 ProblemViewer.propTypes = {
     curProblems: PropTypes.array,
     getAllProblems: PropTypes.func,
-    getProblemSubset: PropTypes.func,
-    getSearchResults: PropTypes.func,
     curList: PropTypes.object,
 }
 
 const mapStateToProps = (state) => {
     return {
-        curProblems: state.problems.curProblems,
         curList: state.lists.curList, // currently selected list
-        // curProblemsInList: state.lists.
+        curProblems: state.problems.curProblems, // Problems for the currently selected list
         listErrors: state.lists.error,
     }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        // Get problems
-        getProblemSubset: (start, end) => dispatch(problemActions.problemsGetSome(start, end)),
-        getSearchResults: (term) => dispatch(problemActions.problemsGetSearch(term)),
-        updateListProblems: (problemList, curList) => dispatch(listActions.listsUpdateProblems(problemList, curList)),
+        updateListProblems: (updatedProblems, listID) => dispatch(listActions.listsUpdateProblems(updatedProblems, listID)),
+        getProblemsForList: (list) => dispatch(problemActions.problemsGetAllForList(list)),
     }
 }
 

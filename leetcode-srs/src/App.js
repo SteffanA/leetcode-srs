@@ -9,7 +9,6 @@ import Navbar from './containers/SharedItems/Navbar'
 import Auth from './containers/Auth/Auth'
 import Logout from './containers/Auth/Logout'
 import ListEditor from './containers/ListEditor/ListEditor'
-import ProblemViewer from './containers/Modals/ProblemViewer/ProblemViewer'
 
 import * as actions from './store/actions/index'
 

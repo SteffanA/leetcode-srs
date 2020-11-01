@@ -8,7 +8,7 @@ import Button from '../UI/Button/Button'
 //import PageTabs from '../UI/PageTabs/PageTabs'
 import Selector from '../MainPage/Selector/Selector'
 
-import { checkValidity, updateObject} from '../../utility/utility'
+import { checkValidity, updateObject } from '../../shared/utility'
 import Modal from 'react-modal'
 import ProblemViewer from '../Modals/ProblemViewer/ProblemViewer'
 
@@ -43,7 +43,6 @@ const ListEditor = props => {
     const [listState, setListState] = useState({
         // Visibility for our forms
         newListFormVisible: true,
-        editListFormVisible: false,
         // The controls for our forms
         newListControls: {
             // Name of the new list
@@ -87,7 +86,6 @@ const ListEditor = props => {
     // Deconstruct our listState
     const {
         newListFormVisible,
-        editListFormVisible,
         newListControls,
     } = listState
 
@@ -188,25 +186,16 @@ const ListEditor = props => {
         </form>
     )
 
-    // Tabs for which form to display
-    const availableTabs = [
-        'Create new list',
-        'Edit existing list',
-    ]
-
-    const test = ''
-
-
     return (
         <div>
-            {newListForm}
+            {newListFormVisible && newListForm}
             <Selector showLists={true} showProblems={false}/>
             <Button btnType="Success" clicked={openModal}>Edit Selected List</Button>
             <Modal
                 isOpen={modalIsOpen}
                 onAfterOpen={afterOpenModal}
                 onRequestClose={closeModal}
-                contentLabel="Example Modal"
+                contentLabel="Problem Viewer Modal"
             >
                 <div>
                     <Button btnType="Danger" clicked={closeModal}>Exit List Editor</Button>
