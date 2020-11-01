@@ -1,6 +1,5 @@
 import * as actions from './actionTypes'
-import axios from '../../axios-interceptor' //TODO: Revert to base axios
-// TODO: Setup env for debug usage of interceptor or base
+import * as api from '../../shared/api_calls/lists'
 
 // Functions for our list-related actions live here
 
@@ -39,52 +38,15 @@ const listsPostListSuccess = (newList) => {
     }
 }
 
-// BEGIN EXPORTS
-
-export const listsGetAll = () => {
-    return dispatch => {
-        // Start the list process
-        dispatch(listStart())
-        // Get the user's token from local storage
-        const token = localStorage.getItem('token')
-        if (!token) {
-            // If there's no token, we can't get lists
-            dispatch(listError('User not logged in!'))
-        }
-        else {
-            // Get the user's lists
-            const url = process.env.REACT_APP_HOST_URL + '/api/users/lists'
-            const config = {
-                headers: {
-                    'x-auth-token': token,
-                    'content-type': 'json',
-                }
-            }
-            axios.get(url, config).then(response => {
-                if (!response) {
-                    // No data returned.
-                    dispatch(listError('No lists available.'))
-                }
-                else {
-                    // So for all other calls where we update the cur list, we have it such that
-                    // the object has id, not _id as a field.  We can take our response's first object
-                    // and use that to set the cur list as a 'unified' format firstList
-                    const unifiedFirstList = {
-                        id: response.data[0]._id,
-                        name: response.data[0].name
-                    }
-                    dispatch(listsGetListsSuccess(response.data, unifiedFirstList))
-                }
-                
-            }).catch(error => {
-                console.log(error)
-                // Clear out the old lists if we failed to get any
-                dispatch(listClear())
-                dispatch(listError(error.msg))
-            })
-        }
+// Successfully updated the current list's problems
+const listsUpdatedProblemsSuccess = () => {
+    return {
+        type: actions.LISTS_UPDATE_PROBLEMS,
+        error: null,
     }
 }
+
+// BEGIN EXPORTS
 
 // Update the current list
 export const listSetCurrent = (list) => {
@@ -101,36 +63,58 @@ export const listClear = () => {
     }
 }
 
+// Get all lists for the current user in the database and place in Redux
+export const listsGetAll = () => {
+    return async dispatch => {
+        // Start the list process
+        dispatch(listStart())
+        const response = await api.getAllLists()
+        if (response === undefined || response === null || typeof(response) === String) {
+            // Clear out the old lists if we failed to get any
+            dispatch(listClear())
+            dispatch(listError(response))
+            return
+        }
 
-// Create a new List and export it to our database
+        // So for all other calls where we update the cur list, we have it such that
+        // the object has id, not _id as a field.  We can take our response's first object
+        // and use that to set the cur list as a 'unified' format firstList
+        const unifiedFirstList = {
+            id: response[0]._id,
+            name: response[0].name
+        }
+        dispatch(listsGetListsSuccess(response, unifiedFirstList))
+    }
+}
+
+// Create a new List and export it to our database, then
+// putting this new list in Redux
 export const listsCreateNewList = (name, isPublic) => {
-    return dispatch => {
+    return async dispatch => {
         // Start the lists process
         dispatch(listStart())
-        const token = localStorage.getItem('token')
-        if (!token) {
-            // If there's no token, we can't get lists
-            dispatch(listError('User not logged in!'))
+        const response = await api.createNewList(name, isPublic)
+        if (response === undefined || response === null || typeof(response) === String) {
+            // Failed to update the list for some reason
+            dispatch(listError(response))
+            return
         }
-        const url = process.env.REACT_APP_HOST_URL + '/api/lists'
-        const body = {
-            "name": name,
-            "public": isPublic.localeCompare('public') === 0 ? true : false,
-        }
+        dispatch(listsPostListSuccess(response))
+    }
+}
 
-        const config = {
-            headers: {
-                'x-auth-token': token,
-                'content-type': 'application/json',
-            }
+export const listsUpdateProblems = (updatedProblems, curListID) => {
+    return async dispatch => {
+        // Start the lists process
+        dispatch(listStart())
+        const response = await api.updateListsProblems(updatedProblems, curListID)
+        // TODO: What is our response here anyway?
+        if (response === undefined || response === null || typeof(response) === String) {
+            // Failed to update the list for some reason
+            dispatch(listError(response))
+            return
         }
-
-        axios.post(url, body, config
-        ).then(response => {
-            dispatch(listsPostListSuccess(response.data))
-        }).catch(err => {
-            console.log(err)
-            dispatch(listError(err)) //TODO: Transform back to err.message. Use this for debugging only
-        })
+        // Update the current list object to reflect the results
+        dispatch(listsUpdatedProblemsSuccess())
     }
 }

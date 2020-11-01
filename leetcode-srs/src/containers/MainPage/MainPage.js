@@ -70,7 +70,7 @@ const MainPage = (props) => {
 
     return (
         <div className={classes.MainPage}>
-            {props.isAuth && <Selector/>}
+            {props.isAuth && <Selector showLists={true} showProblems={true}/>}
             {formVisible && null}
             {timerVisible && null}
             {props.isAuth && curProblem && <a href={link} target='_blank' rel="noopener noreferrer" onClick={openProblemHandler}>Start Problem</a>}

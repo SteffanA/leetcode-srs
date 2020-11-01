@@ -7,6 +7,7 @@ import DropDownMenu from '../../SharedItems/DropDownMenu'
 import * as listActions from '../../../store/actions/lists'
 import * as problemActions from '../../../store/actions/problems'
 
+// TODO: This component can probably have its props cleaned up
 
 /*
 This component allows the user to:
@@ -17,6 +18,10 @@ Select a problem from the above selected-list
 const Selector = props => {
     // Destructure props when neccessary
     const {
+        // Passed props
+        showLists,
+        showProblems,
+        // Props from redux
         auth,
         curList,
         curListName,
@@ -81,8 +86,8 @@ const Selector = props => {
 
     return (
         <div>
-            <DropDownMenu items={listItems} title={listTitle} updateCurItem={updateCurList}/>
-            <DropDownMenu items={problemItems} title={problemTitle} updateCurItem={updateCurProblem}/>
+            {showLists && <DropDownMenu items={listItems} title={listTitle} updateCurItem={updateCurList}/>}
+            {showProblems &&<DropDownMenu items={problemItems} title={problemTitle} updateCurItem={updateCurProblem}/>}
         </div>
     )
 }
@@ -95,7 +100,6 @@ const mapStateToProps = (state) => {
         lists: state.lists.usersLists,
         curList: state.lists.curList,
         curListName: state.lists.curListName,
-        loading: state.lists.loading, // TODO: Needed?
         error: state.lists.error,
         auth: state.auth.token !== null,
     }

@@ -4,6 +4,7 @@ This takes the results of the LeetCode api page and transforms it into the data 
 Assumes that the results of the standard LC api are stored in this folder as apiresults.json
 
 This helper script may or may not work depending on if LC changes their API structure.
+TODO: Have the last updated date auto-update on call?
 Last tested: 2/16/2020
 Last updated: 2/16/2020
 '''

@@ -1,5 +1,5 @@
 import * as actions from '../actions/actionTypes'
-import {updateObject} from '../../utility/utility'
+import { updateObject } from '../../shared/utility'
 
 const initialState = {
     curList: null,
@@ -68,6 +68,15 @@ const listAddNewList = (state, action) => {
     })
 }
 
+// Add or remove problems from a list
+// For now, just reset loading and error
+const listUpdateProblems = (state, action) => {
+    return updateObject(state, {
+        error: null,
+        loading: false,
+    })
+}
+
 export const listReducer = (state=initialState, action) => {
     switch (action.type) {
         case actions.LISTS_START: return listStart(state, action)
@@ -76,6 +85,7 @@ export const listReducer = (state=initialState, action) => {
         case actions.LISTS_SET_CURRENT: return listSetCurrent(state, action)
         case actions.LISTS_CLEAR: return listClear(state, action)
         case actions.LISTS_ADD_NEW: return listAddNewList(state, action)
+        case actions.LISTS_UPDATE_PROBLEMS: return listUpdateProblems(state, action)
         default: return state
     }
 }
