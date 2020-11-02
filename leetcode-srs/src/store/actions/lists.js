@@ -81,7 +81,8 @@ export const listsGetAll = () => {
         // and use that to set the cur list as a 'unified' format firstList
         const unifiedFirstList = {
             id: response[0]._id,
-            name: response[0].name
+            name: response[0].name,
+            public: response[0].public,
         }
         dispatch(listsGetListsSuccess(response, unifiedFirstList))
     }

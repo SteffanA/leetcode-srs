@@ -112,3 +112,34 @@ export const updateListsProblems = (updatedProblems, curListID) => {
         })
     })
 }
+
+// Set a list's public status to True
+export const setListPublic = (listID) => {
+    console.log('Setting cur list public with id of ' + listID)
+    const token = getTokenOrNull()
+    // Can't make updates without having a token
+    if (token === null) {
+        return 'User not logged in!'
+    }
+    const url = process.env.REACT_APP_HOST_URL + '/api/lists/' + listID
+    const config = {
+        headers: {
+            'x-auth-token': token,
+            'content-type': 'application/json',
+        }
+    }
+    const body = {
+        "public" : true,
+    }
+
+    return new Promise((resolve, reject) => {
+        axios.put(url, body, config
+        ).then(response => {
+            console.log(response)
+            resolve(response)
+        }).catch(err => {
+            console.debug(err)
+            reject(err.message)
+        })
+    })
+}

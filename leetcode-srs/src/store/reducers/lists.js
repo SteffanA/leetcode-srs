@@ -2,8 +2,11 @@ import * as actions from '../actions/actionTypes'
 import { updateObject } from '../../shared/utility'
 
 const initialState = {
+    // We deconstruct the current lists's attributes for easy access
     curList: null,
-    curListName: null, // We could grab out of curList, but this is better perf (?)
+    curListName: null,
+    curListPublic: null,
+
     usersLists: null,
     error: null,
     loading: false,
@@ -19,6 +22,7 @@ const listSetCurrent = (state, action) => {
     return updateObject(state, {
         curList: action.curList,
         curListName: action.curList.name,
+        curListPublic: action.curList.public,
         loading: false,
     })
 }
@@ -28,6 +32,7 @@ const listGetLists = (state, action) => {
     return updateObject(state, {
         curList: action.firstList,
         curListName: action.firstList.name,
+        curListPublic: action.firstList.public,
         usersLists: action.lists,
         error: null,
         loading: false,
@@ -45,6 +50,7 @@ const listClear = (state, action) => {
     return updateObject(state, {
         curList: null,
         curListName: null,
+        curListPublic: null,
         usersLists: null,
         error: null,
         loading: false,
@@ -58,9 +64,11 @@ const listAddNewList = (state, action) => {
         // Use the unified format of id and name
         curList: {
             id: action.list._id,
-            name: action.list.name
+            name: action.list.name,
+            public: action.list.public,
         },
         curListName: action.list.name,
+        curListPublic: action.list.public,
         // Update the array of user's lists
         usersLists: state.usersLists.push(action.list),
         error: null,

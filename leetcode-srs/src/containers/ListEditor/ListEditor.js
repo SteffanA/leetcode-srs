@@ -11,6 +11,7 @@ import Selector from '../MainPage/Selector/Selector'
 import { checkValidity, updateObject } from '../../shared/utility'
 import Modal from 'react-modal'
 import ProblemViewer from '../Modals/ProblemViewer/ProblemViewer'
+import {setListPublic} from '../../shared/api_calls/lists'
 
 
 /*
@@ -93,7 +94,10 @@ const ListEditor = props => {
         console.log('In list editor')
     }, [])
 
-    const [modalIsOpen, setIsOpen] = useState(false)
+    // State of our modals, ProblemViewer and SetPublic
+    const [problemViewerOpen, setProblemViewerOpen] = useState(false)
+    const [publicOpen, setPublicOpen] = useState(false)
+    
 
     
 // Functions
@@ -135,23 +139,59 @@ const ListEditor = props => {
         setListState({...listState, updatedControls})
     }
 
-    // CModal functions copied from example
-    const openModal = (event) => {
-        event.preventDefault()
-        setIsOpen(true)
-        console.log('opened modal')
+
+    function feedReducer(args){
+        return new Promise((res,rej)=>{
+        res(args);
+    })
+    }
+    // Set a list to be a public list
+    const setListPublic = async (listID) => {
+        console.log('Setting list public')
+        const res = await feedReducer(true)
+        if (typeof(res) === String || res === null || res === undefined) {
+            // Send an alert on failure to update
+            // alert('Could not set list public, try again later.')
+            console.log('Failed to set list public')
+        }
+        else {
+            console.log('Successful set public')
+            // Set the modal to close on success
+            setPublicOpen(false)
+        }
     }
 
+    // Modal functions for the ProblemViewer and SetPublic modals
+
+    // Open/close problem viewer modal
+    const openProblemViewer = (event) => {
+        event.preventDefault()
+        setProblemViewerOpen(true)
+        console.log('opened PV')
+    }
+    const closeProblemViewer = () => {
+        setProblemViewerOpen(false)
+        console.log('PV is closed')
+    }
+
+    // Set list public Modal open/close
+    const openPublicModal = (event) => {
+        event.preventDefault()
+        setPublicOpen(true)
+        console.log('opened public modal')
+    }
+    const closePublicModal = () => {
+        setPublicOpen(false)
+        console.log('public modal is closed')
+    }
+
+    // Cleanup function for after the modal has been opened
     const afterOpenModal = () => {
         // references are now sync'd and can be accessed.
         // subtitle.style.color = '#f00';
-        console.log('After open modal')
+        console.log('After open PV')
     }
     
-    const closeModal = () => {
-        setIsOpen(false);
-        console.log('Modal is closed')
-    }
 
 // JSX
     const formElements = []
@@ -190,19 +230,39 @@ const ListEditor = props => {
         <div>
             {newListFormVisible && newListForm}
             <Selector showLists={true} showProblems={false}/>
-            <Button btnType="Success" clicked={openModal}>Edit Selected List</Button>
+            <Button btnType="Success" clicked={openProblemViewer}>Edit Selected List</Button>
             <Modal
-                isOpen={modalIsOpen}
+                isOpen={problemViewerOpen}
                 onAfterOpen={afterOpenModal}
-                onRequestClose={closeModal}
+                onRequestClose={closeProblemViewer}
                 contentLabel="Problem Viewer Modal"
             >
                 <div>
-                    <Button btnType="Danger" clicked={closeModal}>Exit List Editor</Button>
+                    <Button btnType="Danger" clicked={closeProblemViewer}>Exit List Editor</Button>
                 </div>
                 <div>
                     <h1>Editing List: {props.curListName}</h1>
                     <ProblemViewer/>
+                </div>
+            </Modal>
+            {/* If the current list is private, offer the option to set it public
+            TODO: Instead of a modal, replace with a standard pop-up?
+            */}
+            {!props.curListPublic && <Button btnType="Success" clicked={openPublicModal}>Set Selected List Public</Button>}
+            <Modal
+                isOpen={publicOpen}
+                onAfterOpen={afterOpenModal}
+                onRequestClose={closePublicModal}
+                contentLabel="Set Public List Modal"
+            >
+                <div>
+                    <Button btnType="Success" clicked={closePublicModal}>Back to List Editor</Button>
+                </div>
+                <div>
+                    <h1>Really set {props.curListName} public? This cannot be reversed!</h1>
+                    <p>Public lists can be viewed by anyone logged in!</p>
+                    <button onClick={setListPublic}>Set Public button</button>
+                    <Button btnType="Danger" clicked={(curList) => setListPublic(curList)}>Set Public</Button>
                 </div>
             </Modal>
         </div>
@@ -218,6 +278,7 @@ const mapStateToProps = (state) => {
         // Assuming the user is editing a list they want to use next, we should update curList here
         curList: state.lists.curList,
         curListName: state.lists.curListName,
+        curListPublic: state.lists.curListPublic,
     }
 }
 
