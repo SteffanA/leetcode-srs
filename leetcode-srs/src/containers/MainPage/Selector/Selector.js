@@ -81,6 +81,8 @@ const Selector = props => {
     if (curProblemName) {
         problemTitle = curProblemName
     }
+    console.log('cur list in selector is: ')
+    console.log(curList)
 
     return (
         <div>
