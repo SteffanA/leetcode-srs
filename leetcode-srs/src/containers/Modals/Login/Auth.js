@@ -4,12 +4,12 @@ import classes from './Auth.module.css'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 
-import Input from '../UI/Input/Input'
-import Button from '../UI/Button/Button'
-import Spinner from '../UI/Spinner/Spinner'
+import Input from '../../UI/Input/Input'
+import Button from '../../UI/Button/Button'
+import Spinner from '../../UI/Spinner/Spinner'
 
-import { checkValidity, updateObject } from '../../shared/utility'
-import * as actions from '../../store/actions/auth'
+import { checkValidity, updateObject } from '../../../shared/utility'
+import * as actions from '../../../store/actions/auth'
 
 
 const Auth = props => {

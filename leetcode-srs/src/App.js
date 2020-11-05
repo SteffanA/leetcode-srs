@@ -6,7 +6,7 @@ import './App.css';
 
 import MainPage from './containers/MainPage/MainPage';
 import Navbar from './containers/SharedItems/Navbar'
-import Auth from './containers/Auth/Auth'
+import Auth from './containers/Modals/Login/Auth'
 import Logout from './containers/Auth/Logout'
 import ListEditor from './containers/ListEditor/ListEditor'
 
