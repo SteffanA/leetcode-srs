@@ -113,42 +113,9 @@ export const updateListsProblems = (updatedProblems, curListID) => {
     })
 }
 
-export const tester = async (val) => {
-    // return false // Just this = ok, this with stuff below = not okay
-    console.log('Setting cur list public with id of ')
-    console.log(val)
-    const token = getTokenOrNull()
-    // Can't make updates without having a token
-    if (token === null) {
-        return 'User not logged in!'
-    }
-    const url = process.env.REACT_APP_HOST_URL + '/api/lists/' + val 
-    const config = {
-        headers: {
-            'x-auth-token': token,
-            'content-type': 'application/json',
-        }
-    }
-    const body = {
-        "public" : true,
-    }
-
-    return new Promise((resolve, reject) => {
-        axios.put(url, body, config
-        ).then(response => {
-            console.log(response)
-            resolve(response)
-        }).catch(err => {
-            console.debug(err)
-            reject(err.message)
-        })
-    })
-}
-
-// Set a list's public status to True
-export const setListPublic = async (listID) => {
-    return false
-    console.log('Setting cur list public with id of ' + listID)
+// Set's a list's public status to True
+// TODO: Why does this not work when given the name setListPublic ?
+export const setPublic = async (listID) => {
     const token = getTokenOrNull()
     // Can't make updates without having a token
     if (token === null) {

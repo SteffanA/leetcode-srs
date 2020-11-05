@@ -74,7 +74,7 @@ const listAddNewList = (state, action) => {
         curListName: action.list.name,
         curListPublic: action.list.public,
         // Update the array of user's lists
-        usersLists: state.usersLists.push(action.list),
+        usersLists: [...state.usersLists, action.list],
         error: null,
         loading: false,
     })

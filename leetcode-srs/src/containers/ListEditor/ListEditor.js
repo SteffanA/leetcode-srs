@@ -11,7 +11,7 @@ import Selector from '../MainPage/Selector/Selector'
 import { checkValidity, updateObject } from '../../shared/utility'
 import Modal from 'react-modal'
 import ProblemViewer from '../Modals/ProblemViewer/ProblemViewer'
-import {setListPublic, tester} from '../../shared/api_calls/lists'
+import {setPublic} from '../../shared/api_calls/lists'
 
 
 /*
@@ -139,19 +139,13 @@ const ListEditor = props => {
         setListState({...listState, updatedControls})
     }
 
-
-    function feedReducer(args){
-        return new Promise((res,rej)=>{
-            res(args);
-        })
-    }
     // Set a list to be a public list
     const setListPublic = async (e, list) => {
         e.preventDefault()
         console.log('Setting list public')
         // const res = await setListPublic(listID)
         // const res = await feedReducer(listID)
-        await tester(list.id).then((res) => {
+        await setPublic(list.id).then((res) => {
             if (typeof(res) === String || res === null || res === undefined) {
                 // Send an alert on failure to update
                 alert('Could not set list public, try again later.')
@@ -161,6 +155,9 @@ const ListEditor = props => {
                 console.log('Successful set public')
                 // Set the modal to close on success
                 setPublicOpen(false)
+                // Update the state of the list in redux
+                list.public = true
+                props.updateCurrentList(list)
             }
         }).catch((err) => {
             console.debug(err)
@@ -269,7 +266,6 @@ const ListEditor = props => {
                 <div>
                     <h1>Really set {props.curListName} public? This cannot be reversed!</h1>
                     <p>Public lists can be viewed by anyone logged in!</p>
-                    <button onClick={setListPublic}>Set Public button</button>
                     <Button btnType="Danger" clicked={(event) => setListPublic(event,props.curList)}>Set Public</Button>
                 </div>
             </Modal>
@@ -293,6 +289,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         createList: (name, isPublic) => dispatch(listActions.listsCreateNewList(name, isPublic)),
+        updateCurrentList: (list) => dispatch(listActions.listSetCurrent(list)),
     }
 }
 

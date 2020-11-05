@@ -59,7 +59,7 @@ const Selector = props => {
     // in a seperate drop down menu for each.
     if (lists) {
         listItems = lists.map((list) => {
-            return {name: list.name, id: list._id}
+            return {name: list.name, id: list._id, public: list.public}
         })
     }
     
