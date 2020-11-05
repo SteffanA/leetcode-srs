@@ -7,8 +7,6 @@ import DropDownMenu from '../../SharedItems/DropDownMenu'
 import * as listActions from '../../../store/actions/lists'
 import * as problemActions from '../../../store/actions/problems'
 
-// TODO: This component can probably have its props cleaned up
-
 /*
 This component allows the user to:
 
@@ -61,7 +59,7 @@ const Selector = props => {
     // in a seperate drop down menu for each.
     if (lists) {
         listItems = lists.map((list) => {
-            return {name: list.name, id: list._id}
+            return {name: list.name, id: list._id, public: list.public}
         })
     }
     
@@ -83,6 +81,8 @@ const Selector = props => {
     if (curProblemName) {
         problemTitle = curProblemName
     }
+    console.log('cur list in selector is: ')
+    console.log(curList)
 
     return (
         <div>

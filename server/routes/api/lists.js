@@ -187,6 +187,7 @@ async (req, res) => {
 router.put('/:id', [auth],
 async (req, res) => {
     try {
+        console.log('Trying to update a problem')
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(404).send({errors: [{msg: 'List not found.'}]})
         }
@@ -217,6 +218,7 @@ async (req, res) => {
 
         // Save the updated list
         const updatedList = await list.save()
+        console.log('Updated list attributes for id ' + req.params.id)
         return res.json(updatedList)
     } catch (error) {
         console.error('Update list attributes: ' + error.message)

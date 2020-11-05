@@ -23,7 +23,7 @@ export const bulkUpdateProblems = (listID, updatedProblems) => {
     // Check if we have any problems to actually update
     if (updatedProblems === null || updatedProblems.length === 0) {
         // Exit early
-        return
+        return 'No problems to update.'
     }
     const url = process.env.REACT_APP_HOST_URL + '/api/lists/bulk/' + listID
     const config = {

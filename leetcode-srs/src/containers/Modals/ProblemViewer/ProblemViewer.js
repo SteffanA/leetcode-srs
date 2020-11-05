@@ -136,7 +136,7 @@ export const ProblemViewer = (props) => {
         console.log('Problem viewer refreshed')
         // Setup the problem states for any new-in-view problems
         setInitialProblemStates()
-    }, [curProblemResults, getSubsetOfProblems, searchTerm, getProblemSearchResults, setProblemResults])
+    }, [curProblemResults, searchTerm, getProblemSearchResults, setProblemResults])
 
     // Declare our function earlier than the others so useEffect can run appropriately
     // Handle submission of a search term for a problem
@@ -156,7 +156,7 @@ export const ProblemViewer = (props) => {
                 setProblemResults(results)
             }
         },
-        [searchTerm, getProblemSearchResults, getSubsetOfProblems]
+        [searchTerm]
     )
 
     // Use this to override any enter key press on the page
@@ -187,7 +187,7 @@ export const ProblemViewer = (props) => {
             setProblemResults(results)
         }, 1000)
         return () => clearTimeout(timeOutId)
-    }, [setSearchTerm, query, getProblemSearchResults])
+    }, [setSearchTerm, query])
 
     /* Submission and change handlers */
 

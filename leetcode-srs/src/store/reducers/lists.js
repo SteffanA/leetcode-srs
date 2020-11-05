@@ -2,8 +2,11 @@ import * as actions from '../actions/actionTypes'
 import { updateObject } from '../../shared/utility'
 
 const initialState = {
+    // We deconstruct the current lists's attributes for easy access
     curList: null,
-    curListName: null, // We could grab out of curList, but this is better perf (?)
+    curListName: null,
+    curListPublic: null,
+
     usersLists: null,
     error: null,
     loading: false,
@@ -16,18 +19,24 @@ const listStart = (state, action) => {
 
 // Set the current list (presumably to one of the ones in userLists)
 const listSetCurrent = (state, action) => {
+    console.log('Setting current list, which is:')
+    console.log(action.curList)
     return updateObject(state, {
         curList: action.curList,
         curListName: action.curList.name,
+        curListPublic: action.curList.public,
         loading: false,
     })
 }
 
 // Set the userLists (and the curList)
 const listGetLists = (state, action) => {
+    console.log('Got lists:')
+    console.log(action.lists)
     return updateObject(state, {
         curList: action.firstList,
         curListName: action.firstList.name,
+        curListPublic: action.firstList.public,
         usersLists: action.lists,
         error: null,
         loading: false,
@@ -45,6 +54,7 @@ const listClear = (state, action) => {
     return updateObject(state, {
         curList: null,
         curListName: null,
+        curListPublic: null,
         usersLists: null,
         error: null,
         loading: false,
@@ -58,11 +68,13 @@ const listAddNewList = (state, action) => {
         // Use the unified format of id and name
         curList: {
             id: action.list._id,
-            name: action.list.name
+            name: action.list.name,
+            public: action.list.public,
         },
         curListName: action.list.name,
+        curListPublic: action.list.public,
         // Update the array of user's lists
-        usersLists: state.usersLists.push(action.list),
+        usersLists: [...state.usersLists, action.list],
         error: null,
         loading: false,
     })
