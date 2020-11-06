@@ -8,6 +8,7 @@ import * as listActions from '../../../store/actions/lists'
 import classes from './ProblemViewer.module.css'
 import Input from '../../UI/Input/Input'
 import Button from '../../UI/Button/Button'
+import SearchBar from '../../SharedItems/SearchBar/SearchBar'
 // TODO: The page is currently being refreshed with a query url schema upon form submission
 // Why is this, and how can I prevent it? preventDefault on the form button does nothing
 
@@ -23,7 +24,6 @@ export const ProblemViewer = (props) => {
     } = props
 
     // Keep track of the term being searched for
-    // TODO: Should we store the last search term across the app via Redux?
     const [
         searchTerm,
         setSearchTerm
@@ -141,23 +141,20 @@ export const ProblemViewer = (props) => {
     // Declare our function earlier than the others so useEffect can run appropriately
     // Handle submission of a search term for a problem
     // We will replace the problems displayed on the page with the results
-    const handleSubmit = useCallback(
-        async (event) => {
-            event.preventDefault()
-            // TODO: Not sure if this is a great approach to take,
-            // considering it's not out of the realm of possibility for
-            // an actual LC problem to be called this.
-            // TODO: Does this actually get called? Look into Code Coverage
-            if (searchTerm === 'Search for a Problem') {
-                getSubsetOfProblems(0,50)
-            }
-            else {
-                const results = await getProblemSearchResults(searchTerm)
-                setProblemResults(results)
-            }
-        },
-        [searchTerm]
-    )
+    const handleSubmit = async (event, searchTerm) => {
+        event.preventDefault()
+        // TODO: Not sure if this is a great approach to take,
+        // considering it's not out of the realm of possibility for
+        // an actual LC problem to be called this.
+        // TODO: Does this actually get called? Look into Code Coverage
+        if (searchTerm === 'Search for a Problem') {
+            getSubsetOfProblems(0,50)
+        }
+        else {
+            const results = await getProblemSearchResults(searchTerm)
+            setProblemResults(results)
+        }
+    }
 
     // Use this to override any enter key press on the page
     // This will prevent page reloads when we submit our form (text box & submit button)
@@ -165,14 +162,14 @@ export const ProblemViewer = (props) => {
     useEffect(() => {
         const listener = event => {
         if (event.code === "Enter" || event.code === "NumpadEnter") {
-            handleSubmit(event)
+            handleSubmit(event, searchTerm)
         }
         };
         document.addEventListener("keydown", listener);
         return () => {
         document.removeEventListener("keydown", listener);
         };
-    }, [handleSubmit]);
+    }, [handleSubmit, searchTerm]);
 
     // Setup our hook so that we only update the search term after a 
     // given period
@@ -320,13 +317,14 @@ export const ProblemViewer = (props) => {
 
     return (
         <div>
-            <form>
+            {/* <form>
                 <label>
                     Search for a problem:
                     <Input elementType='input' name="name" value={query} changed={handleChange}/>
                 </label>
                 <Input elementType="submit" value="Submit" clicked={handleSubmit}/>
-            </form>
+            </form> */}
+            <SearchBar defaultText="Search for a Problem" handleSubmit={handleSubmit}/>
             <Input elementType="submit" value="Save Changes" clicked={saveChanges}/>
             <table>
                 <tbody>
