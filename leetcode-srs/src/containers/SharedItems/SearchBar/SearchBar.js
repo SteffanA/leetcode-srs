@@ -8,7 +8,9 @@ export const SearchBar = (props) => {
     const {
         defaultText, // default text for the search bar
         handleSubmit, // handler for submission - required params are (event, searchTerm)
+        termGetter, // function for the parent to take the search term
     } = props
+
 
     // Keep track of the term being searched for
     const [
@@ -32,6 +34,8 @@ export const SearchBar = (props) => {
         const timeOutId = setTimeout(async () => {
             console.log('Auto updating and querying with ' + query)
             setSearchTerm(query)
+            // Update the prop as well
+            termGetter(query)
             // Auto-update the results
             // Use query since the search term may not be set in time
             // for getProblemSearchResults to execute on the right text
