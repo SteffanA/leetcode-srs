@@ -44,9 +44,9 @@ router.get('/own', auth, async (req, res) => {
 
 
 // @route  GET api/lists/:id
-// @desc   Get a public list
+// @desc   Get a public list by ID
 // @access Public
-router.get('/:id', async (req, res) => {
+router.get('/public/id/:id', async (req, res) => {
     try {
         const list = await List.findById(req.params.id)
         if (!list) {
@@ -60,6 +60,25 @@ router.get('/:id', async (req, res) => {
         return res.json(list)
     } catch (error) {
         console.error('Get a public list: ' + error.message)
+        return res.status(500).send('Server Error')
+    }
+})
+
+// @route  GET api/lists/public/search/:term
+// @desc   Get public lists matching search term
+// @access Public
+router.get('/public/search/:term', async (req, res) => {
+    try {
+        console.log(req.params.term)
+        const lists = await List.find({$and:
+            [
+                {public: true},
+                {name: {$regex: req.params.term, $options: 'i'}},
+            ]
+        })
+        return res.json(lists)
+    } catch (error) {
+        console.error('Search public lists: ' + error.message)
         return res.status(500).send('Server Error')
     }
 })
@@ -82,6 +101,47 @@ router.get('/private/:id', auth, async (req, res) => {
         return res.json(list)
     } catch (error) {
         console.error('Get a public or private list: ' + error.message)
+        return res.status(500).send('Server Error')
+    }
+})
+
+// @route  GET /api/lists/:id/problems
+// @desc   Retrieve all problems in a given list
+// @access Private
+router.get('/:id/problems', [auth], 
+async (req, res) => {
+    try {
+        // Get the list with the given ID
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
+        const list = await List.findById(req.params.id)
+        if (!list) {
+            // Couldn't find a list with given ID
+            return res.status(404).json({errors: [{msg: 'List not found.'}]})
+        }
+        // If list is a private list, ensure User owns the list
+        if (!list.public) {
+            if (list.creator.toString().localeCompare(req.user.id) !== 0) {
+                return res.status(401).json({errors: [{msg: 'Access to List denied.'}]})
+            }
+            // Implicit else is we're okay to access; continue onwards
+        }
+
+        // For each problem in the list, get the problem object and
+        // store it in an array
+        problems = []
+
+        for (let prob of list.problems) {
+            const problem = await Problem.findById(prob._id)
+            if (problem) {
+                problems.push(problem)
+            }
+        }
+
+        return await res.json(problems)
+    } catch (error) {
+        console.log('Get all problems for list: ' + error.message)
         return res.status(500).send('Server Error')
     }
 })
@@ -371,6 +431,11 @@ router.put('/bulk/:list_id', [auth, [
     check('problems.*.add', 'All problems must provide bool for adding.').isBoolean(),
 ]],
 async (req, res) => {
+    const validationErrors = validationResult(req)
+    if (!validationErrors.isEmpty) {
+        // Something was missing, send an error
+        return res.status(400).json({errors : errors.array()})
+    }
     try {
         console.log(req.body)
         // Get the list
@@ -399,10 +464,6 @@ async (req, res) => {
             const problem_info = problems[i]
             const id = problem_info['id']
             const adding = problem_info['add']
-            // const [
-            //     id,
-            //     adding,
-            // ] = problem_info
             console.log(problem_info)
             console.log(id)
             console.log(adding)
@@ -455,45 +516,6 @@ async (req, res) => {
     }
 })
 
-// @route  GET /api/lists/:id/problems
-// @desc   Retrieve all problems in a given list
-// @access Private
-router.get('/:id/problems', [auth], 
-async (req, res) => {
-    try {
-        // Get the list with the given ID
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(404).send({errors: [{msg: 'List not found.'}]})
-        }
-        const list = await List.findById(req.params.id)
-        if (!list) {
-            // Couldn't find a list with given ID
-            return res.status(404).json({errors: [{msg: 'List not found.'}]})
-        }
-        // If list is a private list, ensure User owns the list
-        if (!list.public) {
-            if (list.creator.toString().localeCompare(req.user.id) !== 0) {
-                return res.status(401).json({errors: [{msg: 'Access to List denied.'}]})
-            }
-            // Implicit else is we're okay to access; continue onwards
-        }
 
-        // For each problem in the list, get the problem object and
-        // store it in an array
-        problems = []
-
-        for (let prob of list.problems) {
-            const problem = await Problem.findById(prob._id)
-            if (problem) {
-                problems.push(problem)
-            }
-        }
-
-        return await res.json(problems)
-    } catch (error) {
-        console.log('Get all problems for list: ' + error.message)
-        return res.status(500).send('Server Error')
-    }
-})
 
 module.exports = router

@@ -8,6 +8,7 @@ import * as listActions from '../../../store/actions/lists'
 import classes from './ProblemViewer.module.css'
 import Input from '../../UI/Input/Input'
 import Button from '../../UI/Button/Button'
+import SearchBar from '../../SharedItems/SearchBar/SearchBar'
 // TODO: The page is currently being refreshed with a query url schema upon form submission
 // Why is this, and how can I prevent it? preventDefault on the form button does nothing
 
@@ -21,23 +22,6 @@ export const ProblemViewer = (props) => {
         updateListProblems,
         getProblemsForList
     } = props
-
-    // Keep track of the term being searched for
-    // TODO: Should we store the last search term across the app via Redux?
-    const [
-        searchTerm,
-        setSearchTerm
-    ] = useState('Search for a Problem')
-
-    // Keep track of the current search term query
-    // This may be slightly different than the search term,
-    // as this is set based on user input, and is sent to the
-    // searchTerm on a delay so the searchTerm isn't constantly
-    // updating as the user types
-    const [
-        query,
-        setQuery
-    ] = useState("Search for a Problem")
 
     // Keep track of any problems that have been updated to be included
     // or removed from a list
@@ -53,12 +37,18 @@ export const ProblemViewer = (props) => {
         setProblemResults
     ] = useState([])
 
+    const [
+        searchTerm,
+        setSearchTerm
+    ] = useState('')
+
 
     // Define this func earlier than other function so it can be utilized in
     // the useEffect hook below
     // This will setup the initial mapping of the problems displayed
     // and if they are in the current list or not
     const setInitialProblemStates = () => {
+        console.log('Setting initial problem states')
         // Set the current problem state
         // Create a copy of the current state that we can pass to the update hook
         if (curProblemResults === null) {
@@ -110,24 +100,13 @@ export const ProblemViewer = (props) => {
 
     // Load problems on startup into the table
     useEffect(() => {
-        // TODO: If we enter an invalid result, we infinitely page refresh
-        // Need to fix this pretty badly.
+        // If we have no results, get the first 50 problems
         if (curProblemResults === null || curProblemResults.length === 0) {
-            // Helper function to allow us to execute async in the hook
-            const getProblems = async (searchTerm) => {
-                let results = null
-                // TODO: This is awful, figure out the good solution
-                if (searchTerm === null || searchTerm === '' || searchTerm === 'Search for a Problem') {
-                    console.debug('Page refresh: getting subset')
-                    results = await getSubsetOfProblems(0, 50)
-                }
-                else {
-                    console.debug('Page refresh: getting res for ' + searchTerm)
-                    results = await getProblemSearchResults(searchTerm)
-                }
+            const getProblems = async () => {
+                const results = await getSubsetOfProblems(0, 50)
                 setProblemResults(results)
             }
-            getProblems(searchTerm)
+            getProblems()
         }
         else {
             console.debug('ProblemViewer: problems already exist')
@@ -136,28 +115,27 @@ export const ProblemViewer = (props) => {
         console.log('Problem viewer refreshed')
         // Setup the problem states for any new-in-view problems
         setInitialProblemStates()
-    }, [curProblemResults, searchTerm, getProblemSearchResults, setProblemResults])
+    }, [curProblemResults, getProblemSearchResults, setProblemResults])
 
     // Declare our function earlier than the others so useEffect can run appropriately
     // Handle submission of a search term for a problem
     // We will replace the problems displayed on the page with the results
-    const handleSubmit = useCallback(
-        async (event) => {
-            event.preventDefault()
-            // TODO: Not sure if this is a great approach to take,
-            // considering it's not out of the realm of possibility for
-            // an actual LC problem to be called this.
-            // TODO: Does this actually get called? Look into Code Coverage
-            if (searchTerm === 'Search for a Problem') {
-                getSubsetOfProblems(0,50)
-            }
-            else {
-                const results = await getProblemSearchResults(searchTerm)
-                setProblemResults(results)
-            }
-        },
-        [searchTerm]
-    )
+    const handleSubmit = async (event, searchTermy) => {
+        event.preventDefault()
+        // TODO: Not sure if this is a great approach to take,
+        // considering it's not out of the realm of possibility for
+        // an actual LC problem to be called this.
+        // TODO: Does this actually get called? Look into Code Coverage
+        if (searchTermy === 'Search for a Problem') {
+            const res = await getSubsetOfProblems(0,50)
+            setProblemResults(res)
+        }
+        else {
+            // TODO: Need to handle errors gracefully
+            const results = await getProblemSearchResults(searchTermy)
+            setProblemResults(results)
+        }
+    }
 
     // Use this to override any enter key press on the page
     // This will prevent page reloads when we submit our form (text box & submit button)
@@ -165,7 +143,8 @@ export const ProblemViewer = (props) => {
     useEffect(() => {
         const listener = event => {
         if (event.code === "Enter" || event.code === "NumpadEnter") {
-            handleSubmit(event)
+            console.log('Search term on enter refresh is ' + searchTerm)
+            handleSubmit(event, searchTerm)
         }
         };
         document.addEventListener("keydown", listener);
@@ -174,26 +153,8 @@ export const ProblemViewer = (props) => {
         };
     }, [handleSubmit]);
 
-    // Setup our hook so that we only update the search term after a 
-    // given period
-    useEffect (() => {
-        const timeOutId = setTimeout(async () => {
-            console.log('Auto updating and querying with ' + query)
-            setSearchTerm(query)
-            // Auto-update the results
-            // Use query since the search term may not be set in time
-            // for getProblemSearchResults to execute on the right text
-            const results = await getProblemSearchResults(query)
-            setProblemResults(results)
-        }, 1000)
-        return () => clearTimeout(timeOutId)
-    }, [setSearchTerm, query])
 
     /* Submission and change handlers */
-
-    const handleChange = (event) => {
-        setQuery(event.target.value)
-    }
 
     // Save any changes to the list that were made
     const saveChanges = async (event) => {
@@ -263,6 +224,14 @@ export const ProblemViewer = (props) => {
         setUpdatedProblems(updatedState)
     }
 
+    // Wrapper function to pass to search bar that lets us know
+    // what the currently being searched term is from us (the parent)
+    // We need the term to use in our hook on enter press on this page
+    const updateSearchTerm = (term) => {
+        setSearchTerm(term)
+    }
+
+
     /* JSX creation */
 
     // Create an add-to-list or remove-from-list button depending
@@ -320,13 +289,7 @@ export const ProblemViewer = (props) => {
 
     return (
         <div>
-            <form>
-                <label>
-                    Search for a problem:
-                    <Input elementType='input' name="name" value={query} changed={handleChange}/>
-                </label>
-                <Input elementType="submit" value="Submit" clicked={handleSubmit}/>
-            </form>
+            <SearchBar defaultText="Search for a Problem" handleSubmit={handleSubmit} termGetter={updateSearchTerm}/>
             <Input elementType="submit" value="Save Changes" clicked={saveChanges}/>
             <table>
                 <tbody>

@@ -75,6 +75,10 @@ const Navbar = props => {
             <div>
                 {props.isAuth && <NavLink className={classes.NavLink} to='/view-problems'>View Problems</NavLink>}
             </div>
+            <div>
+                <NavLink className={classes.NavLink} to='/view-public-lists'>View Public Lists</NavLink>
+            </div>
+
         </div>
     )
 }

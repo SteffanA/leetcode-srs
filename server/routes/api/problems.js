@@ -5,6 +5,7 @@ const auth = require('../../middleware/auth')
 const express = require('express')
 const {check, validationResult} = require('express-validator')
 const dotenv = require('dotenv')
+const mongoose = require('mongoose')
 
 const router = express.Router()
 dotenv.config({path: '../../.env'}) // for environ variables
@@ -74,7 +75,7 @@ router.get('/:id', async (req, res) => {
 
         return res.json({problem})
     } catch (error) {
-        console.error(error.message)
+        console.error('Get problem by id err: ' + error.message)
         return res.status(500).send('Server error.')
     }
 })
@@ -169,6 +170,39 @@ router.post('/', [auth, [
     }
 })
 
+
+// @route  PUT /api/problems/bulk
+// @desc   Get multiple problems by ids
+// @note   This would be a GET usually, but axios on the frontend doesn't allow
+//         for GET requests with a body
+// @access Public
+router.put('/bulk', [
+    check('problems', 'Must provide problems to update list with').not().isEmpty(),
+    check('problems', 'Must provide array of problem IDs').isArray(),
+    check('problems.*', 'All problem IDs must be a valid MongoID').isMongoId(),
+], async (req, res) => {
+    const validationErrors = validationResult(req)
+    if (!validationErrors.isEmpty) {
+        // Something was missing, send an error
+        return res.status(400).json({errors : errors.array()})
+    }
+    try {
+        // Convert all the ID strings to Mongoose object IDs
+        const object_ids = req.body.problems.map(id => mongoose.Types.ObjectId(id))
+        // Try to get the problems by IDs
+        const problems = await Problem.find({'_id' : {$in: object_ids}})
+
+        // Check that the problems actually exist
+        if (!problems) {
+            // Doesn't exist, return bad request
+            return res.status(404).json({msg: 'Problems not found.'})
+        }
+        return res.json({problems})
+    } catch (error) {
+        console.error('Bulk problem get err: ' + error.message)
+        return res.status(500).send('Server error.')
+    }
+})
 
 // @route  PUT /api/problems
 // @desc   Updates a LeetCode problem in the database
