@@ -161,3 +161,57 @@ export const getProblemSearchResults = (term) => {
         })
     })
 }
+
+// Get a problem via ID
+export const getProblemFromID = (id) => {
+    let url = process.env.REACT_APP_HOST_URL + '/api/problems/' + id
+    const config = {
+        headers: {
+            'content-type': 'json',
+        }
+    }
+
+    return new Promise((resolve, reject) => {
+        axios.get(url, config).then(response => {
+            if (!response) {
+                // No data returned.
+                reject('Could not find problem with id ' + id + ' .')
+            }
+            else {
+                resolve(response.data)
+            }
+        }).catch(error => {
+            console.debug('get problem by id error of' , error, ' from ', id)
+            reject(error.msg)
+        })
+    })
+}
+
+// Get multiple problems from a list of IDs
+export const getProblemsFromIDs = (ids) => {
+    let url = process.env.REACT_APP_HOST_URL + '/api/problems/bulk/'
+    const config = {
+        headers: {
+            'content-type': 'application/json',
+        }
+    }
+
+    const body = {
+        "problems" : ids
+    }
+
+    return new Promise((resolve, reject) => {
+        axios.put(url, body, config).then(response => {
+            if (!response) {
+                // No data returned.
+                reject('Could not find problems with ids provided.')
+            }
+            else {
+                resolve(response.data.problems)
+            }
+        }).catch(error => {
+            console.debug('get problem by id error of' , error, ' from bulk ids')
+            reject(error.msg)
+        })
+    })
+}

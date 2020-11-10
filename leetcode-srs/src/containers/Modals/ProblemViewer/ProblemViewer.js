@@ -127,10 +127,11 @@ export const ProblemViewer = (props) => {
         // an actual LC problem to be called this.
         // TODO: Does this actually get called? Look into Code Coverage
         if (searchTermy === 'Search for a Problem') {
-            getSubsetOfProblems(0,50)
+            const res = await getSubsetOfProblems(0,50)
+            setProblemResults(res)
         }
         else {
-            // TODO: Need to handle errors gracefuly
+            // TODO: Need to handle errors gracefully
             const results = await getProblemSearchResults(searchTermy)
             setProblemResults(results)
         }

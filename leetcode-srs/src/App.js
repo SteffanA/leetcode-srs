@@ -9,6 +9,7 @@ import Navbar from './containers/SharedItems/Navbar'
 import Auth from './containers/Modals/Login/Auth'
 import Logout from './containers/Auth/Logout'
 import ListEditor from './containers/ListEditor/ListEditor'
+import ListsViewer from './containers/ListsViewer/ListsViewer'
 
 import * as actions from './store/actions/index'
 
@@ -43,6 +44,7 @@ const App = props => {
           <Route exact path="/auth" component={Auth} />
           <Route exact path="/logout" component={Logout} />
           <PrivateRoute exact path="/create-lists" component={ListEditor} />
+          <Route exact path="/view-public-lists" component={ListsViewer}/>
         </Switch>
       </section>
     </Fragment>

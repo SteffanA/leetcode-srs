@@ -35,7 +35,9 @@ export const SearchBar = (props) => {
             console.log('Auto updating and querying with ' + query)
             setSearchTerm(query)
             // Update the prop as well
-            termGetter(query)
+            if (termGetter !== null) {
+                termGetter(query)
+            }
             // Auto-update the results
             // Use query since the search term may not be set in time
             // for getProblemSearchResults to execute on the right text

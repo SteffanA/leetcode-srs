@@ -143,3 +143,47 @@ export const setPublic = async (listID) => {
         })
     })
 }
+
+// Search all public lists by name
+export const searchPublicLists = async (term) => {
+    const url = process.env.REACT_APP_HOST_URL + '/api/lists/public/search/' + term
+    const config = {
+        headers: {
+            'content-type': 'application/json',
+        }
+    }
+
+    return new Promise((resolve, reject) => {
+        axios.get(url, config).then(
+            response => {
+                console.log(response)
+                resolve(response.data)
+            }
+        ).catch(err => {
+            console.debug(err)
+            reject(err.message)
+        })
+    })
+}
+
+// Get all existing public lists
+export const getPublicLists = async () => {
+    const url = process.env.REACT_APP_HOST_URL + '/api/lists/'
+    const config = {
+        headers: {
+            'content-type': 'application/json',
+        }
+    }
+
+    return new Promise((resolve, reject) => {
+        axios.get(url, config).then(
+            response => {
+                console.log(response)
+                resolve(response.data)
+            }
+        ).catch(err => {
+            console.debug(err)
+            reject(err.message)
+        })
+    })
+}
