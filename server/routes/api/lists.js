@@ -198,7 +198,7 @@ router.post('/', [auth, [
 })
 
 // @route  POST api/lists/copy/:id
-// @desc   Copy a public list into user's private lists
+// @desc   Copy a public list or owned private list into user's private lists
 // @access Private
 router.post('/copy/:id', [auth],
 async (req, res) => {

@@ -9,6 +9,7 @@ import classes from './ProblemViewer.module.css'
 import Input from '../../UI/Input/Input'
 import Button from '../../UI/Button/Button'
 import SearchBar from '../../SharedItems/SearchBar/SearchBar'
+import ProblemTable from '../../SharedItems/ProblemTable/ProblemTable'
 // TODO: The page is currently being refreshed with a query url schema upon form submission
 // Why is this, and how can I prevent it? preventDefault on the form button does nothing
 
@@ -42,13 +43,17 @@ export const ProblemViewer = (props) => {
         setSearchTerm
     ] = useState('')
 
+    // Constants definining the index of states within the currentProblemsAndState 
+    // mapped arrays
+    const TOUCHED_INDEX = 0 // Has problem been touched (made to add or remove)
+    const ADDING_INDEX = 1 // Should this problem be added (or removed if false)
 
     // Define this func earlier than other function so it can be utilized in
     // the useEffect hook below
     // This will setup the initial mapping of the problems displayed
     // and if they are in the current list or not
     const setInitialProblemStates = () => {
-        console.log('Setting initial problem states')
+        console.debug('Setting initial problem states')
         // Set the current problem state
         // Create a copy of the current state that we can pass to the update hook
         if (curProblemResults === null) {
@@ -56,8 +61,6 @@ export const ProblemViewer = (props) => {
             return
         }
         const updatedVersion = new Map(currentProblemsAndState)
-        console.log('Cur list in set initial problem state')
-        console.log(curList)
         // Add all problems currently in the list to a set for easy lookup
         const current_lists_problems = new Set()
         // Ensure curProblems isn't null
@@ -66,15 +69,10 @@ export const ProblemViewer = (props) => {
                 current_lists_problems.add(problem._id)
             })
         }
-        console.log('cur problems are: ')
-        console.log(curProblems)
-        console.log('generated set:')
-        console.log(current_lists_problems)
         curProblemResults.forEach((problem) => {
             // Only update the state if the problem is newly seen
             // otherwise keep whatever updates the user made on the page already
             if (!updatedVersion.has(problem._id)) {
-                console.log('setting problem ' + problem + ' with id ' + problem._id)
                 // Map the problem ID to a tuple of touched, adding
                 // If touched is true, we've updated this value
                 // If adding is true, we're adding this problem to the list
@@ -84,7 +82,6 @@ export const ProblemViewer = (props) => {
                     updatedVersion.set(problem._id, [false, false])
                 }
                 else {
-                    console.log(problem.name + ' is already in list')
                     // already in list, set adding to True so we setup for removal
                     updatedVersion.set(problem._id, [false, true])
                 }
@@ -93,10 +90,6 @@ export const ProblemViewer = (props) => {
         setUpdatedProblems(updatedVersion)
     }
 
-    // Constants definining the index of states within the currentProblemsAndState 
-    // mapped arrays
-    const TOUCHED_INDEX = 0 // Has problem been touched (made to add or remove)
-    const ADDING_INDEX = 1 // Should this problem be added (or removed if false)
 
     // Load problems on startup into the table
     useEffect(() => {
@@ -143,7 +136,7 @@ export const ProblemViewer = (props) => {
     useEffect(() => {
         const listener = event => {
         if (event.code === "Enter" || event.code === "NumpadEnter") {
-            console.log('Search term on enter refresh is ' + searchTerm)
+            console.debug('Search term on enter refresh is ' + searchTerm)
             handleSubmit(event, searchTerm)
         }
         };
@@ -236,7 +229,8 @@ export const ProblemViewer = (props) => {
 
     // Create an add-to-list or remove-from-list button depending
     // on if the problem passed is already inside the 
-    const getAppropriateButton = (problem_id) => {
+    const getAppropriateButton = (prob) => {
+        const problem_id = prob._id
         const cur_state = currentProblemsAndState.get(problem_id)
         // If the problem isn't in the curState, or if it is but isn't in the list
         // Create an add-to-list button
@@ -261,53 +255,26 @@ export const ProblemViewer = (props) => {
         }
     }
 
-    // Map the difficulty of a problem from a number to a String
-    const difficultyMapping = {
-        '1' : 'Easy',
-        '2' : 'Medium',
-        '3' : 'Hard'
-    }
-
-    let probs = null
-    if (curProblemResults) {
-        console.debug(curProblemResults)
-        probs = curProblemResults.map(prob => {
-            return (
-                <tr key={prob._id}>
-                    <td> {prob.id} </td>
-                    <td><a href={createLink(prob.link)}>{prob.name}</a></td>
-                    <td><b>{difficultyMapping[prob.difficulty]}</b></td>
-                    <td>{prob.problem_text}</td>
-                    <td>{getAppropriateButton(prob._id)}</td>
-                </tr>
-            )
-            }
-
-        )
-    }
+    // Array of title/generator pairings for the ProblemTable generation
+    const extraProblemFields = [
+        {
+            title : 'Add/Remove From List',
+            generator: getAppropriateButton
+        }
+    ]
 
 
     return (
         <div>
             <SearchBar defaultText="Search for a Problem" handleSubmit={handleSubmit} termGetter={updateSearchTerm}/>
             <Input elementType="submit" value="Save Changes" clicked={saveChanges}/>
-            <table>
-                <tbody>
-                    <tr>
-                        <th>ID</th>
-                        <th>Problem</th>
-                        <th>Difficulty</th>
-                        <th>Problem Text</th>
-                        <th>Add/Remove From List</th>
-                    </tr>
-                    {probs}
-                </tbody>
-            </table>
+            <ProblemTable problems={curProblemResults} extraFields={extraProblemFields}/>
             {/*TODO: Add support for these results - will likely need to update the API
                         to allow for selective result filtering - aka, grab results 10-20
                         Also, add a button for selecting number of results displayed? 
                         
-                NOTE: Deferring this to post MVP*/}
+                NOTE: Deferring this to post MVP
+                another NOTE:  This will likely be inside ProblemTable*/}
             {/* <div>
                 <Button
                     btnType="Danger"
