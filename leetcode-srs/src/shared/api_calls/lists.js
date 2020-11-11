@@ -187,3 +187,32 @@ export const getPublicLists = async () => {
         })
     })
 }
+
+
+// Clone a public list as a new private list for the user
+export const clonePublicList = async (listID) => {
+    const token = getTokenOrNull()
+    // Can't make updates without having a token
+    if (token === null) {
+        return 'User not logged in!'
+    }
+    const url = process.env.REACT_APP_HOST_URL + '/api/lists/copy/' + listID
+    const config = {
+        headers: {
+            'content-type': 'application/json',
+            'x-auth-token': token,
+        }
+    }
+
+    return new Promise((resolve, reject) => {
+        axios.post(url, null, config).then(
+            response => {
+                console.log(response)
+                resolve(response.data)
+            }
+        ).catch(err => {
+            console.debug(err)
+            reject(err.message)
+        })
+    })
+}

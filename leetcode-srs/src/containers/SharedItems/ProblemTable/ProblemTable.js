@@ -1,5 +1,7 @@
 import React, { } from 'react'
+import PropTypes from 'prop-types'
 import {createLink} from '../../../shared/utility'
+
 
 // Creates a generic table for visualizing problems
 // Contains standard fields, id, name, difficulty, problem text
@@ -12,7 +14,7 @@ export const ProblemTable = (props) => {
     } = props
 
     /*
-    Extra fields is a mapping containing the following: 
+    Extra fields is an array of mappings containing the following: 
     {
         title: <String title of the column>
         generator: <function that generates the cell output when provided a problem>
@@ -27,7 +29,10 @@ export const ProblemTable = (props) => {
     }
     
     let probs = null
+    console.debug('ProblemTable has extra fields of:')
+    console.debug(extraFields)
     if (problems) {
+        console.debug('Problem Table has problems:')
         console.debug(problems)
         probs = problems.map(prob => {
             // Generate additional table columns for all the extra fields to append
@@ -85,5 +90,9 @@ export const ProblemTable = (props) => {
     )
 }
 
+ProblemTable.propTypes = {
+    problems: PropTypes.array,
+    extraFields: PropTypes.array,
+}
 
 export default ProblemTable

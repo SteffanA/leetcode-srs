@@ -8,6 +8,8 @@ import ProblemTable from '../SharedItems/ProblemTable/ProblemTable'
 import * as api from '../../shared/api_calls/lists'
 import {getProblemsFromIDs} from '../../shared/api_calls/problems'
 
+// TODO: Generize this a bit, I'll want to reuse this for viewing
+// private lists too as a part of LCS-4
 export const ListsViewer = (props) => {
     // Deconstruct our props
     const {
@@ -66,9 +68,20 @@ export const ListsViewer = (props) => {
         setSearchTerm(term)
     }
 
-    // JSX
+    // Function to call our list cloning API when list clone button is pressed
+    const cloneListHandler = async (event, id) => {
+        event.preventDefault()
+        try {
+            const res = await api.clonePublicList(id)
+            console.log(res)
+            alert('List successfully cloned.')
+        } catch (error) {
+            alert('Unable to clone list, please try again later.')
+        }
+    }
 
     // Modal handlers
+
     const openProblems = async (event, probs) => {
         event.preventDefault()
         // Grab the problems for the list and store it in curProblems
@@ -93,10 +106,8 @@ export const ListsViewer = (props) => {
         setProblemsOpen(false)
     }
 
-    const test = () => {
-        // e.preventDefault()
-        console.log('clone')
-    }
+
+    // JSX
 
     let listsOutput = null
     if (lists) {
@@ -112,7 +123,7 @@ export const ListsViewer = (props) => {
                         </Button>
                     </td>
                     <td>
-                        <Button btnType="Success" clicked={test}>
+                        <Button btnType="Success" clicked={(event) => cloneListHandler(event, list._id)}>
                             Clone List
                         </Button>
                     </td>
