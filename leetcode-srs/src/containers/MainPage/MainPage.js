@@ -8,8 +8,7 @@ import {createLink} from '../../shared/utility'
 import Timer from 'react-compound-timer'
 import Selector from '../SharedItems/Selector/Selector'
 import Button from '../UI/Button/Button'
-import TimerHOC from '../../hoc/TimerHOC'
-import TimerBox from './timerBox'
+import TimerBox from './TimerBox'
 
 /*
 Main Page is made of 3 main components:
@@ -26,15 +25,18 @@ const MainPage = (props) => {
     // Store our currentProblemStub such that it persists
     const currentProblemLink = useRef('')
 
-    let timerProps = null
-
+    // Store information regarding our timer
+    const [stoppedTime, setStoppedTime] = useState()
     const [curTime, setCurTime] = useState(0)
+    const [curState, setCurState] = useState()
 
     // Store the timer object as a ref so we can access the
     // hooks and the current times
+    // TODO: Do we actually need this as a ref? Can we just use as an obj?
     const timer = useRef(
-        <TimerBox updateTime={setCurTime} initialTime={curTime}/>
+        <TimerBox start={true} updateTime={setCurTime} updateState={setCurState} initialTime={curTime}/>
     )
+
 
     // Deconstruct the state
     const {
@@ -63,17 +65,13 @@ const MainPage = (props) => {
     
 
 
-    // const link = 'https://leetcode.com/problems/' + currentProblemStub.current
     let form = null
 
+    // Show our timer and submission form when the problem is opened.
+    // The timer will start automatically
     const openProblemHandler = (event) => {
         // Show the form and the timer box
         setelements({...elements, formVisible: true, timerVisible: true})
-        // Start the timer
-        console.log('Problem started')
-        console.log('curtime:')
-        // NOTE: curTime is a count in seconds/1000 => milliseconds
-        console.log(curTime)
     }
 
     const updateProblem = () => {
@@ -88,16 +86,36 @@ const MainPage = (props) => {
 
     const showHideTimer = () => {
         if (timerVisible) {
-            // We're hiding the timer, so set the initial time...?
-            // reset the timerbox ref
-            console.log('Hiding timer box')
-            timer.current = <TimerBox updateTime={setCurTime} initialTime={curTime}/>
+            // We're hiding our timer - we need to set our initial time
+            if (curState.localeCompare('PAUSED') === 0) {
+                // Do not update the stopped time if the timer is paused or stopped.
+                setStoppedTime(0)
+            }
+            else {
+                // Store the current time
+                setStoppedTime(new Date())
+            }
+        }
+        else {
+            // Exposing timer box again
+            let updatedTime = curTime
+            let shouldStart = false // init to have timer box not start right away
+            if (stoppedTime !== 0) {
+                // a 0 stopped time instead of a date means we just use
+                // the initial curTime, since the timer was paused/stopped
+                // when hidden. Otherwise we calculate elapsed time since hidden
+                updatedTime += (new Date() - stoppedTime)
+                // since the timer was 'running' in the background, set shouldStart
+                // to true
+                shouldStart = true 
+            }
+            // Update our timer reference
+            timer.current = <TimerBox start={shouldStart} updateTime={setCurTime} updateState={setCurState} initialTime={updatedTime}/>
         }
         setelements({...elements, timerVisible: !timerVisible})
     }
 
-    // TODO: Need hide/show to not reset initial time...
-    // So store initial time in a state, or maybe a ref? pass to timer
+    // Button to determine visibility of the timer
     const timerVisButton = (
     <Button btnType='Success' clicked={showHideTimer}>
         {timerVisible && 'Hide Timer'}{!timerVisible && 'Show Timer'}
@@ -108,7 +126,6 @@ const MainPage = (props) => {
         <div className={classes.MainPage}>
             {props.isAuth && <Selector showLists={true} showProblems={true}/>}
             {formVisible && null}
-            {timerVisible && null}
             {props.isAuth && curProblem && <a href={currentProblemLink.current} target='_blank' rel="noopener noreferrer" onClick={openProblemHandler}>Start Problem</a>}
             {timerVisible && timer.current}
             <br/>
