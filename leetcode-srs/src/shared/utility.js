@@ -1,4 +1,4 @@
-import React, {useRef, useEffect} from 'react'
+import {useRef, useEffect} from 'react'
 
 /*
 Return an object that is created from an old object where

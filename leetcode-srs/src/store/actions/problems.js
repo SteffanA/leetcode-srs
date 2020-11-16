@@ -28,7 +28,7 @@ const problemsGetProblemsSuccess = (problems, firstProblem) => {
 
 const handleGenericProblemGetResponse = (response) => {
     return dispatch => {
-        if (response === undefined || response === null || typeof(response) === String) {
+        if (response === undefined || response === null || typeof(response) === 'string') {
             // Failed to gather problems for some reason
             // Clear out the problems if we failed to retrieve any. If we're swapping between lists,
             // this might happen and we don't want to display problems associated w/ another list.
@@ -47,6 +47,8 @@ const handleGenericProblemGetResponse = (response) => {
 // BEGIN EXPORTS
 
 export const problemSetCurrent = (problem) => {
+    console.log('prob set current')
+    console.log(problem)
     return {
         type: actions.PROBLEMS_SET_CURRENT,
         curProblem: problem,

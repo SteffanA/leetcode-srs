@@ -6,7 +6,7 @@ import * as listActions from '../../store/actions/lists'
 import Input from '../UI/Input/Input'
 import Button from '../UI/Button/Button'
 //import PageTabs from '../UI/PageTabs/PageTabs'
-import Selector from '../MainPage/Selector/Selector'
+import Selector from '../SharedItems/Selector/Selector'
 
 import { checkValidity, updateObject } from '../../shared/utility'
 import Modal from 'react-modal'
@@ -274,7 +274,9 @@ const ListEditor = props => {
 }
 
 ListEditor.propTypes = {
-
+    curListName: PropTypes.string.isRequired,
+    curList: PropTypes.object.isRequired,
+    curListPublic: PropTypes.bool.isRequired,
 }
 
 const mapStateToProps = (state) => {

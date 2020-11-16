@@ -46,7 +46,7 @@ function DropDownMenu(props) {
     // Set the current list when a list is selected from the drop down
     const setCurItem = (id) => {
         // Find the matching item from props items based on the passed ID
-        const matchingItems = items.filter(item => (item.id.localeCompare(id) === 0))
+        const matchingItems = items.filter(item => (item._id.localeCompare(id) === 0))
         if (!matchingItems) {
             // I don't see how this can happen - but let's handle it
             console.log('Matching item not found - how did this happen?')
@@ -63,12 +63,15 @@ function DropDownMenu(props) {
     let selections = null
 
     // Make a button for each item passed
-    if (items) {
+    if (items && Array.isArray(items)) {
         selections = items.map(item => (
-            <button key={item.id} onClick={() => setCurItem(item.id)}>
+            <button key={item._id} onClick={() => setCurItem(item._id)}>
                 {item.name}
             </button>
         ))
+    }
+    else if(items) {
+        console.debug('Items in DropDownMenu not of type array, investigate')
     }
 
     return (

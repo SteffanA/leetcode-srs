@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { connect } from 'react-redux'
-import * as listActions from '../../store/actions/lists'
 import SearchBar from '../SharedItems/SearchBar/SearchBar'
 import Button from '../UI/Button/Button'
 import Modal from 'react-modal'
@@ -12,8 +10,8 @@ import {getProblemsFromIDs} from '../../shared/api_calls/problems'
 // private lists too as a part of LCS-4
 export const ListsViewer = (props) => {
     // Deconstruct our props
-    const {
-    } = props
+    // const {
+    // } = props
 
     const INIT_SEARCH_TERM = 'Search List Names'
 
@@ -163,4 +161,4 @@ export const ListsViewer = (props) => {
     )
 }
 
-export default (ListsViewer)
+export default ListsViewer
