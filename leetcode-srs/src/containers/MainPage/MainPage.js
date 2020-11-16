@@ -1,12 +1,15 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, Fragment} from 'react'
 // import {Link} from 'react-router-dom'
 import PropTypes from 'prop-types'
 import classes from './MainPage.module.css'
 import { connect } from 'react-redux'
 
-import Selector from './Selector/Selector'
-// import Button from '../UI/Button/Button'
-// import Input from '../UI/Input/Input'
+import {createLink} from '../../shared/utility'
+import Timer from 'react-compound-timer'
+import Selector from '../SharedItems/Selector/Selector'
+import Button from '../UI/Button/Button'
+import TimerHOC from '../../hoc/TimerHOC'
+import TimerBox from './timerBox'
 
 /*
 Main Page is made of 3 main components:
@@ -21,7 +24,17 @@ const MainPage = (props) => {
     })
 
     // Store our currentProblemStub such that it persists
-    const currentProblemStub = useRef('')
+    const currentProblemLink = useRef('')
+
+    let timerProps = null
+
+    const [curTime, setCurTime] = useState(0)
+
+    // Store the timer object as a ref so we can access the
+    // hooks and the current times
+    const timer = useRef(
+        <TimerBox updateTime={setCurTime} initialTime={curTime}/>
+    )
 
     // Deconstruct the state
     const {
@@ -39,16 +52,18 @@ const MainPage = (props) => {
         console.log('Updating main page')
         console.log(curProblem)
         if (curProblem) {
+            console.log('cur problem and link on main page:')
             console.log(curProblem)
             console.log(curProblem.link)
-            currentProblemStub.current = curProblem.link
+            currentProblemLink.current = createLink(curProblem.link)
+            console.log(currentProblemLink)
         }
     }, [curProblem])
 
     
 
 
-    const link = 'https://leetcode.com/problems/' + currentProblemStub
+    // const link = 'https://leetcode.com/problems/' + currentProblemStub.current
     let form = null
 
     const openProblemHandler = (event) => {
@@ -56,6 +71,9 @@ const MainPage = (props) => {
         setelements({...elements, formVisible: true, timerVisible: true})
         // Start the timer
         console.log('Problem started')
+        console.log('curtime:')
+        // NOTE: curTime is a count in seconds/1000 => milliseconds
+        console.log(curTime)
     }
 
     const updateProblem = () => {
@@ -68,12 +86,33 @@ const MainPage = (props) => {
         */
     }
 
+    const showHideTimer = () => {
+        if (timerVisible) {
+            // We're hiding the timer, so set the initial time...?
+            // reset the timerbox ref
+            console.log('Hiding timer box')
+            timer.current = <TimerBox updateTime={setCurTime} initialTime={curTime}/>
+        }
+        setelements({...elements, timerVisible: !timerVisible})
+    }
+
+    // TODO: Need hide/show to not reset initial time...
+    // So store initial time in a state, or maybe a ref? pass to timer
+    const timerVisButton = (
+    <Button btnType='Success' clicked={showHideTimer}>
+        {timerVisible && 'Hide Timer'}{!timerVisible && 'Show Timer'}
+    </Button>
+    )
+
     return (
         <div className={classes.MainPage}>
             {props.isAuth && <Selector showLists={true} showProblems={true}/>}
             {formVisible && null}
             {timerVisible && null}
-            {props.isAuth && curProblem && <a href={link} target='_blank' rel="noopener noreferrer" onClick={openProblemHandler}>Start Problem</a>}
+            {props.isAuth && curProblem && <a href={currentProblemLink.current} target='_blank' rel="noopener noreferrer" onClick={openProblemHandler}>Start Problem</a>}
+            {timerVisible && timer.current}
+            <br/>
+            {formVisible && timerVisButton}
         </div>
     )
 }

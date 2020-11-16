@@ -3,10 +3,14 @@ import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 
-import DropDownMenu from '../../SharedItems/DropDownMenu'
+import DropDownMenu from '../DropDownMenu'
 import * as listActions from '../../../store/actions/lists'
 import * as problemActions from '../../../store/actions/problems'
 
+/*
+TODO: Instead of using showLists/showProblems,
+should generize this, and pass props to handle whatever data type
+we actually want/need
 /*
 This component allows the user to:
 
@@ -52,42 +56,20 @@ const Selector = props => {
     }, [curList, getProblems])
 
 // JSX Elements
-    let listItems = null
-
-    // If we're authenticated, we should display
-    // the user's lists and problems for list
-    // in a seperate drop down menu for each.
-    if (lists) {
-        listItems = lists.map((list) => {
-            return {name: list.name, id: list._id, public: list.public}
-        })
-    }
-    
     let listTitle = 'No Lists'
     if (curListName) {
         listTitle = curListName
-    }
-
-    // If we have a list selected, we should have a drop down for
-    // displaying all the problems under the list. 
-    let problemItems = null
-    if (problems) {
-        problemItems = problems.map((problem) => {
-            return {name: problem.name, id: problem._id}
-        })
     }
 
     let problemTitle = 'No Problems'
     if (curProblemName) {
         problemTitle = curProblemName
     }
-    console.log('cur list in selector is: ')
-    console.log(curList)
 
     return (
         <div>
-            {showLists && <DropDownMenu items={listItems} title={listTitle} updateCurItem={updateCurList}/>}
-            {showProblems &&<DropDownMenu items={problemItems} title={problemTitle} updateCurItem={updateCurProblem}/>}
+            {showLists && <DropDownMenu items={lists} title={listTitle} updateCurItem={updateCurList}/>}
+            {showProblems &&<DropDownMenu items={problems} title={problemTitle} updateCurItem={updateCurProblem}/>}
         </div>
     )
 }
@@ -118,6 +100,7 @@ const mapDispatchToProps = dispatch => {
 Selector.propTypes = {
     auth: PropTypes.bool.isRequired,
     getLists: PropTypes.func.isRequired,
+    lists: PropTypes.array.isRequired,
     setCurrentList: PropTypes.func.isRequired,
     curListName: PropTypes.string,
     curList: PropTypes.object,

@@ -68,23 +68,31 @@ export const listsGetAll = () => {
     return async dispatch => {
         // Start the list process
         dispatch(listStart())
-        const response = await api.getAllLists()
-        if (response === undefined || response === null || typeof(response) === String) {
+        try {
+            const response = await api.getAllLists()
+            if (response === undefined || response === null || typeof(response) === 'string') {
+                // Clear out the old lists if we failed to get any
+                dispatch(listClear())
+                dispatch(listError(response))
+                return
+            }
+
+            // So for all other calls where we update the cur list, we have it such that
+            // the object has id, not _id as a field.  We can take our response's first object
+            // and use that to set the cur list as a 'unified' format firstList
+            const unifiedFirstList = {
+                id: response[0]._id,
+                name: response[0].name,
+                public: response[0].public,
+            }
+            dispatch(listsGetListsSuccess(response, unifiedFirstList))
+        } catch (error) {
+            console.debug('Lists get all error:')
+            console.debug(error)           
             // Clear out the old lists if we failed to get any
             dispatch(listClear())
-            dispatch(listError(response))
-            return
+            dispatch(listError(error))
         }
-
-        // So for all other calls where we update the cur list, we have it such that
-        // the object has id, not _id as a field.  We can take our response's first object
-        // and use that to set the cur list as a 'unified' format firstList
-        const unifiedFirstList = {
-            id: response[0]._id,
-            name: response[0].name,
-            public: response[0].public,
-        }
-        dispatch(listsGetListsSuccess(response, unifiedFirstList))
     }
 }
 
@@ -95,7 +103,7 @@ export const listsCreateNewList = (name, isPublic) => {
         // Start the lists process
         dispatch(listStart())
         const response = await api.createNewList(name, isPublic)
-        if (response === undefined || response === null || typeof(response) === String) {
+        if (response === undefined || response === null || typeof(response) === 'string') {
             // Failed to update the list for some reason
             dispatch(listError(response))
             return
@@ -110,7 +118,7 @@ export const listsUpdateProblems = (updatedProblems, curListID) => {
         dispatch(listStart())
         const response = await api.updateListsProblems(updatedProblems, curListID)
         // TODO: What is our response here anyway?
-        if (response === undefined || response === null || typeof(response) === String) {
+        if (response === undefined || response === null || typeof(response) === 'string') {
             // Failed to update the list for some reason
             dispatch(listError(response))
             return
