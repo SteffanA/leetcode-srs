@@ -44,6 +44,7 @@ router.post('/:problem_id', [auth, [
     check('result', 'Submission result is required').isBoolean(),
     check('time_spent', 'Time spent on submission is required').isNumeric(),
 ]], async (req, res) => {
+    console.log('In POST for submission')
     const validationErrors = validationResult(req)
     if (!validationErrors.isEmpty()) {
         // Some check failed, send bad response

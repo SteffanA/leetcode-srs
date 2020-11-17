@@ -174,13 +174,15 @@ const Auth = props => {
             <Input
                 key = {formElement.id}
                 elementConfig={formElement.config.elementConfig}
+                elementType={formElement.config.elementType}
                 value={formElement.config.value}
                 invalid={!formElement.config.valid}
                 shouldValidate = {formElement.config.validation}
                 touched = {formElement.config.touched}
                 changed={(event) => inputChangedHandler(event, formElement.id)}
             />
-        ))
+            )  
+        )
     }
 
     let redirect = null
