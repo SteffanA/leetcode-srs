@@ -2,13 +2,12 @@ import axios from '../../axios-interceptor' //TODO: Revert to base axios
 import {getTokenOrNull} from '../utility'
 
 // Contains API calls that can be reused in various contexts for List objects
-const BASE_URL = process.env.REACT_APP_HOST_URL + '/api/submission/'
+const BASE_URL = process.env.REACT_APP_HOST_URL + '/api/submissions/'
 
 
 // Posts a new problem submission to the database for a particular problem
 // Note it expects the LeetCode ID, not the MongoDB _id field!
 export const addNewSubmission = (sub, prob_id) => {
-    console.log('submitting')
     const token = getTokenOrNull()
     // Can't make updates without having a token
     if (token === null) {
@@ -24,11 +23,8 @@ export const addNewSubmission = (sub, prob_id) => {
         }
     }
 
-    const body = {
-        body: sub
-    }
     return new Promise((resolve, reject) => {
-        axios.post(url, body, config
+        axios.post(url, sub, config
         ).then(response => {
             resolve(response.data)
         }).catch(err => {

@@ -66,12 +66,11 @@ const MainPage = (props) => {
                         }
                     ]
                 },
-                // TODO: What should value be - how do we work it?
-                value: 'Success',
+                value: true,
                 validation: {
                     required: true,
                 },
-                valid: false,
+                valid: true,
                 touched: false,
             },
             // Reported memory used
@@ -100,26 +99,26 @@ const MainPage = (props) => {
             },
             // Time spent on submission
             timeSpent: {
-                'elementType': 'input',
+                elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    placeholder: 'Time Spent (in seconds)'
+                    placeholder: 'Time Spent (in seconds) - Required'
                 },
                 value: '',
                 validation: {
                     required: true,
                 },
-                valid: true,
+                valid: false,
                 touched: false,
             }
-        }
+        },
+        formValid : false,
     })
 
     const {
         controls,
+        formValid,
     } = subState
-
-    const initialFormState = useRef(subState)
 
     // Store information regarding our timer
     const [stoppedTime, setStoppedTime] = useState()
@@ -135,6 +134,7 @@ const MainPage = (props) => {
 
     // Store our currentProblemStub such that it persists
     const currentProblemLink = useRef('')
+
 
     // Update the problem stub whenever the curProblem changes
     useEffect(() => {
@@ -169,23 +169,17 @@ const MainPage = (props) => {
             "execution_time": execTime.value,
             "time_spent": timeSpent.value,
         }
-        console.log('Sending a submission of...')
-        console.log(submission)
 
         // Call our submit handler
         try {
             const res = await subAPI.addNewSubmission(submission, curProblem.id)
             alert('Problem successfully submitted!')
-            console.log('res: ')
-            console.log(res)
-            // Now refresh the page and/or clear out our form
-            // I think this will actually be done in a React-y way if we update
-            // the curProblem and such based on the 'next submit' time.
-            // We do likely need to clear the form though...
-            setSubState(initialFormState)
+            console.log('Submit successful')
+            // Now refresh the page - this seems a bit hacky, but it works.
+            window.open(process.env.REACT_APP_HOST_URL, "_self")
         } catch (error) {
-            console.log('Error submitting:')
-            console.log(error)
+            console.error('Error submitting:')
+            console.error(error)
             alert('Unable to process submission, please try later.')
         }
     }
@@ -205,12 +199,19 @@ const MainPage = (props) => {
         const updatedControls = controls
         updatedControls[controlKey] = updatedControl
         
+        let formIsValid = true
+        for (let input in updatedControls) {
+            formIsValid &= updatedControls[input].valid
+        }
         // Update our state
-        setSubState({...subState, updatedControls})
+        setSubState({...subState, updatedControls, formValid: !!(formIsValid)})
+
     }
     // Show our timer and submission form when the problem is opened.
     // The timer will start automatically
     const openProblemHandler = (event) => {
+        // Open the link to the problem
+        window.open(currentProblemLink.current, "_blank")
         // Show the form and the timer box
         setelements({...elements, formVisible: true, timerVisible: true})
     }
@@ -257,19 +258,19 @@ const MainPage = (props) => {
             value: Math.floor(curTime/1000),
             // Note that the element has now been touched
             touched: true,
+            valid: true,
         })
         //Attach updated control to our original control
         const updatedControls = controls
         updatedControls['timeSpent'] = updatedControl
         
         // Update our state
-        setSubState({...subState, updatedControls})
+        setSubState({...subState, updatedControls, formValid : true})
         // Stop our timer - doing this in a cheaty way by hiding the element
         // and setting the state to 'paused'
         setCurState('PAUSED')
         setStoppedTime(0)
         setelements({...elements, timerVisible: false})
-
     }
 // JSX
 
@@ -285,32 +286,27 @@ const MainPage = (props) => {
     }
     // Create the form when form is visible
     if (formVisible) {
-        form = formElements.map(formEl => (
-            <Input
-                key = {formEl.id}
-                elementConfig = {formEl.config.elementConfig}
-                elementType = {formEl.config.elementType}
-                value = {formEl.config.value}
-                invalid = {!formEl.config.valid}
-                shouldValidate = {formEl.config.validation}
-                touched = {formEl.config.touched}
-                changed={(event) => inputChangedHandler(event, formEl.id)}
-            />
-        ))
-        
+        const inputs = formElements.map(formEl => (
+                    <Input
+                        key = {formEl.id}
+                        elementConfig = {formEl.config.elementConfig}
+                        elementType = {formEl.config.elementType}
+                        value = {formEl.config.value}
+                        invalid = {!formEl.config.valid}
+                        shouldValidate = {formEl.config.validation}
+                        touched = {formEl.config.touched}
+                        changed={(event) => inputChangedHandler(event, formEl.id)}
+                    />
+                ))
+        form = (<div name="resultForm">
+                    {inputs}
+                </div>)
     }
 
     // Button to determine visibility of the timer
     const timerVisButton = (
     <Button btnType='Success' clicked={showHideTimer}>
         {timerVisible && 'Hide Timer'}{!timerVisible && 'Show Timer'}
-    </Button>
-    )
-
-    // Button for submitting results
-    const submitFormButton = (
-    <Button btnType='Success' clicked={submitHandler}>
-        Submit Result
     </Button>
     )
 
@@ -321,15 +317,29 @@ const MainPage = (props) => {
     </Button>
     )
 
+    // Button for submitting our form to send this Submission to the server
+    // TODO: The disabled property doesn't seem to be working as intended here - snuck around it for now
+    const submitResultsButton = (
+        <Button clicked={submitHandler} disabled={!formValid} btnType="Success">Submit Result</Button>
+    )
+    
+    // Button to open the link to the currently selected problem
+    const problemLinkButton = (
+        <Button clicked={openProblemHandler} disabled={false} btnType="Success">Start Problem</Button>
+    )
+
     return (
         <div className={classes.MainPage}>
             {props.isAuth && <Selector showLists={true} showProblems={true}/>}
             {formVisible && form}
-            {props.isAuth && curProblem && <a href={currentProblemLink.current} target='_blank' rel="noopener noreferrer" onClick={openProblemHandler}>Start Problem</a>}
-            {timerVisible && timer.current}
+            {(!formVisible && props.isAuth && curProblem) && problemLinkButton}
             <br/>
-            {formVisible && timerVisButton} {timerVisible && importTimeToFormButton}
-            {formVisible && submitFormButton}
+            <div>
+                {timerVisible && timer.current}
+                <br/>
+                {formVisible && timerVisButton} {timerVisible && importTimeToFormButton}
+            </div>
+            {(formValid && formVisible) && submitResultsButton}
         </div>
     )
 }
@@ -342,11 +352,11 @@ const mapStateToProps = (state) => {
     }
 }
 
-const mapDispatchToProps = (dispatch) => {
-    return {
+// const mapDispatchToProps = (dispatch) => {
+//     return {
 
-    }
-}
+//     }
+// }
 
 MainPage.propTypes = {
     curProblem: PropTypes.object,
@@ -354,4 +364,4 @@ MainPage.propTypes = {
     isAuth: PropTypes.bool.isRequired,
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(MainPage)
+export default connect(mapStateToProps, null)(MainPage)
