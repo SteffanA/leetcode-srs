@@ -154,8 +154,6 @@ const MainPage = (props) => {
     const submitHandler = async (event) => {
         event.preventDefault() // Prevent a page reload
         // Deconstruct our controls
-        console.log('Submitting our form')
-        console.log(event)
         const {
             code,
             result,
@@ -203,13 +201,8 @@ const MainPage = (props) => {
         
         let formIsValid = true
         for (let input in updatedControls) {
-            console.log('form is now: ' + formIsValid)
-            console.log('Input in validation is:')
-            console.log(input)
-            console.log(updatedControls[input].valid)
             formIsValid &= updatedControls[input].valid
         }
-        console.log('Form valid set to: ' + !!(formIsValid))
         // Update our state
         setSubState({...subState, updatedControls, formValid: !!(formIsValid)})
 
