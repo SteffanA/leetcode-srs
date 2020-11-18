@@ -5,10 +5,11 @@ const Problem = require('../../models/Problem')
 const express = require('express')
 const {check, validationResult} = require('express-validator')
 const auth = require('../../middleware/auth')
+const {createProblemStatus} = require('../../utility/problemStatuses')
 
 const router = express.Router()
 
-// @route  GET api/submission/:problem_id
+// @route  GET api/submissions/:problem_id
 // @desc   Retrieve all submissions for a particular problem
 // @access Private
 router.get('/:problem_id', auth, async (req, res) => {
@@ -37,7 +38,7 @@ router.get('/:problem_id', auth, async (req, res) => {
     }
 })
 
-// @route  POST api/submission/:problem_id
+// @route  POST api/submissions/:problem_id
 // @desc   Create a new submission for a problem
 // @access Private
 router.post('/:problem_id', [auth, [
@@ -56,16 +57,7 @@ router.post('/:problem_id', [auth, [
         if (!problem) {
             return res.status(404).json({errors: [{msg: 'Problem does not exist.'}]})
         }
-        // Get the status for this problem
-        const index = user.problem_statuses.map((status) => {
-                return status.problem.toString()})
-                .indexOf(problem._id.toString())
-        if (index === -1) {
-            // Couldn't find status, send not found
-            return res.status(404).json({errors: [{msg: 'Problem status not found.'}]})
-        }
-        const status = user.problem_statuses[index]
-        // Otherwise this status does belong to the user.
+
         const {
             text,
             result,
@@ -73,6 +65,21 @@ router.post('/:problem_id', [auth, [
             execution_time,
             time_spent
         } = req.body
+
+        // Get the status for this problem
+        let status = null
+        const index = user.problem_statuses.map((status) => {
+                return status.problem.toString()})
+                .indexOf(problem._id.toString())
+        if (index === -1) {
+            // Couldn't find status - create one, we assume this is a first submission
+            // TODO: Adjust this to use the user's defined multiplier
+            status = await createProblemStatus(result, 1.5, user, problem)
+        }
+        else {
+            status = user.problem_statuses[index]
+        }
+        // Otherwise this status does belong to the user.
         // Create a new Submission and add it to the status
         const sub = new Submission({
             result: result,

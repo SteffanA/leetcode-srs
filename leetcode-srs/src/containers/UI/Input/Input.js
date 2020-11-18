@@ -35,6 +35,7 @@ const input = (props) => {
                 onChange={props.changed}/>
             break
         case('select'):
+            console.log('Have select element')
             inputElement = <select className={inputClasses.join(' ')}
                 value={props.value}
                 onChange={props.changed}>

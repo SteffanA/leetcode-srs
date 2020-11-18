@@ -6,3 +6,4 @@ utility/test.json
 keys/
 Database/
 package-lock.json
+.vscode*

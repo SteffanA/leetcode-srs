@@ -4,15 +4,12 @@ const User = require('../../models/User.js')
 const express = require('express')
 const {check, validationResult} = require('express-validator')
 const auth = require('../../middleware/auth')
+const {addDays} = require('../../utility/utility')
+const {createProblemStatus} = require('../../utility/problemStatuses')
+const { create } = require('../../models/User.js')
 
 const router = express.Router()
 
-// Helper function for adding days to a Date
-const addDays = (days) => {
-    let result = new Date(Date.now())
-    result.setDate(result.getDate() + days);
-    return result;
-}
 
 
 // @route  GET api/problem_status/:problem_id
@@ -61,7 +58,7 @@ router.get('/:problem_id', auth, async (req, res) => {
 // @desc   Create or update a problem status for a problem
 // @access Private
 router.put('/:problem_id', [auth,[
-    check('result', 'Result for this attempt required.').not().isEmpty(),
+    check('result', 'Result for this attempt required.').isBoolean(),
     check('time_multiplier', 'Multiplier for successful attempt required').isNumeric()
 ]], async (req, res) => {
     try {
@@ -88,7 +85,7 @@ router.put('/:problem_id', [auth,[
         } = req.body
 
         // Time to next depends on multiplier and result
-        const success = (result === 'success')
+        // Note that result is true for a successful attempt, false for incorrect
         // Check if we already have a problem status for this particular problem attached to this user
         let index = -1
         // Check that we actually have any statuses to begin with
@@ -103,7 +100,7 @@ router.put('/:problem_id', [auth,[
             const results = problem_status.results
             // Update this problem status
             let ttn = 0 // ttn = time to next
-            if (success) {
+            if (result) {
                 ttn = time_multiplier * problem_status.interval
                 results.success += 1
             }
@@ -131,30 +128,8 @@ router.put('/:problem_id', [auth,[
         // Else problem status for this problem does not exist
         else {
             // Create a new problem status for this problem
-            const new_status = {
-                problem: problem._id,
-                interval: (success ? time_multiplier : 1),
-                results: {
-                    success: 0,
-                    incorrect: 0
-                },
-            }
-            const results = new_status.results
-            if (success) {
-                // Increment by current date by interval # of days for next_submission
-                new_status.next_submission = addDays(new_status.interval)
-                results.success += 1
-            }
-            else {
-                results.incorrect += 1
-                // Keep next_submission at default Date.now
-            }
-
-            // Save problem status to user
-            user.problem_statuses.push(new_status)
-            await user.save()
-
-            return res.json(user.problem_statuses[user.problem_statuses.length-1])
+            const new_status = await createProblemStatus(result, time_multiplier, user, problem)
+            return res.json(new_status)
         }
     } catch (error) {
         console.error(error.message)
