@@ -40,44 +40,8 @@ const Selector = props => {
         setProblems,
     } = props
 
-    const [sortedProblems, setSortedProblems] = useState(problems)
-    const [sortedLists, setSortedLists] = useState(lists)
-    const [sorted, setSorted] = useState(false)
-
     // When this component mounts, try to get the lists
     useEffect(() => {
-        // Helper function to sort problems/lists
-        // if sort function provided
-        const sortItems = async () => {
-            // Sort the lists if sort function is provided
-            if (showLists && listSortFunc  && auth && lists && !sorted) {
-                console.debug('sorting lists')
-                const updatedLists = await listSortFunc(lists)
-                setSortedLists(updatedLists)
-            }
-            if (showProblems && problemSortFunc && !sorted) {
-                console.debug('Sorted problems going from:')
-                console.debug(sortedProblems)
-                const updatedProblems = await problemSortFunc(problems)
-                console.debug('to:')
-                console.debug(updatedProblems)
-                props.setProblems(updatedProblems)
-                // setSortedProblems(updatedProblems)
-            }
-            setSorted(true)
-        }
-        // Update sortedProblems and sortedLists now to problems/lists
-        // if (showLists) {
-        //     console.log('setting lists w/')
-        //     console.log(lists)
-        //     setSortedLists(lists)
-        // }
-        // if (showProblems) {
-        //     console.log('setting problems w/')
-        //     console.log(problems)
-        //     setSortedProblems(problems)
-        // }
-        // Update the lists if we haven't already got them
         if (showLists && auth && !lists) {
             getLists()
             console.log('got lists')
@@ -85,21 +49,15 @@ const Selector = props => {
         // This function will actually sort/setSortedX if we need to
         // sortItems()
         console.log('Updating selector')
-    }, [auth, lists, getLists, problems, setSortedLists, setSortedProblems, 
-        showLists, showProblems, problemSortFunc, listSortFunc])
+    }, [showLists, auth, lists, getLists])
     
     useDeepCompareEffect(() => {
+        // Helper function for updating sorting our problems
         const sortItems = async () => {
             if (showProblems && problemSortFunc) {
-                console.debug('Sorted problems going from:')
-                console.debug(sortedProblems)
                 const updatedProblems = await problemSortFunc(problems)
-                console.debug('to:')
-                console.debug(updatedProblems)
                 setProblems(updatedProblems)
-                // setSortedProblems(updatedProblems)
             }
-            setSorted(true)
         }
         sortItems()
         console.log('Deep compare for problems')
@@ -127,7 +85,7 @@ const Selector = props => {
 
     return (
         <div>
-            {showLists && <DropDownMenu items={sortedLists} title={listTitle} updateCurItem={updateCurList}/>}
+            {showLists && <DropDownMenu items={lists} title={listTitle} updateCurItem={updateCurList}/>}
             {showProblems &&<DropDownMenu items={problems} title={problemTitle} updateCurItem={updateCurProblem}/>}
         </div>
     )
@@ -161,7 +119,7 @@ Selector.propTypes = {
     auth: PropTypes.bool.isRequired,
     getLists: PropTypes.func.isRequired,
     lists: PropTypes.array.isRequired,
-    setCurrentList: PropTypes.func.isRequired,
+    updateCurList: PropTypes.func.isRequired,
     curListName: PropTypes.string,
     curList: PropTypes.object,
     curProblem: PropTypes.object,

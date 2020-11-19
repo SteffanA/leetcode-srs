@@ -287,15 +287,9 @@ const MainPage = (props) => {
             console.log('mapping followed by await')
             const prob_ids = problems.map((prob) => prob._id)
             const timeToProblem = await getTimeToNextSubmissionToProblemMap(prob_ids)
-            console.debug('timeToProblem:')
-            console.debug(timeToProblem)
             // Sort the keys of the map
             const keysArray = Array.from(Object.keys(timeToProblem))
-            console.debug('KeysArray:')
-            console.debug(keysArray)
             const sortedTimes = keysArray.sort()
-            console.debug('sortedTimes:')
-            console.debug(sortedTimes)
             // Make a new array to pass back
             let sortedArray = []
 
@@ -311,22 +305,18 @@ const MainPage = (props) => {
                     const timeAsDate = new Date(time)
                     // Add a color field to the problems based on the date they should be done
                     if (timeAsDate < Date.now()) {
-                        console.log('Adding red as color')
                         fullProblem.color = 'color:red'
                     }
                     else if (timeAsDate <= addDays(3)) {
-                        console.log('adding yellow as color')
                         fullProblem.color = 'color:yellow'
                     }
                     else if (timeAsDate <= addDays(7)) {
-                        console.log('adding green as color')
                         fullProblem.color = 'color:green'
                     }
-                    console.log('Final fullProblem is:')
-                    console.log(fullProblem)
                     sortedArray.push(fullProblem)
                 })
             }
+            console.log('Returning sorted array')
             return sortedArray
         } catch (error) {
             console.error('Could not sort problems by TTN:')

@@ -72,24 +72,16 @@ router.put('/next_times', [auth, [
         const {
             problems
         } = req.body
-        console.log(problems)
 
         let problemToTime = new Map()
         // Define current time in advance so all problems mapped to
         // 'now' have the same value
-        const curTime = Date.now()
+        const curTime = new Date().getTime()
         for (let problemID of problems) {
-            console.log(problemID)
             const index = user.problem_statuses.map(status=> status.problem.toString() ).indexOf(problemID)
-            // const index = user.problem_statuses.map((status) => {
-            //     console.log(status.problem)
-            //     return status.problem.toString()
-            // }).indexOf(problemID)
-            console.log(index)
             if (index === -1) {
                 // We don't have a status for this problem.
                 // Map it to current time
-                console.log('Has no time, using cur')
                 problemToTime.set(problemID,curTime)
             }
             else {

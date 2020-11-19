@@ -113,9 +113,7 @@ export const getTimeToNextSubmissionToProblemMap = async (problems) => {
             const probToTimeMap = await getProblemToNextSubTime(problems)
             // Result is problemID : date
             let timeToProbsMap = new DefaultDict(Set)
-            console.debug('About to make timeToProbsMap')
             for (let prob of Object.keys(probToTimeMap)) {
-                console.log('in for loop for mapping')
                 let time = probToTimeMap[prob]
                 // MongoDB format will be something like 2020-11-18T21:52:21.804Z
                 // Convert to a more 'normalized' date object for ease of comparison
@@ -123,12 +121,8 @@ export const getTimeToNextSubmissionToProblemMap = async (problems) => {
                 // is in standard MS, which also works fine as an arg
                 time = new Date(time)
                 timeToProbsMap[time].add(prob)
-                console.log('time: ' + time)
-                console.log('given: ' + prob)
             }
             timeToProbsMap = Object.assign({}, timeToProbsMap)
-            console.log('Passing from getTTNSubToProbMap')
-            console.log(timeToProbsMap)
             return timeToProbsMap
         } catch (error) {
             console.error('Error trying to get time to sub map')

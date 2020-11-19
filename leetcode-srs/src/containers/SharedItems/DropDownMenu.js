@@ -14,10 +14,21 @@ function DropDownMenu(props) {
         items
     } = props
 
+    const [curTitle, setCurTitle] = useState('Nothing here. Create a list/add problems')
+
+    // useEffect(() => {
+    //     // We need to update this if the title changes
+    //     // console.log('new title: ', title)
+    // }, [title])
+
+    // Update curTitle when items changes
     useEffect(() => {
-        // We need to update this if the title changes
-        // console.log('new title: ', title)
-    }, [title])
+        console.debug('in use effect for selector')
+        if (items && items.length > 0) {
+            console.debug('updating the title')
+            setCurTitle(items[0].name)
+        }
+    },[items, setCurTitle])
 
     const menuVisibilityHandler = (event) => {
         event.preventDefault()
@@ -67,15 +78,21 @@ function DropDownMenu(props) {
         selections = items.map(item => {
             // Items may have a color defined - add it if available.
             // 'color:blue'
+            let color = null
             let style = null
             if (item.color) {
                 console.log('Item has color:')
                 console.log(item)
-                style = item.color
-                console.log('style now: ' + style)
+                color = item.color
+            }
+            if (color) {
+                // Setup the style
+                style = {'style' : color}
+                console.log('style is: ')
+                console.log(style)
             }
             return (
-            <button style={style} key={item._id} onClick={() => setCurItem(item._id)}>
+            <button style={{style}} key={item._id} onClick={() => setCurItem(item._id)}>
                 {item.name}
             </button>
             )}
@@ -90,7 +107,7 @@ function DropDownMenu(props) {
     return (
         <div className={classes.DropDownMenu}>
             <button onClick={menuVisibilityHandler}>
-                Select {props.title}
+                <b>Select: </b> {curTitle}{/*props.title*/}
             </button>
             {visibility.showMenu ? (
                 <div className={classes.Menu}>
