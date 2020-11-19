@@ -64,15 +64,28 @@ function DropDownMenu(props) {
 
     // Make a button for each item passed
     if (items && Array.isArray(items)) {
-        selections = items.map(item => (
-            <button key={item._id} onClick={() => setCurItem(item._id)}>
+        selections = items.map(item => {
+            // Items may have a color defined - add it if available.
+            // 'color:blue'
+            let style = null
+            if (item.color) {
+                console.log('Item has color:')
+                console.log(item)
+                style = item.color
+                console.log('style now: ' + style)
+            }
+            return (
+            <button style={style} key={item._id} onClick={() => setCurItem(item._id)}>
                 {item.name}
             </button>
-        ))
+            )}
+        )
     }
     else if(items) {
         console.debug('Items in DropDownMenu not of type array, investigate')
     }
+    console.log('Selections:')
+    console.log(selections)
 
     return (
         <div className={classes.DropDownMenu}>

@@ -54,6 +54,59 @@ router.get('/:problem_id', auth, async (req, res) => {
     }
 })
 
+// @route  PUT api/problem_status/next_times
+// @desc   Get the time of next submission for all provided problems
+// @access Private
+router.put('/next_times', [auth, [
+    check('problems', 'Must provide array of problems.').isArray(),
+    check('problems.*', 'Must provide problem IDS').isMongoId(),
+]], async (req, res) => {
+    // Check our request contains required fields
+    const validationErrors = validationResult(req)
+    if (!validationErrors.isEmpty) {
+        // Something was missing, send an error
+        return res.status(400).json({errors : errors.array()})
+    }
+    try {
+        const user = await User.findById(req.user.id)
+        const {
+            problems
+        } = req.body
+        console.log(problems)
+
+        let problemToTime = new Map()
+        // Define current time in advance so all problems mapped to
+        // 'now' have the same value
+        const curTime = Date.now()
+        for (let problemID of problems) {
+            console.log(problemID)
+            const index = user.problem_statuses.map(status=> status.problem.toString() ).indexOf(problemID)
+            // const index = user.problem_statuses.map((status) => {
+            //     console.log(status.problem)
+            //     return status.problem.toString()
+            // }).indexOf(problemID)
+            console.log(index)
+            if (index === -1) {
+                // We don't have a status for this problem.
+                // Map it to current time
+                console.log('Has no time, using cur')
+                problemToTime.set(problemID,curTime)
+            }
+            else {
+                // Grab the next_submission date
+                const next_sub_time = user.problem_statuses[index].next_submission
+                problemToTime.set(problemID, next_sub_time )
+            }
+        }
+        console.log(problemToTime)
+
+        return res.json(Object.fromEntries(problemToTime))
+    } catch (e) {
+        console.error('Error getting next sub times: ' + e.message)
+        return res.status(500).send('Server Error')
+    }
+})
+
 // @route  PUT api/problem_status/:problem_id
 // @desc   Create or update a problem status for a problem
 // @access Private

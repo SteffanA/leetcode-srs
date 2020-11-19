@@ -1,4 +1,5 @@
 import {useRef, useEffect} from 'react'
+import {getProblemToNextSubTime} from '../shared/api_calls/problemStatuses'
 
 /*
 Return an object that is created from an old object where
@@ -68,4 +69,71 @@ export const useTraceUpdate = (props) => {
     }
     prev.current = props;
   });
+}
+
+// Add a number of days to today's date and return the date object
+export const addDays = (days) => {
+    let result = new Date(Date.now())
+    result.setDate(result.getDate() + days);
+    return result;
+}
+
+// Default dict equivelent
+// Sample usage:
+/*
+const lists = new DefaultDict(Array)
+lists.men.push('bob')
+lists.women.push('alice')
+console.log(lists.men) // ['bob']
+console.log(lists.women) // ['alice']
+console.log(lists.nonbinary) // []
+*/
+export class DefaultDict {
+  constructor(defaultInit) {
+    return new Proxy(Map, {
+      get: (target, name) => name in target ?
+        target[name] :
+        (target[name] = typeof defaultInit === 'function' ?
+          new defaultInit().valueOf() :
+          defaultInit)
+    })
+  }
+}
+
+
+export const getTimeToNextSubmissionToProblemMap = async (problems) => {
+    // Get the user's token from local storage
+    const token = getTokenOrNull()
+    // Can't make updates without having a token
+    if (token === null) {
+        return 'User not logged in!'
+    }
+    else {
+        try {
+            const probToTimeMap = await getProblemToNextSubTime(problems)
+            // Result is problemID : date
+            let timeToProbsMap = new DefaultDict(Set)
+            console.debug('About to make timeToProbsMap')
+            for (let prob of Object.keys(probToTimeMap)) {
+                console.log('in for loop for mapping')
+                let time = probToTimeMap[prob]
+                // MongoDB format will be something like 2020-11-18T21:52:21.804Z
+                // Convert to a more 'normalized' date object for ease of comparison
+                // In the event the problem hasn't been done, the provided date
+                // is in standard MS, which also works fine as an arg
+                time = new Date(time)
+                timeToProbsMap[time].add(prob)
+                console.log('time: ' + time)
+                console.log('given: ' + prob)
+            }
+            timeToProbsMap = Object.assign({}, timeToProbsMap)
+            console.log('Passing from getTTNSubToProbMap')
+            console.log(timeToProbsMap)
+            return timeToProbsMap
+        } catch (error) {
+            console.error('Error trying to get time to sub map')
+            console.error(error)
+            return new Map()
+        }
+    }
 }
