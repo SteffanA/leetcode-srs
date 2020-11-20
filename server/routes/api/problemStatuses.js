@@ -76,7 +76,8 @@ router.put('/next_times', [auth, [
         let problemToTime = new Map()
         // Define current time in advance so all problems mapped to
         // 'now' have the same value
-        const curTime = new Date().getTime()
+        const curDate = new Date()
+        const curTime = curDate.getTime()
         for (let problemID of problems) {
             const index = user.problem_statuses.map(status=> status.problem.toString() ).indexOf(problemID)
             if (index === -1) {
@@ -90,7 +91,6 @@ router.put('/next_times', [auth, [
                 problemToTime.set(problemID, next_sub_time )
             }
         }
-        console.log(problemToTime)
 
         return res.json(Object.fromEntries(problemToTime))
     } catch (e) {

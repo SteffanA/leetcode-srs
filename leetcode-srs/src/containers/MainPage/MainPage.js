@@ -300,8 +300,8 @@ const MainPage = (props) => {
             // Go through each key by the sorted order, then add all values
             // to the sorted array
             for (let time of sortedTimes) {
-                timeToProblem[time].forEach((prob) => {
-                    let fullProblem = problemIDtoProblemObj[prob]
+                timeToProblem[time].forEach((probID) => {
+                    let fullProblem = problemIDtoProblemObj[probID]
                     const timeAsDate = new Date(time)
                     // Add a color field to the problems based on the date they should be done
                     if (timeAsDate < Date.now()) {

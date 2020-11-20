@@ -9,17 +9,11 @@ function DropDownMenu(props) {
     })
 
     const {
-        title,
         updateCurItem,
         items
     } = props
 
     const [curTitle, setCurTitle] = useState('Nothing here. Create a list/add problems')
-
-    // useEffect(() => {
-    //     // We need to update this if the title changes
-    //     // console.log('new title: ', title)
-    // }, [title])
 
     // Update curTitle when items changes
     useEffect(() => {
@@ -27,6 +21,9 @@ function DropDownMenu(props) {
         if (items && items.length > 0) {
             console.debug('updating the title')
             setCurTitle(items[0].name)
+        }
+        else {
+            setCurTitle('Nothing here. Create a list/add problems')
         }
     },[items, setCurTitle])
 

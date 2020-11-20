@@ -11,6 +11,9 @@ import * as problemActions from '../../../store/actions/problems'
 TODO: Instead of using showLists/showProblems,
 should generize this, and pass props to handle whatever data type
 we actually want/need
+
+So basically using it as a wrapper for the DropDownMenu? Just handling the sort?
+Not sure if we even need this
 /*
 This component allows the user to:
 
@@ -46,8 +49,6 @@ const Selector = props => {
             getLists()
             console.log('got lists')
         }
-        // This function will actually sort/setSortedX if we need to
-        // sortItems()
         console.log('Updating selector')
     }, [showLists, auth, lists, getLists])
     
@@ -55,8 +56,12 @@ const Selector = props => {
         // Helper function for updating sorting our problems
         const sortItems = async () => {
             if (showProblems && problemSortFunc) {
-                const updatedProblems = await problemSortFunc(problems)
-                setProblems(updatedProblems)
+                try {
+                    const updatedProblems = await problemSortFunc(problems)
+                    setProblems(updatedProblems)
+                } catch (error) {
+                    console.error('Error updating problems after sorting')
+                }
             }
         }
         sortItems()
@@ -73,20 +78,10 @@ const Selector = props => {
     }, [curList, getProblems])
 
 // JSX Elements
-    let listTitle = 'No Lists'
-    if (curListName) {
-        listTitle = curListName
-    }
-
-    let problemTitle = 'No Problems'
-    if (curProblemName) {
-        problemTitle = curProblemName
-    }
-
     return (
         <div>
-            {showLists && <DropDownMenu items={lists} title={listTitle} updateCurItem={updateCurList}/>}
-            {showProblems &&<DropDownMenu items={problems} title={problemTitle} updateCurItem={updateCurProblem}/>}
+            {showLists && <DropDownMenu items={lists} updateCurItem={updateCurList}/>}
+            {showProblems &&<DropDownMenu items={problems} updateCurItem={updateCurProblem}/>}
         </div>
     )
 }

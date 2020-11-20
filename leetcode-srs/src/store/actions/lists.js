@@ -77,15 +77,11 @@ export const listsGetAll = () => {
                 return
             }
 
-            // So for all other calls where we update the cur list, we have it such that
-            // the object has id, not _id as a field.  We can take our response's first object
-            // and use that to set the cur list as a 'unified' format firstList
-            const unifiedFirstList = {
-                id: response[0]._id,
-                name: response[0].name,
-                public: response[0].public,
+            let firstList = null
+            if (response.length > 0) {
+                firstList = response[0]
             }
-            dispatch(listsGetListsSuccess(response, unifiedFirstList))
+            dispatch(listsGetListsSuccess(response, firstList))
         } catch (error) {
             console.debug('Lists get all error:')
             console.debug(error)           
@@ -102,13 +98,19 @@ export const listsCreateNewList = (name, isPublic) => {
     return async dispatch => {
         // Start the lists process
         dispatch(listStart())
-        const response = await api.createNewList(name, isPublic)
-        if (response === undefined || response === null || typeof(response) === 'string') {
+        try {
+            const response = await api.createNewList(name, isPublic)
+            // TODO: Do I need the below w/ trycatch?
+            if (response === undefined || response === null || typeof(response) === 'string') {
+                // Failed to update the list for some reason
+                dispatch(listError(response))
+                return
+            }
+            dispatch(listsPostListSuccess(response))
+        } catch (error) {
             // Failed to update the list for some reason
-            dispatch(listError(response))
-            return
+            dispatch(listError(error))
         }
-        dispatch(listsPostListSuccess(response))
     }
 }
 
@@ -116,14 +118,19 @@ export const listsUpdateProblems = (updatedProblems, curListID) => {
     return async dispatch => {
         // Start the lists process
         dispatch(listStart())
-        const response = await api.updateListsProblems(updatedProblems, curListID)
-        // TODO: What is our response here anyway?
-        if (response === undefined || response === null || typeof(response) === 'string') {
-            // Failed to update the list for some reason
-            dispatch(listError(response))
-            return
+        try {
+            const response = await api.updateListsProblems(updatedProblems, curListID)
+            // TODO: Is the below needed within trycatch?
+            // TODO: What is our response here anyway?
+            if (response === undefined || response === null || typeof(response) === 'string') {
+                // Failed to update the list for some reason
+                dispatch(listError(response))
+                return
+            }
+            // Update the current list object to reflect the results
+            dispatch(listsUpdatedProblemsSuccess())
+        } catch (error) {
+            dispatch(listError(error))
         }
-        // Update the current list object to reflect the results
-        dispatch(listsUpdatedProblemsSuccess())
     }
 }

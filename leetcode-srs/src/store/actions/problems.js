@@ -72,7 +72,8 @@ export const problemsGetAllForList = (list) => {
             dispatch(problemError('No list provided.'))
             return
         }
-        const response = await api.getAllProblemsForList(list.id)
+        // TODO: Does the below replace a trycatch effectively?
+        const response = await api.getAllProblemsForList(list._id)
         dispatch(handleGenericProblemGetResponse(response))
     }
 }

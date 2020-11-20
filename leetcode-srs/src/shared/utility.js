@@ -90,7 +90,7 @@ console.log(lists.nonbinary) // []
 */
 export class DefaultDict {
   constructor(defaultInit) {
-    return new Proxy(Map, {
+    return new Proxy({}, {
       get: (target, name) => name in target ?
         target[name] :
         (target[name] = typeof defaultInit === 'function' ?
@@ -112,7 +112,7 @@ export const getTimeToNextSubmissionToProblemMap = async (problems) => {
         try {
             const probToTimeMap = await getProblemToNextSubTime(problems)
             // Result is problemID : date
-            let timeToProbsMap = new DefaultDict(Set)
+            const timeToProbsMap = new DefaultDict(Set)
             for (let prob of Object.keys(probToTimeMap)) {
                 let time = probToTimeMap[prob]
                 // MongoDB format will be something like 2020-11-18T21:52:21.804Z
@@ -122,8 +122,8 @@ export const getTimeToNextSubmissionToProblemMap = async (problems) => {
                 time = new Date(time)
                 timeToProbsMap[time].add(prob)
             }
-            timeToProbsMap = Object.assign({}, timeToProbsMap)
-            return timeToProbsMap
+            const timeToProbsMapObj = Object.assign({}, timeToProbsMap)
+            return timeToProbsMapObj
         } catch (error) {
             console.error('Error trying to get time to sub map')
             console.error(error)
