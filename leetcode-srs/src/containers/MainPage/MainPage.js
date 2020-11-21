@@ -3,13 +3,14 @@ import PropTypes from 'prop-types'
 import classes from './MainPage.module.css'
 import { connect } from 'react-redux'
 
-import {createLink, checkValidity, updateObject} from '../../shared/utility'
+import {createLink, checkValidity, updateObject, addDays, getTimeToNextSubmissionToProblemMap} from '../../shared/utility'
 import Selector from '../SharedItems/Selector/Selector'
 import Button from '../UI/Button/Button'
 import Input from '../UI/Input/Input'
 import TimerBox from './TimerBox'
 
 import * as subAPI from '../../shared/api_calls/submissions'
+import * as problemActions from '../../store/actions/problems'
 
 /*
 Main Page is made of 3 main components:
@@ -251,7 +252,6 @@ const MainPage = (props) => {
 
     // Places the time from our timer into the form
     const importTimeToForm = () => {
-        // TODO: Why do we set updatedControl and updatedControls?
         // Update the control linked to the control key
         const updatedControl = updateObject(controls['timeSpent'], {
             // Update the value
@@ -271,6 +271,58 @@ const MainPage = (props) => {
         setCurState('PAUSED')
         setStoppedTime(0)
         setelements({...elements, timerVisible: false})
+    }
+
+    // Passed to the Selector object
+    // Sorts a given problem array based on the time-to-next (next_submission) date
+    // in the User's problem_status's array in their model
+    const sortProblemsByTTN = async (problems) => {
+        // Get a map of the date to problem(s) at the required date first
+        // Note that if a problem doesn't have a submission, the date defaults to now 
+        console.log('IN SORT')
+        if (!problems) {
+            return problems
+        }
+        try {
+            console.log('mapping followed by await')
+            const prob_ids = problems.map((prob) => prob._id)
+            const timeToProblem = await getTimeToNextSubmissionToProblemMap(prob_ids)
+            // Sort the keys of the map
+            const keysArray = Array.from(Object.keys(timeToProblem))
+            const sortedTimes = keysArray.sort()
+            // Make a new array to pass back
+            let sortedArray = []
+
+            const problemIDtoProblemObj = new Map()
+            problems.map((prob) => (
+                problemIDtoProblemObj[prob._id] = prob
+            ))
+            // Go through each key by the sorted order, then add all values
+            // to the sorted array
+            for (let time of sortedTimes) {
+                timeToProblem[time].forEach((probID) => {
+                    let fullProblem = problemIDtoProblemObj[probID]
+                    const timeAsDate = new Date(time)
+                    // Add a color field to the problems based on the date they should be done
+                    if (timeAsDate < Date.now()) {
+                        fullProblem.color = 'red'
+                    }
+                    else if (timeAsDate <= addDays(3)) {
+                        fullProblem.color = 'yellow'
+                    }
+                    else if (timeAsDate <= addDays(7)) {
+                        fullProblem.color = 'green'
+                    }
+                    sortedArray.push(fullProblem)
+                })
+            }
+            console.log('Returning sorted array')
+            return sortedArray
+        } catch (error) {
+            console.error('Could not sort problems by TTN:')
+            console.error(error)
+            return problems
+        }
     }
 // JSX
 
@@ -330,7 +382,7 @@ const MainPage = (props) => {
 
     return (
         <div className={classes.MainPage}>
-            {props.isAuth && <Selector showLists={true} showProblems={true}/>}
+            {props.isAuth && <Selector showLists={true} showProblems={true} problemSortFunc={sortProblemsByTTN}/>}
             {formVisible && form}
             {(!formVisible && props.isAuth && curProblem) && problemLinkButton}
             <br/>
@@ -354,7 +406,6 @@ const mapStateToProps = (state) => {
 
 // const mapDispatchToProps = (dispatch) => {
 //     return {
-
 //     }
 // }
 

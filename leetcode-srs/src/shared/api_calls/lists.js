@@ -90,6 +90,10 @@ export const updateListsProblems = (updatedProblems, curListID) => {
         // Exit early
         return 'No problems to update.'
     }
+    if (!curListID) {
+        console.error('Cur listID undefined!')
+        return 'No curListID provided.'
+    }
     const url = process.env.REACT_APP_HOST_URL + '/api/lists/bulk/' + curListID
     const config = {
         headers: {

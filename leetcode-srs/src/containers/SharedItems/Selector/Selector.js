@@ -1,4 +1,4 @@
-import React, {useEffect}  from 'react'
+import React, {useEffect, useState}  from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import useDeepCompareEffect from 'use-deep-compare-effect'
@@ -11,6 +11,9 @@ import * as problemActions from '../../../store/actions/problems'
 TODO: Instead of using showLists/showProblems,
 should generize this, and pass props to handle whatever data type
 we actually want/need
+
+So basically using it as a wrapper for the DropDownMenu? Just handling the sort?
+Not sure if we even need this
 /*
 This component allows the user to:
 
@@ -23,6 +26,8 @@ const Selector = props => {
         // Passed props
         showLists,
         showProblems,
+        listSortFunc,
+        problemSortFunc,
         // Props from redux
         auth,
         curList,
@@ -34,17 +39,34 @@ const Selector = props => {
         curProblemName,
         updateCurList,
         updateCurProblem,
+
+        setProblems,
     } = props
 
     // When this component mounts, try to get the lists
     useEffect(() => {
-        // Update the lists if we haven't already got them
-        if (auth && !lists) {
+        if (showLists && auth && !lists) {
             getLists()
             console.log('got lists')
         }
         console.log('Updating selector')
-    }, [auth, lists, getLists])
+    }, [showLists, auth, lists, getLists])
+    
+    useDeepCompareEffect(() => {
+        // Helper function for updating sorting our problems
+        const sortItems = async () => {
+            if (showProblems && problemSortFunc) {
+                try {
+                    const updatedProblems = await problemSortFunc(problems)
+                    setProblems(updatedProblems)
+                } catch (error) {
+                    console.error('Error updating problems after sorting')
+                }
+            }
+        }
+        sortItems()
+        console.log('Deep compare for problems')
+    }, [problems, setProblems, showProblems])
 
     // Update our problems whenever the curList changes
     useDeepCompareEffect(() =>{
@@ -56,20 +78,10 @@ const Selector = props => {
     }, [curList, getProblems])
 
 // JSX Elements
-    let listTitle = 'No Lists'
-    if (curListName) {
-        listTitle = curListName
-    }
-
-    let problemTitle = 'No Problems'
-    if (curProblemName) {
-        problemTitle = curProblemName
-    }
-
     return (
         <div>
-            {showLists && <DropDownMenu items={lists} title={listTitle} updateCurItem={updateCurList}/>}
-            {showProblems &&<DropDownMenu items={problems} title={problemTitle} updateCurItem={updateCurProblem}/>}
+            {showLists && <DropDownMenu items={lists} updateCurItem={updateCurList}/>}
+            {showProblems &&<DropDownMenu items={problems} updateCurItem={updateCurProblem}/>}
         </div>
     )
 }
@@ -93,6 +105,7 @@ const mapDispatchToProps = dispatch => {
         getProblems: (list) => dispatch(problemActions.problemsGetAllForList(list)),
         updateCurList: (list) => dispatch(listActions.listSetCurrent(list)),
         updateCurProblem: (problem) => dispatch(problemActions.problemSetCurrent(problem)),
+        setProblems: (problems) => dispatch(problemActions.problemSetProblems(problems)),
     }
 }
 
@@ -101,13 +114,15 @@ Selector.propTypes = {
     auth: PropTypes.bool.isRequired,
     getLists: PropTypes.func.isRequired,
     lists: PropTypes.array.isRequired,
-    setCurrentList: PropTypes.func.isRequired,
+    updateCurList: PropTypes.func.isRequired,
     curListName: PropTypes.string,
     curList: PropTypes.object,
     curProblem: PropTypes.object,
     curProblemName: PropTypes.string,
     problems: PropTypes.array,
     getProblems: PropTypes.func.isRequired,
+    listSortFunc: PropTypes.func,
+    problemSortFunc: PropTypes.func,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Selector)

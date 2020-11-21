@@ -46,6 +46,7 @@ const handleGenericProblemGetResponse = (response) => {
 
 // BEGIN EXPORTS
 
+
 export const problemSetCurrent = (problem) => {
     console.log('prob set current')
     console.log(problem)
@@ -71,7 +72,8 @@ export const problemsGetAllForList = (list) => {
             dispatch(problemError('No list provided.'))
             return
         }
-        const response = await api.getAllProblemsForList(list.id)
+        // TODO: Does the below replace a trycatch effectively?
+        const response = await api.getAllProblemsForList(list._id)
         dispatch(handleGenericProblemGetResponse(response))
     }
 }
@@ -111,5 +113,24 @@ export const problemsGetSearch = (term) => {
          // Get our subset of problems containing the search term
         const response = await api.getProblemSearchResults(term)
         dispatch(handleGenericProblemGetResponse(response))
+    }
+}
+
+// Given an array of full problem objects, set the stored problems to it
+export const problemSetProblems = (problems) => {
+    return dispatch => {
+        dispatch(problemStart)
+        // Ensure we were passed an array
+        console.log('problemSetProblems was passed:')
+        console.log(problems)
+        if (!Array.isArray(problems)) {
+            dispatch(problemError('No array provided for set problems.'))
+            return
+        }
+        let firstProblem = null
+        if (problems.length > 0) {
+            firstProblem = problems[0]
+        }
+        dispatch(problemsGetProblemsSuccess(problems, firstProblem))
     }
 }

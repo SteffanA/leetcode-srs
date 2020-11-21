@@ -81,7 +81,7 @@ const UserSchema = new mongoose.Schema({
                     },
                 },
             ],
-            // Link to a specific problem - using the LC problem ID, not the document's
+            // Link to a specific problem
             problem: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'problem',

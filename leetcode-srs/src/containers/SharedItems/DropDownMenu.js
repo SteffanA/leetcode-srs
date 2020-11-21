@@ -9,15 +9,33 @@ function DropDownMenu(props) {
     })
 
     const {
-        title,
         updateCurItem,
         items
     } = props
 
+    const [curTitle, setCurTitle] = useState('Nothing here. Create a list/add problems')
+    const [titleColor, setTitleColor] = useState(null)
+
+    // Update curTitle when items changes
     useEffect(() => {
-        // We need to update this if the title changes
-        // console.log('new title: ', title)
-    }, [title])
+        console.debug('in use effect for selector')
+        if (items && items.length > 0) {
+            console.debug('updating the title')
+            setCurTitle(items[0].name)
+            // Check if there's a color to set
+            if (items[0].color) {
+                // Set the title color
+                setTitleColor(items[0].color)
+            }
+            else {
+                // Reset title color to null
+                setTitleColor(null)
+            }
+        }
+        else {
+            setCurTitle('Nothing here. Create a list/add problems')
+        }
+    },[items, setCurTitle])
 
     const menuVisibilityHandler = (event) => {
         event.preventDefault()
@@ -64,20 +82,29 @@ function DropDownMenu(props) {
 
     // Make a button for each item passed
     if (items && Array.isArray(items)) {
-        selections = items.map(item => (
-            <button key={item._id} onClick={() => setCurItem(item._id)}>
-                {item.name}
-            </button>
-        ))
+        selections = items.map(item => {
+            // Items may have a color defined - add it if available.
+            let itemColor = null
+            if (item.color) {
+                itemColor = item.color
+            }
+            return (
+                <button style={{color : itemColor}} key={item._id} onClick={() => setCurItem(item._id)}>
+                    {item.name}
+                </button>
+            )}
+        )
     }
     else if(items) {
         console.debug('Items in DropDownMenu not of type array, investigate')
     }
+    console.log('Selections:')
+    console.log(selections)
 
     return (
         <div className={classes.DropDownMenu}>
-            <button onClick={menuVisibilityHandler}>
-                Select {props.title}
+            <button onClick={menuVisibilityHandler} style={{color : titleColor}}>
+                <b style={{color: 'black'}}>Select: </b> {curTitle}
             </button>
             {visibility.showMenu ? (
                 <div className={classes.Menu}>

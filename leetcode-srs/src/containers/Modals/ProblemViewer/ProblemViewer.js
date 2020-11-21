@@ -95,8 +95,14 @@ export const ProblemViewer = (props) => {
         // If we have no results, get the first 50 problems
         if (curProblemResults === null || curProblemResults.length === 0) {
             const getProblems = async () => {
-                const results = await getSubsetOfProblems(0, 50)
-                setProblemResults(results)
+                try {
+                    const results = await getSubsetOfProblems(0, 50)
+                    setProblemResults(results)
+                } catch (error) {
+                    console.debug('Failed to get subset of problems')
+                    console.debug(error)
+                    alert('Failed to load problems. Please try again later.')
+                }
             }
             getProblems()
         }
@@ -119,13 +125,25 @@ export const ProblemViewer = (props) => {
         // an actual LC problem to be called this.
         // TODO: Does this actually get called? Look into Code Coverage
         if (searchTermy === 'Search for a Problem') {
-            const res = await getSubsetOfProblems(0,50)
-            setProblemResults(res)
+            try {
+                const results = await getSubsetOfProblems(0, 50)
+                setProblemResults(results)
+            } catch (error) {
+                console.debug('Failed to get subset of problems')
+                console.debug(error)
+                alert('Failed to load problems. Please try again later.')
+            }
         }
         else {
             // TODO: Need to handle errors gracefully
-            const results = await getProblemSearchResults(searchTermy)
-            setProblemResults(results)
+            try {
+                const results = await getProblemSearchResults(searchTermy)
+                setProblemResults(results)
+            } catch (error) {
+                console.debug('Error when trying to get search results.')
+                console.debug(error)
+                alert('Search failed - please try again later.')
+            }
         }
     }
 
@@ -165,7 +183,13 @@ export const ProblemViewer = (props) => {
             }
         })
         // Send the request to update our list
-        await updateListProblems(updatedProblems, curList.id)
+        try {
+            await updateListProblems(updatedProblems, curList._id)
+        } catch (error) {
+            console.error('Error after updateListProblems')
+            alert('Save failed! Please try again later.')
+            return
+        }
         // Check for any errors after our request finishes
         if (listErrors !== null) {
             alert('Save failed! Please try again later.')
@@ -174,7 +198,11 @@ export const ProblemViewer = (props) => {
         alert('Changes saved!')
 
         // Update problems now
-        await getProblemsForList(curList)
+        try {
+            await getProblemsForList(curList)
+        } catch (error) {
+            console.error('Error after getProblemsForList')
+        }
         // Reset the currentProblemsAndState mapping, since 'touched' and non touched
         // vars are going to be different now.
         setUpdatedProblems(new Map())
