@@ -5,7 +5,7 @@ const Problem = require('../../models/Problem')
 const express = require('express')
 const {check, validationResult} = require('express-validator')
 const auth = require('../../middleware/auth')
-const {createProblemStatus} = require('../../utility/problemStatuses')
+const {createProblemStatus, updateProblemStatus} = require('../../utility/problemStatuses')
 
 const router = express.Router()
 
@@ -77,7 +77,9 @@ router.post('/:problem_id', [auth, [
             status = await createProblemStatus(result, 1.5, user, problem)
         }
         else {
-            status = user.problem_statuses[index]
+            // Update the status based on the submission results
+            // TODO: Get the time multiplier from the user's settings and replace
+            status = await updateProblemStatus(user, 1.5, result, index)
         }
         // Otherwise this status does belong to the user.
         // Create a new Submission and add it to the status

@@ -1,7 +1,7 @@
 const Problem = require('../models/Problem.js')
 const User = require('../models/User')
 
-const {addDays} = require('./utility')
+const {addDaysToDate} = require('./utility')
 
 // Contains re-usable functions pertaining to problem statuses
 
@@ -34,4 +34,47 @@ exports.createProblemStatus = async (result, time_multiplier, user, problem) => 
     user.problem_statuses.push(new_status)
     await user.save()
     return user.problem_statuses[user.problem_statuses.length-1]
+}
+
+// Updates the problem status for an existing problem
+// Pass the user, time multiplier, problem result, and index of the status
+// within the user's problem_statuses array.  These should be validated
+// prior to calling this function.  Assume this is called in a trycatch
+exports.updateProblemStatus = async (user, time_multiplier, result, index) => {
+    console.log('Found existing status')
+    // Get the problem status
+    const problem_status = user.problem_statuses[index]
+    const results = problem_status.results
+    // Update this problem status
+    let ttn = 0 // ttn = time to next
+    if (result) {
+        ttn = time_multiplier * problem_status.interval
+        results.success += 1
+    }
+    else {
+        // TODO: Does this make sense, keeping the same interval?
+        // Should we maybe drop next sub back to 0?
+        results.incorrect += 1
+    }
+
+    problem_status.interval = (ttn === 0 ? 1 : ttn)
+    //Fix up date based on ttn
+    let prior_sub = problem_status.next_submission
+    if (ttn !== 0) {
+        // If ttn isn't 0, set next_submission to
+        //  cur Date + (ttn as Days)
+        console.log('Adding: ' + ttn + ' to next sub')
+        problem_status.next_submission = addDaysToDate(prior_sub, ttn)
+    }
+    else{
+        // TTN is 0, set next submission to tomorrow
+        console.log('Adding 1 to next sub')
+        problem_status.next_submission = addDaysToDate(prior_sub, 1)
+    }
+
+    // save the User with updated status
+    await user.save()
+    console.log(user.problem_statuses[index])
+
+    return user.problem_statuses[index]
 }

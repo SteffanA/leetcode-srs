@@ -305,13 +305,13 @@ const MainPage = (props) => {
                     const timeAsDate = new Date(time)
                     // Add a color field to the problems based on the date they should be done
                     if (timeAsDate < Date.now()) {
-                        fullProblem.color = 'color:red'
+                        fullProblem.color = 'red'
                     }
                     else if (timeAsDate <= addDays(3)) {
-                        fullProblem.color = 'color:yellow'
+                        fullProblem.color = 'yellow'
                     }
                     else if (timeAsDate <= addDays(7)) {
-                        fullProblem.color = 'color:green'
+                        fullProblem.color = 'green'
                     }
                     sortedArray.push(fullProblem)
                 })

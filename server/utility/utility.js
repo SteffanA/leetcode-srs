@@ -7,3 +7,9 @@ exports.addDays = (days) => {
     result.setDate(result.getDate() + days);
     return result;
 }
+
+// Adds days to a provided date
+exports.addDaysToDate = (date, days) => {
+    date.setDate(date.getDate() + days);
+    return date;
+}

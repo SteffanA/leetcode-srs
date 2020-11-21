@@ -4,9 +4,7 @@ const User = require('../../models/User.js')
 const express = require('express')
 const {check, validationResult} = require('express-validator')
 const auth = require('../../middleware/auth')
-const {addDays} = require('../../utility/utility')
-const {createProblemStatus} = require('../../utility/problemStatuses')
-const { create } = require('../../models/User.js')
+const {createProblemStatus, updateProblemStatus} = require('../../utility/problemStatuses')
 
 const router = express.Router()
 
@@ -107,6 +105,7 @@ router.put('/:problem_id', [auth,[
     check('time_multiplier', 'Multiplier for successful attempt required').isNumeric()
 ]], async (req, res) => {
     try {
+        console.log('Updating problem status for problem ' + req.params.problem_id)
         // Check our validators
         const validationErrors = validationResult(req)
         if (!validationErrors.isEmpty()) {
@@ -140,35 +139,9 @@ router.put('/:problem_id', [auth,[
                 .indexOf(problem._id.toString())
         }
         if (index !== -1) {
-            // Get the problem status
-            const problem_status = user.problem_statuses[index]
-            const results = problem_status.results
-            // Update this problem status
-            let ttn = 0 // ttn = time to next
-            if (result) {
-                ttn = time_multiplier * problem_status.interval
-                results.success += 1
-            }
-            else {
-                results.incorrect += 1
-            }
-
-            problem_status.interval = (ttn === 0 ? 1 : ttn)
-            //Fix up date based on ttn
-            if (ttn !== 0) {
-                // If ttn isn't 0, set next_submission to
-                //  cur Date + (ttn as Days)
-                problem_status.next_submission = addDays(ttn)
-            }
-            else{
-                // TTN is 0, set next submission to now
-                problem_status.next_submission = Date.now()
-            }
-
-            // save the User with updated status
-            await user.save()
-
-            return res.json(user.problem_statuses[index])
+            // Update the existing problem status
+            const status = await updateProblemStatus(user, time_multiplier, result, index)
+            return res.json(status)
         }
         // Else problem status for this problem does not exist
         else {

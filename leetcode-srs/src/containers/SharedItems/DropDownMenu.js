@@ -14,6 +14,7 @@ function DropDownMenu(props) {
     } = props
 
     const [curTitle, setCurTitle] = useState('Nothing here. Create a list/add problems')
+    const [titleColor, setTitleColor] = useState(null)
 
     // Update curTitle when items changes
     useEffect(() => {
@@ -21,6 +22,15 @@ function DropDownMenu(props) {
         if (items && items.length > 0) {
             console.debug('updating the title')
             setCurTitle(items[0].name)
+            // Check if there's a color to set
+            if (items[0].color) {
+                // Set the title color
+                setTitleColor(items[0].color)
+            }
+            else {
+                // Reset title color to null
+                setTitleColor(null)
+            }
         }
         else {
             setCurTitle('Nothing here. Create a list/add problems')
@@ -74,24 +84,14 @@ function DropDownMenu(props) {
     if (items && Array.isArray(items)) {
         selections = items.map(item => {
             // Items may have a color defined - add it if available.
-            // 'color:blue'
-            let color = null
-            let style = null
+            let itemColor = null
             if (item.color) {
-                console.log('Item has color:')
-                console.log(item)
-                color = item.color
-            }
-            if (color) {
-                // Setup the style
-                style = {'style' : color}
-                console.log('style is: ')
-                console.log(style)
+                itemColor = item.color
             }
             return (
-            <button style={{style}} key={item._id} onClick={() => setCurItem(item._id)}>
-                {item.name}
-            </button>
+                <button style={{color : itemColor}} key={item._id} onClick={() => setCurItem(item._id)}>
+                    {item.name}
+                </button>
             )}
         )
     }
@@ -103,8 +103,8 @@ function DropDownMenu(props) {
 
     return (
         <div className={classes.DropDownMenu}>
-            <button onClick={menuVisibilityHandler}>
-                <b>Select: </b> {curTitle}{/*props.title*/}
+            <button onClick={menuVisibilityHandler} style={{color : titleColor}}>
+                <b style={{color: 'black'}}>Select: </b> {curTitle}
             </button>
             {visibility.showMenu ? (
                 <div className={classes.Menu}>
