@@ -6,6 +6,7 @@ const express = require('express')
 const { check, validationResult } = require('express-validator')
 const auth = require('../../middleware/auth')
 const mongoose = require('mongoose')
+const {sortStatusByNextSubmission} = require('../../utility/utility')
 
 const router = express.Router()
 
@@ -105,10 +106,10 @@ router.get('/private/:id', auth, async (req, res) => {
     }
 })
 
-// @route  GET /api/lists/:id/problems
+// @route  GET /api/lists/:id/problems/:sort*?
 // @desc   Retrieve all problems in a given list
 // @access Private
-router.get('/:id/problems', [auth], 
+router.get('/:id/problems/:sort*?', [auth], 
 async (req, res) => {
     try {
         // Get the list with the given ID
@@ -136,6 +137,28 @@ async (req, res) => {
             const problem = await Problem.findById(prob._id)
             if (problem) {
                 problems.push(problem)
+            }
+        }
+        // Sort the problems by time to next if sort requested
+        // As of now, any truthy means sort requested
+        if (req.params.sort)  {
+            const user = await User.findById(req.user.id)
+            if (user) {
+                const statuses = user.problem_statuses
+                // Make a lookup map for the problem->status index
+                const probIdToStatus = new Map()
+                for (const [index, status] of statuses.entries()) {
+                    probIdToStatus.set(status.problem.toString(), status)
+                }
+                problems.sort((a, b) => {
+                    // Try to get the status for both
+                    const aStatus = probIdToStatus.get(a._id.toString())
+                    const bStatus = probIdToStatus.get(b._id.toString())
+                    return sortStatusByNextSubmission(aStatus, bStatus)
+                })
+            }
+            else{
+                console.log('No user associated, returning as is.')
             }
         }
 

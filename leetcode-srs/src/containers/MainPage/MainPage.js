@@ -3,13 +3,15 @@ import PropTypes from 'prop-types'
 import classes from './MainPage.module.css'
 import { connect } from 'react-redux'
 
-import {createLink, checkValidity, updateObject, addDays, getTimeToNextSubmissionToProblemMap} from '../../shared/utility'
+import {createLink, checkValidity, updateObject} from '../../shared/utility'
 import Selector from '../SharedItems/Selector/Selector'
 import Button from '../UI/Button/Button'
 import Input from '../UI/Input/Input'
 import TimerBox from './TimerBox'
 
 import * as subAPI from '../../shared/api_calls/submissions'
+import * as statusAPI from '../../shared/api_calls/problemStatuses'
+
 import * as problemActions from '../../store/actions/problems'
 
 /*
@@ -22,7 +24,10 @@ const MainPage = (props) => {
 // Hooks and variables
     // Deconstruct our props
     const {
-        curProblem
+        curProblem,
+        problems,
+        isAuth,
+        setTTN,
     } = props
 
     // State used to determine if the form/timer elements are visible
@@ -139,13 +144,8 @@ const MainPage = (props) => {
 
     // Update the problem stub whenever the curProblem changes
     useEffect(() => {
-        console.log('Updating main page')
-        console.log(curProblem)
         if (curProblem) {
-            console.log('cur problem and link on main page:')
-            console.log(curProblem)
             currentProblemLink.current = createLink(curProblem.link)
-            console.log(currentProblemLink.current)
         }
     }, [curProblem])
 
@@ -173,9 +173,13 @@ const MainPage = (props) => {
 
         // Call our submit handler
         try {
-            const res = await subAPI.addNewSubmission(submission, curProblem.id)
+            await subAPI.addNewSubmission(submission, curProblem.id)
             alert('Problem successfully submitted!')
-            console.log('Submit successful')
+            // We need to update our problems for the list in our redux to
+            // reflect the new problem states
+            const probIds = problems.map(prob => prob._id)
+            const probTTN = await statusAPI.getProblemToNextSubTime(probIds)
+            setTTN(probTTN)
             // Now refresh the page - this seems a bit hacky, but it works.
             window.open(process.env.REACT_APP_HOST_URL, "_self")
         } catch (error) {
@@ -273,57 +277,6 @@ const MainPage = (props) => {
         setelements({...elements, timerVisible: false})
     }
 
-    // Passed to the Selector object
-    // Sorts a given problem array based on the time-to-next (next_submission) date
-    // in the User's problem_status's array in their model
-    const sortProblemsByTTN = async (problems) => {
-        // Get a map of the date to problem(s) at the required date first
-        // Note that if a problem doesn't have a submission, the date defaults to now 
-        console.log('IN SORT')
-        if (!problems) {
-            return problems
-        }
-        try {
-            console.log('mapping followed by await')
-            const prob_ids = problems.map((prob) => prob._id)
-            const timeToProblem = await getTimeToNextSubmissionToProblemMap(prob_ids)
-            // Sort the keys of the map
-            const keysArray = Array.from(Object.keys(timeToProblem))
-            const sortedTimes = keysArray.sort()
-            // Make a new array to pass back
-            let sortedArray = []
-
-            const problemIDtoProblemObj = new Map()
-            problems.map((prob) => (
-                problemIDtoProblemObj[prob._id] = prob
-            ))
-            // Go through each key by the sorted order, then add all values
-            // to the sorted array
-            for (let time of sortedTimes) {
-                timeToProblem[time].forEach((probID) => {
-                    let fullProblem = problemIDtoProblemObj[probID]
-                    const timeAsDate = new Date(time)
-                    // Add a color field to the problems based on the date they should be done
-                    if (timeAsDate < Date.now()) {
-                        fullProblem.color = 'red'
-                    }
-                    else if (timeAsDate <= addDays(3)) {
-                        fullProblem.color = 'yellow'
-                    }
-                    else if (timeAsDate <= addDays(7)) {
-                        fullProblem.color = 'green'
-                    }
-                    sortedArray.push(fullProblem)
-                })
-            }
-            console.log('Returning sorted array')
-            return sortedArray
-        } catch (error) {
-            console.error('Could not sort problems by TTN:')
-            console.error(error)
-            return problems
-        }
-    }
 // JSX
 
     // Our form for the problem submission
@@ -382,9 +335,9 @@ const MainPage = (props) => {
 
     return (
         <div className={classes.MainPage}>
-            {props.isAuth && <Selector showLists={true} showProblems={true} problemSortFunc={sortProblemsByTTN}/>}
+            {isAuth && <Selector showLists={true} showProblems={true} />}
             {formVisible && form}
-            {(!formVisible && props.isAuth && curProblem) && problemLinkButton}
+            {(!formVisible && isAuth && curProblem) && problemLinkButton}
             <br/>
             <div>
                 {timerVisible && timer.current}
@@ -399,15 +352,17 @@ const MainPage = (props) => {
 const mapStateToProps = (state) => {
     return {
         curProblem: state.problems.curProblem, // currently selected problem
+        problems: state.problems.curProblems,
         curList: state.lists.curList, // currently selected list
         isAuth: state.auth.token !== null,
     }
 }
 
-// const mapDispatchToProps = (dispatch) => {
-//     return {
-//     }
-// }
+const mapDispatchToProps = (dispatch) => {
+    return {
+        setTTN: (ttnObj) => dispatch(problemActions.problemsSetTimeToNextSubmissions(ttnObj)),
+    }
+}
 
 MainPage.propTypes = {
     curProblem: PropTypes.object,
@@ -415,4 +370,4 @@ MainPage.propTypes = {
     isAuth: PropTypes.bool.isRequired,
 }
 
-export default connect(mapStateToProps, null)(MainPage)
+export default connect(mapStateToProps, mapDispatchToProps)(MainPage)

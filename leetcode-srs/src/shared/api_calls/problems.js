@@ -49,8 +49,20 @@ export const bulkUpdateProblems = (listID, updatedProblems) => {
     })
 }
 
+// Get the problem's for a particular list sorted by time-to-next submission
+export const getAllProblemsForListSorted = (listID) => {
+    const url = process.env.REACT_APP_HOST_URL + '/api/lists/' + listID + '/problems/true'
+    return getProblemsForList(url, listID)
+}
+
 // Get the problem's for a particular list.
 export const getAllProblemsForList = (listID) => {
+    const url = process.env.REACT_APP_HOST_URL + '/api/lists/' + listID + '/problems'
+    return getProblemsForList(url, listID)
+}
+
+// Get all problems for a list. Sorted or not depends on the url passed.
+const getProblemsForList = (url, listID) => {
     if (!listID) {
         return 'No list provided.'
     }
@@ -60,7 +72,6 @@ export const getAllProblemsForList = (listID) => {
         // If there's no token, we can't get problems
         return 'User not logged in!'
     }
-    let url = process.env.REACT_APP_HOST_URL + '/api/lists/' + listID + '/problems'
     const config = {
         headers: {
             'x-auth-token': token,

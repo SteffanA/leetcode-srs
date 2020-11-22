@@ -78,6 +78,12 @@ export const addDays = (days) => {
     return result;
 }
 
+
+export const addDaysToDate = (date, days) => {
+    date.setDate(date.getDate() + days);
+    return date;
+}
+
 // Default dict equivelent
 // Sample usage:
 /*
@@ -100,7 +106,9 @@ export class DefaultDict {
   }
 }
 
-
+// Reverses the result of the getProblemToNextSubTime API call
+// Instead of problem : sub_time you get 
+// sub_time : problem
 export const getTimeToNextSubmissionToProblemMap = async (problems) => {
     // Get the user's token from local storage
     const token = getTokenOrNull()

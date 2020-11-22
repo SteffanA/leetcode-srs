@@ -20,15 +20,20 @@ function DropDownMenu(props) {
     useEffect(() => {
         console.debug('in use effect for selector')
         if (items && items.length > 0) {
-            console.debug('updating the title')
-            setCurTitle(items[0].name)
+            const firstItem = items[0]
+            console.log('trying to get first item color')
+            console.log(firstItem['color'])
+            console.log(firstItem.color)
+            setCurTitle(firstItem.name)
             // Check if there's a color to set
-            if (items[0].color) {
+            if (firstItem['color'] || firstItem.color) {
                 // Set the title color
-                setTitleColor(items[0].color)
+                console.log('Setting title color')
+                setTitleColor(firstItem.color)
             }
             else {
                 // Reset title color to null
+                console.log('Title color set to null')
                 setTitleColor(null)
             }
         }
@@ -98,8 +103,6 @@ function DropDownMenu(props) {
     else if(items) {
         console.debug('Items in DropDownMenu not of type array, investigate')
     }
-    console.log('Selections:')
-    console.log(selections)
 
     return (
         <div className={classes.DropDownMenu}>
