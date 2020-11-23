@@ -6,6 +6,7 @@ import useDeepCompareEffect from 'use-deep-compare-effect'
 import DropDownMenu from '../DropDownMenu'
 import * as listActions from '../../../store/actions/lists'
 import * as problemActions from '../../../store/actions/problems'
+import { addDaysToDate } from '../../../shared/utility'
 
 /*
 TODO: Instead of using showLists/showProblems,
@@ -26,20 +27,16 @@ const Selector = props => {
         // Passed props
         showLists,
         showProblems,
-        listSortFunc,
-        problemSortFunc,
         // Props from redux
         auth,
         curList,
-        curListName,
         lists,
         getLists,
         problems,
-        getProblems,
-        curProblemName,
+        getProblemsSorted,
         updateCurList,
         updateCurProblem,
-
+        probsTTN,
         setProblems,
     } = props
 
@@ -47,35 +44,40 @@ const Selector = props => {
     useEffect(() => {
         if (showLists && auth && !lists) {
             getLists()
-            console.log('got lists')
         }
-        console.log('Updating selector')
-    }, [showLists, auth, lists, getLists])
-    
-    useDeepCompareEffect(() => {
-        // Helper function for updating sorting our problems
-        const sortItems = async () => {
-            if (showProblems && problemSortFunc) {
-                try {
-                    const updatedProblems = await problemSortFunc(problems)
-                    setProblems(updatedProblems)
-                } catch (error) {
-                    console.error('Error updating problems after sorting')
+        if (problems && probsTTN) {
+            // Add the color field to the problems based on the TTN
+            const now = new Date(Date.now())
+            for (let prob of problems) {
+                const ttn = probsTTN[prob._id]
+                if (ttn) {
+                    const ttnAsDate = new Date(ttn)
+                    let color = 'green'
+                    console.log(ttnAsDate)
+                    if (ttnAsDate < addDaysToDate(now, 3)) {
+                        color = 'red'
+                    }
+                    else if (ttnAsDate < addDaysToDate(now, 7)) {
+                        color = 'yellow'
+                    }
+                    prob.color = color
+                }
+                else {
+                    // Assume not done.
+                    prob.color = 'red'
                 }
             }
+            setProblems(problems)
         }
-        sortItems()
-        console.log('Deep compare for problems')
-    }, [problems, setProblems, showProblems])
+    }, [showLists, auth, lists, getLists, probsTTN])
 
     // Update our problems whenever the curList changes
     useDeepCompareEffect(() =>{
         if (curList) {
-            getProblems(curList)
-            console.log('Got problems from use deep')
+            getProblemsSorted(curList)
         }
-        console.log('Updated selector from useDeep')
-    }, [curList, getProblems])
+        console.log('Updated selector from useDeep on curList')
+    }, [curList, getProblemsSorted])
 
 // JSX Elements
     return (
@@ -89,11 +91,10 @@ const Selector = props => {
 const mapStateToProps = (state) => {
     return {
         curProblem: state.problems.curProblem,
-        curProblemName: state.problems.curProblemName,
         problems: state.problems.curProblems,
+        probsTTN: state.problems.problemIdToTimeToNextSub,
         lists: state.lists.usersLists,
         curList: state.lists.curList,
-        curListName: state.lists.curListName,
         error: state.lists.error,
         auth: state.auth.token !== null,
     }
@@ -102,10 +103,10 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => {
     return {
         getLists: () => dispatch(listActions.listsGetAll()),
-        getProblems: (list) => dispatch(problemActions.problemsGetAllForList(list)),
+        getProblemsSorted: (list) => dispatch(problemActions.problemsGetAllForListSorted(list)),
+        setProblems: (problems) => dispatch(problemActions.problemSetProblems(problems)),
         updateCurList: (list) => dispatch(listActions.listSetCurrent(list)),
         updateCurProblem: (problem) => dispatch(problemActions.problemSetCurrent(problem)),
-        setProblems: (problems) => dispatch(problemActions.problemSetProblems(problems)),
     }
 }
 
@@ -115,14 +116,10 @@ Selector.propTypes = {
     getLists: PropTypes.func.isRequired,
     lists: PropTypes.array.isRequired,
     updateCurList: PropTypes.func.isRequired,
-    curListName: PropTypes.string,
     curList: PropTypes.object,
     curProblem: PropTypes.object,
-    curProblemName: PropTypes.string,
     problems: PropTypes.array,
-    getProblems: PropTypes.func.isRequired,
-    listSortFunc: PropTypes.func,
-    problemSortFunc: PropTypes.func,
+    getProblemsSorted: PropTypes.func.isRequired,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Selector)

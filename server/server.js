@@ -46,6 +46,7 @@ if (SECURE) {
         key: fs.readFileSync(`${key}`),
         cert: fs.readFileSync(`${cert}`),
         passphrase: `${passphrase}`,
+        // cookie: {sameSite: 'none'}, // TODO: Is this required?
     }, app)
     .listen(PORT, () => console.log(`Secure server started on port ${PORT}`))
 }

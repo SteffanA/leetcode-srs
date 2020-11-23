@@ -1,5 +1,6 @@
 import * as actions from './actionTypes'
 import * as api from '../../shared/api_calls/problems'
+import {getProblemToNextSubTime} from '../../shared/api_calls/problemStatuses'
 
 // Functions for our problem-related actions live here
 
@@ -18,11 +19,19 @@ const problemError = (error) => {
     }
 }
 
-const problemsGetProblemsSuccess = (problems, firstProblem) => {
+const problemsGetProblemsSuccess = (problems, firstProblem, probToTTN) => {
     return {
         type: actions.PROBLEMS_RETRIEVE,
         problems: problems,
         firstProblem: firstProblem,
+        problemIdToTimeToNextSub: probToTTN,
+    }
+}
+
+const problemsSetTTNSuccess = (probToTTN) => {
+    return {
+        type: actions.PROBLEMS_SET_TTN,
+        problemIdToTimeToNextSub: probToTTN,
     }
 }
 
@@ -40,7 +49,7 @@ const handleGenericProblemGetResponse = (response) => {
         }
         // Otherwise we got problems successfully
         const firstProblem = response[0]
-        dispatch(problemsGetProblemsSuccess(response, firstProblem))
+        dispatch(problemsGetProblemsSuccess(response, firstProblem, null))
     }
 }
 
@@ -75,6 +84,31 @@ export const problemsGetAllForList = (list) => {
         // TODO: Does the below replace a trycatch effectively?
         const response = await api.getAllProblemsForList(list._id)
         dispatch(handleGenericProblemGetResponse(response))
+    }
+}
+
+// Get all problems for a list and store in Redux sorted by time-to-next submission
+export const problemsGetAllForListSorted = (list) => {
+    return async dispatch => {
+        // Start the problem process
+        dispatch(problemStart)
+        // Check that we were passed a list
+        if (!list) {
+            dispatch(problemError('No list provided.'))
+            return
+        }
+        try {
+            const response = await api.getAllProblemsForListSorted(list._id)
+            const firstProblem = response[0]
+            const problemIds = response.map((problem) => problem._id)
+            const probToTime = await getProblemToNextSubTime(problemIds)
+            dispatch(problemsGetProblemsSuccess(response, firstProblem, probToTime))
+        } catch (error) {
+            console.error('Error getting problems for list sorted.')
+            console.error(error)
+            dispatch(problemsClear())
+            dispatch(problemError(error))
+        }
     }
 }
 
@@ -121,8 +155,6 @@ export const problemSetProblems = (problems) => {
     return dispatch => {
         dispatch(problemStart)
         // Ensure we were passed an array
-        console.log('problemSetProblems was passed:')
-        console.log(problems)
         if (!Array.isArray(problems)) {
             dispatch(problemError('No array provided for set problems.'))
             return
@@ -132,5 +164,13 @@ export const problemSetProblems = (problems) => {
             firstProblem = problems[0]
         }
         dispatch(problemsGetProblemsSuccess(problems, firstProblem))
+    }
+}
+
+export const problemsSetTimeToNextSubmissions = (ttnObj) => {
+    return dispatch => {
+        dispatch(problemStart)
+        console.log('Updating ttn for probs')
+        dispatch(problemsSetTTNSuccess(ttnObj))
     }
 }

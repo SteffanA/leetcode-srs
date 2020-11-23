@@ -1,7 +1,7 @@
 const Problem = require('../models/Problem.js')
 const User = require('../models/User')
 
-const {addDaysToDate} = require('./utility')
+const {addDaysToDate, addDays} = require('./utility')
 
 // Contains re-usable functions pertaining to problem statuses
 
@@ -41,7 +41,6 @@ exports.createProblemStatus = async (result, time_multiplier, user, problem) => 
 // within the user's problem_statuses array.  These should be validated
 // prior to calling this function.  Assume this is called in a trycatch
 exports.updateProblemStatus = async (user, time_multiplier, result, index) => {
-    console.log('Found existing status')
     // Get the problem status
     const problem_status = user.problem_statuses[index]
     const results = problem_status.results
@@ -52,8 +51,6 @@ exports.updateProblemStatus = async (user, time_multiplier, result, index) => {
         results.success += 1
     }
     else {
-        // TODO: Does this make sense, keeping the same interval?
-        // Should we maybe drop next sub back to 0?
         results.incorrect += 1
     }
 
@@ -63,18 +60,15 @@ exports.updateProblemStatus = async (user, time_multiplier, result, index) => {
     if (ttn !== 0) {
         // If ttn isn't 0, set next_submission to
         //  cur Date + (ttn as Days)
-        console.log('Adding: ' + ttn + ' to next sub')
-        problem_status.next_submission = addDaysToDate(prior_sub, ttn)
+        problem_status.next_submission = addDays(ttn)
     }
     else{
         // TTN is 0, set next submission to tomorrow
-        console.log('Adding 1 to next sub')
-        problem_status.next_submission = addDaysToDate(prior_sub, 1)
+        problem_status.next_submission = addDays(1)
     }
 
     // save the User with updated status
     await user.save()
-    console.log(user.problem_statuses[index])
 
     return user.problem_statuses[index]
 }

@@ -89,7 +89,6 @@ router.put('/next_times', [auth, [
                 problemToTime.set(problemID, next_sub_time )
             }
         }
-
         return res.json(Object.fromEntries(problemToTime))
     } catch (e) {
         console.error('Error getting next sub times: ' + e.message)
