@@ -29,6 +29,8 @@ const listSetCurrent = (state, action) => {
 
 // Set the userLists (and the curList)
 const listGetLists = (state, action) => {
+    console.log('Setting getLists stuff')
+    console.log(action)
     return updateObject(state, {
         curList: action.firstList,
         curListName: action.firstList.name,

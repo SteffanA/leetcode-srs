@@ -32,6 +32,7 @@ const Selector = props => {
         curList,
         lists,
         getLists,
+        setLists,
         problems,
         getProblemsSorted,
         updateCurList,
@@ -75,11 +76,24 @@ const Selector = props => {
     useDeepCompareEffect(() =>{
         if (curList) {
             getProblemsSorted(curList)
+            // Edit the lists array such that curList is on top, that way the title
+            // is correctly updated.
+            console.log('Use compare deep selector')
+            console.log(lists)
+            console.log(curList)
+            const curListIndex = lists.findIndex((list) => list._id === curList._id)
+            lists.splice(curListIndex, 1)
+            lists.unshift(curList)
+            console.log(lists)
+            setLists(lists)
+            console.log('End of use compare deep selector')
         }
         console.log('Updated selector from useDeep on curList')
     }, [curList, getProblemsSorted])
 
 // JSX Elements
+    console.log('returning the selector jsx with lists as:')
+    console.log(lists)
     return (
         <div>
             {showLists && <DropDownMenu items={lists} updateCurItem={updateCurList}/>}
@@ -106,6 +120,7 @@ const mapDispatchToProps = dispatch => {
         getProblemsSorted: (list) => dispatch(problemActions.problemsGetAllForListSorted(list)),
         setProblems: (problems) => dispatch(problemActions.problemSetProblems(problems)),
         updateCurList: (list) => dispatch(listActions.listSetCurrent(list)),
+        setLists: (lists) => dispatch(listActions.listsSetLists(lists)),
         updateCurProblem: (problem) => dispatch(problemActions.problemSetCurrent(problem)),
     }
 }

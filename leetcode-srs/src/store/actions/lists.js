@@ -134,3 +134,12 @@ export const listsUpdateProblems = (updatedProblems, curListID) => {
         }
     }
 }
+
+// Set the lists array and firstList in redux
+export const listsSetLists = (lists) => {
+    return dispatch => {
+        dispatch(listStart())
+        const firstList = (lists[0]) ? lists[0] : null
+        dispatch(listsGetListsSuccess(lists, firstList))
+    }
+}

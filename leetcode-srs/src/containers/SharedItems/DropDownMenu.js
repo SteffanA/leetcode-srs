@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
+// import useDeepCompareEffect from 'use-deep-compare-effect'
 
 import classes from './DropDownMenu.module.css'
 
@@ -17,8 +18,38 @@ function DropDownMenu(props) {
     const [titleColor, setTitleColor] = useState(null)
 
     // Update curTitle when items changes
+    // DELETE: but ooo, we're only calling this on the prob change, not the list change
+    // This allows the select for lists to work, and correctly applies color
+    // to the title
     useEffect(() => {
-        console.debug('in use effect for selector')
+        console.debug('in use effect for dropdownmenu')
+        console.log(items)
+        if (items && items.length > 0) {
+            const firstItem = items[0]
+            console.log('trying to get first item color')
+            console.log(firstItem['color'])
+            console.log(firstItem.color)
+            setCurTitle(firstItem.name)
+            // Check if there's a color to set
+            if (firstItem['color'] || firstItem.color) {
+                // Set the title color
+                console.log('Setting title color')
+                setTitleColor(firstItem.color)
+            }
+            else {
+                // Reset title color to null
+                console.log('Title color set to null')
+                setTitleColor(null)
+            }
+        }
+        else {
+            setCurTitle('Nothing here. Create a list/add problems')
+        }
+    })
+    // This will allow the select for problems to work.
+    useEffect(() => {
+        console.debug('in use effect for dropdownmenu')
+        console.log(items)
         if (items && items.length > 0) {
             const firstItem = items[0]
             console.log('trying to get first item color')
@@ -41,6 +72,33 @@ function DropDownMenu(props) {
             setCurTitle('Nothing here. Create a list/add problems')
         }
     },[items, setCurTitle])
+
+// Didnt make a dif
+    // useDeepCompareEffect(() =>{
+    //     console.debug('in use effect for dropdownmenu')
+    //     console.log(items)
+    //     if (items && items.length > 0) {
+    //         const firstItem = items[0]
+    //         console.log('trying to get first item color')
+    //         console.log(firstItem['color'])
+    //         console.log(firstItem.color)
+    //         setCurTitle(firstItem.name)
+    //         // Check if there's a color to set
+    //         if (firstItem['color'] || firstItem.color) {
+    //             // Set the title color
+    //             console.log('Setting title color')
+    //             setTitleColor(firstItem.color)
+    //         }
+    //         else {
+    //             // Reset title color to null
+    //             console.log('Title color set to null')
+    //             setTitleColor(null)
+    //         }
+    //     }
+    //     else {
+    //         setCurTitle('Nothing here. Create a list/add problems')
+    //     }
+    // }, [items, setCurTitle])
 
     const menuVisibilityHandler = (event) => {
         event.preventDefault()
@@ -104,6 +162,8 @@ function DropDownMenu(props) {
         console.debug('Items in DropDownMenu not of type array, investigate')
     }
 
+    console.log('Items before jsx in DDM:')
+    console.log(items)
     return (
         <div className={classes.DropDownMenu}>
             <button onClick={menuVisibilityHandler} style={{color : titleColor}}>
