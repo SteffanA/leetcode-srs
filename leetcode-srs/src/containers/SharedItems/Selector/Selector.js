@@ -75,7 +75,7 @@ const Selector = props => {
             }
             if (!deepEqual(problems, problem_copy)) {
                 // TODO: This is causing an infinite loop!
-                console.log('not equal :)')
+                console.log('not equal :(')
                 // NOTE: Only when showProblems (duh)
                 // setProblems(problems)
             }
@@ -98,6 +98,8 @@ const Selector = props => {
     }, [lists, curList, getProblemsSorted])
 
 // JSX Elements
+    console.log('Lists are now:')
+    console.log(lists)
     return (
         <div>
             {showLists && <DropDownMenu items={lists} updateCurItem={updateCurList}/>}

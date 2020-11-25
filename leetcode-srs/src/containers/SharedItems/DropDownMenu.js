@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
+import { useDeepCompareEffect, useDeepCompareEffectNoCheck } from 'use-deep-compare-effect'
 
 import classes from './DropDownMenu.module.css'
 
@@ -40,7 +41,29 @@ function DropDownMenu(props) {
         else {
             setCurTitle('Nothing here. Create a list/add problems')
         }
-    },[items])
+    },[items, curTitle, titleColor])
+
+    // useDeepCompareEffectNoCheck(() => {
+    //     console.debug('in use DEEP effect for drop down menu')
+    //     if (items && items.length > 0) {
+    //         const firstItem = items[0]
+    //         setCurTitle(firstItem.name)
+    //         // Check if there's a color to set
+    //         if (firstItem['color'] || firstItem.color) {
+    //             // Set the title color
+    //             console.log('Setting title color')
+    //             setTitleColor(firstItem.color)
+    //         }
+    //         else {
+    //             // Reset title color to null
+    //             console.log('Title color set to null')
+    //             setTitleColor(null)
+    //         }
+    //     }
+    //     else {
+    //         setCurTitle('Nothing here. Create a list/add problems')
+    //     }
+    // }, [items, curTitle, titleColor])
 
     const menuVisibilityHandler = (event) => {
         event.preventDefault()

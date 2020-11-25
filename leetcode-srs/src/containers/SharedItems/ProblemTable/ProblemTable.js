@@ -29,11 +29,7 @@ export const ProblemTable = (props) => {
     }
     
     let probs = null
-    console.debug('ProblemTable has extra fields of:')
-    console.debug(extraFields)
     if (problems) {
-        console.debug('Problem Table has problems:')
-        console.debug(problems)
         probs = problems.map(prob => {
             // Generate additional table columns for all the extra fields to append
             let extras = null
