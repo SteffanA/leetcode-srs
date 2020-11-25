@@ -7,6 +7,7 @@ const { check, validationResult } = require('express-validator')
 const auth = require('../../middleware/auth')
 const mongoose = require('mongoose')
 const {sortStatusByNextSubmission} = require('../../utility/utility')
+const {addColorToProblemsBasedOnTON} = require('../../utility/problemStatuses')
 
 const router = express.Router()
 
@@ -141,8 +142,8 @@ async (req, res) => {
         }
         // Sort the problems by time to next if sort requested
         // As of now, any truthy means sort requested
+        const user = await User.findById(req.user.id)
         if (req.params.sort)  {
-            const user = await User.findById(req.user.id)
             if (user) {
                 const statuses = user.problem_statuses
                 // Make a lookup map for the problem->status index
@@ -162,6 +163,14 @@ async (req, res) => {
             }
         }
 
+        // Add color-coding to the problems list based on the time to next,
+        // if the user is authenticated
+        if (user) {
+            problems = addColorToProblemsBasedOnTON(user, problems)
+        }
+        else {
+            console.log('No user associated, not color-coding.')
+        }
         return await res.json(problems)
     } catch (error) {
         console.log('Get all problems for list: ' + error.message)

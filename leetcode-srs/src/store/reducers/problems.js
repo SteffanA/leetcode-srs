@@ -7,7 +7,7 @@ const initialState = {
     curProblems: null,
     error: null,
     loading: false,
-    problemIdToTimeToNextSub: null,
+    problemIdToTimeOfNextSub: null,
 }
 
 // Start up problem retrieval process
@@ -39,7 +39,7 @@ const problemsRetrieve = (state, action) => {
         curProblem: action.firstProblem,
         curProblemName: firstProbName,
         curProblems: action.problems,
-        problemIdToTimeToNextSub: action.problemIdToTimeToNextSub,
+        problemIdToTimeOfNextSub: action.problemIdToTimeOfNextSub,
         error: null,
         loading: false,
     })
@@ -47,16 +47,22 @@ const problemsRetrieve = (state, action) => {
 
 // Set the current problem to one from the current list
 const problemsSetCurrent = (state, action) => {
+    // Update the curProblems list such that curProblem is first
+    // TODO: As time goes by.... I'm thinking that I don't like this approach
+    // and that going back to passing a title is cleaner...
+    const updatedCurProblems = state.curProblems.filter((prob) => prob._id !== action.curProblem._id)
+    updatedCurProblems.splice(0,0,action.curProblem)
     return updateObject(state, {
         curProblem: action.curProblem,
         curProblemName: action.curProblem.name,
+        curProblems: updatedCurProblems,
         loading: false,
     })
 }
 
-const problemsSetTTN = (state, action) => {
+const problemsSetTON = (state, action) => {
     return updateObject(state, {
-        problemIdToTimeToNextSub: action.problemIdToTimeToNextSub,
+        problemIdToTimeOfNextSub: action.problemIdToTimeOfNextSub,
     })
 }
 
@@ -66,7 +72,7 @@ const problemsClear = (state, action) => {
         curProblem: null,
         curProblemName: null,
         curProblems: null,
-        problemIdToTimeToNextSub: null,
+        problemIdToTimeOfNextSub: null,
         error: null,
         loading: false,
     })
@@ -78,7 +84,7 @@ export const problemReducer = (state=initialState, action) => {
         case actions.PROBLEMS_ERROR: return problemsError(state, action)
         case actions.PROBLEMS_RETRIEVE: return problemsRetrieve(state, action)
         case actions.PROBLEMS_SET_CURRENT: return problemsSetCurrent(state, action)
-        case actions.PROBLEMS_SET_TTN: return problemsSetTTN(state, action)
+        case actions.PROBLEMS_SET_TON: return problemsSetTON(state, action)
         case actions.PROBLEMS_CLEAR: return problemsClear(state, action)
         default: return state
     }

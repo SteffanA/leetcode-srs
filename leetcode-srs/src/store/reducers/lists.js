@@ -24,7 +24,6 @@ const listSetCurrent = (state, action) => {
     const updateList = state.usersLists.filter((list) => list._id !== action.curList._id)
     // Now add the curList to the head
     updateList.splice(0,0,action.curList)
-    console.log('Setting current, update list is:')
     return updateObject(state, {
         curList: action.curList,
         curListName: action.curList.name,

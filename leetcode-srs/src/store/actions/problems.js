@@ -19,19 +19,19 @@ const problemError = (error) => {
     }
 }
 
-const problemsGetProblemsSuccess = (problems, firstProblem, probToTTN) => {
+const problemsGetProblemsSuccess = (problems, firstProblem, probToTON) => {
     return {
         type: actions.PROBLEMS_RETRIEVE,
         problems: problems,
         firstProblem: firstProblem,
-        problemIdToTimeToNextSub: probToTTN,
+        problemIdToTimeOfNextSub: probToTON,
     }
 }
 
-const problemsSetTTNSuccess = (probToTTN) => {
+const problemsSetTONSuccess = (probToTON) => {
     return {
-        type: actions.PROBLEMS_SET_TTN,
-        problemIdToTimeToNextSub: probToTTN,
+        type: actions.PROBLEMS_SET_TON,
+        problemIdToTimeOfNextSub: probToTON,
     }
 }
 
@@ -175,12 +175,12 @@ export const problemSetProblems = (problems) => {
     }
 }
 
-// Set the timeToNextSubmissions given a provided mapping of problem
-// ids to TTN
-export const problemsSetTimeToNextSubmissions = (ttnObj) => {
+// Set the timeOfNextSubmissions given a provided mapping of problem
+// ids to TON
+export const problemsSetTimeToNextSubmissions = (tonObj) => {
     return dispatch => {
         dispatch(problemStart)
-        console.log('Updating ttn for probs')
-        dispatch(problemsSetTTNSuccess(ttnObj))
+        console.log('Updating ton for probs')
+        dispatch(problemsSetTONSuccess(tonObj))
     }
 }

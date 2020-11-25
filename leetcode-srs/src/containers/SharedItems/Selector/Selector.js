@@ -37,7 +37,7 @@ const Selector = props => {
         getProblemsSorted,
         updateCurList,
         updateCurProblem,
-        probsTTN,
+        probsTON,
         setProblems,
     } = props
 
@@ -48,45 +48,6 @@ const Selector = props => {
         }
         console.log('Lists UseEffect ran')
     }, [showLists, auth, lists])
-
-    useEffect(() => {
-        if (showProblems && problems && probsTTN) {
-            // Add the color field to the problems based on the TTN
-            const now = new Date(Date.now())
-            const problem_copy = Object.assign(problems)
-            for (let prob of problem_copy) {
-                const ttn = probsTTN[prob._id]
-                if (ttn) {
-                    const ttnAsDate = new Date(ttn)
-                    let color = 'green'
-                    console.log(ttnAsDate)
-                    if (ttnAsDate < addDaysToDate(now, 3)) {
-                        color = 'red'
-                    }
-                    else if (ttnAsDate < addDaysToDate(now, 7)) {
-                        color = 'yellow'
-                    }
-                    prob.color = color
-                }
-                else {
-                    // Assume not done.
-                    prob.color = 'red'
-                }
-            }
-            if (!deepEqual(problems, problem_copy)) {
-                // TODO: This is causing an infinite loop!
-                console.log('not equal :(')
-                // NOTE: Only when showProblems (duh)
-                // setProblems(problems)
-            }
-            else {
-                console.log('These two are equal :)')
-                console.log(problems)
-                console.log(problem_copy)
-            }
-        }
-        console.log('Problem UseEffect ran')
-    }, [showProblems, problems])
 
     // Update our problems whenever the curList changes
     useDeepCompareEffect(() =>{
@@ -112,7 +73,7 @@ const mapStateToProps = (state) => {
     return {
         curProblem: state.problems.curProblem,
         problems: state.problems.curProblems,
-        probsTTN: state.problems.problemIdToTimeToNextSub,
+        probsTON: state.problems.problemIdToTimeOfNextSub,
         lists: state.lists.usersLists,
         curList: state.lists.curList,
         error: state.lists.error,
