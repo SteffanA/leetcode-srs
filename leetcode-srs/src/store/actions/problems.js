@@ -152,21 +152,31 @@ export const problemsGetSearch = (term) => {
 
 // Given an array of full problem objects, set the stored problems to it
 export const problemSetProblems = (problems) => {
-    return dispatch => {
+    return async dispatch => {
         dispatch(problemStart)
         // Ensure we were passed an array
         if (!Array.isArray(problems)) {
             dispatch(problemError('No array provided for set problems.'))
             return
         }
-        let firstProblem = null
-        if (problems.length > 0) {
-            firstProblem = problems[0]
+        if (problems.length === 0) {
+            // Short circuit here
+            dispatch(problemsGetProblemsSuccess(problems, null, null))
+            return
         }
-        dispatch(problemsGetProblemsSuccess(problems, firstProblem))
+        const firstProblem = problems[0]
+        const problemIds = problems.map((problem) => problem._id)
+        try {
+            const probToTime = await getProblemToNextSubTime(problemIds)
+            dispatch(problemsGetProblemsSuccess(problems, firstProblem, probToTime))
+        } catch (error) {
+            dispatch(problemError(error))
+        }
     }
 }
 
+// Set the timeToNextSubmissions given a provided mapping of problem
+// ids to TTN
 export const problemsSetTimeToNextSubmissions = (ttnObj) => {
     return dispatch => {
         dispatch(problemStart)

@@ -1,4 +1,4 @@
-import React, { } from 'react'
+import React, { useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {createLink} from '../../../shared/utility'
 
@@ -64,16 +64,16 @@ export const ProblemTable = (props) => {
     if (extraFields) {
         extraTitles = extraFields.map(field => {
             return (
-                <th>{field['title']}</th>
+                <th key={field['title']}>{field['title']}</th>
             )
         })
     }
     let titles = (
         <tr>
-            <th>ID</th>
-            <th>Problem</th>
-            <th>Difficulty</th>
-            <th>Problem Text</th>
+            <th key='id'>ID</th>
+            <th key='problem'>Problem</th>
+            <th key='difficulty'>Difficulty</th>
+            <th key='problem_text'>Problem Text</th>
             {extraTitles}
         </tr>
     )

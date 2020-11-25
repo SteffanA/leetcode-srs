@@ -2,6 +2,7 @@ import React, {useEffect, useState}  from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import useDeepCompareEffect from 'use-deep-compare-effect'
+import deepEqual from 'deep-equal'
 
 import DropDownMenu from '../DropDownMenu'
 import * as listActions from '../../../store/actions/lists'
@@ -45,10 +46,15 @@ const Selector = props => {
         if (showLists && auth && !lists) {
             getLists()
         }
-        if (problems && probsTTN) {
+        console.log('Lists UseEffect ran')
+    }, [showLists, auth, lists])
+
+    useEffect(() => {
+        if (showProblems && problems && probsTTN) {
             // Add the color field to the problems based on the TTN
             const now = new Date(Date.now())
-            for (let prob of problems) {
+            const problem_copy = Object.assign(problems)
+            for (let prob of problem_copy) {
                 const ttn = probsTTN[prob._id]
                 if (ttn) {
                     const ttnAsDate = new Date(ttn)
@@ -67,17 +73,29 @@ const Selector = props => {
                     prob.color = 'red'
                 }
             }
-            setProblems(problems)
+            if (!deepEqual(problems, problem_copy)) {
+                // TODO: This is causing an infinite loop!
+                console.log('not equal :)')
+                // NOTE: Only when showProblems (duh)
+                // setProblems(problems)
+            }
+            else {
+                console.log('These two are equal :)')
+                console.log(problems)
+                console.log(problem_copy)
+            }
         }
-    }, [showLists, auth, lists, getLists, probsTTN])
+        console.log('Problem UseEffect ran')
+    }, [showProblems, problems])
 
     // Update our problems whenever the curList changes
     useDeepCompareEffect(() =>{
         if (curList) {
             getProblemsSorted(curList)
+            // TODO: Maybe just add hacky behavior back for MVP
         }
         console.log('Updated selector from useDeep on curList')
-    }, [curList, getProblemsSorted])
+    }, [lists, curList, getProblemsSorted])
 
 // JSX Elements
     return (

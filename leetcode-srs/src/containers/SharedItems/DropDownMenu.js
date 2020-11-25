@@ -18,7 +18,7 @@ function DropDownMenu(props) {
 
     // Update curTitle when items changes
     useEffect(() => {
-        console.debug('in use effect for selector')
+        console.debug('in use effect for drop down menu')
         if (items && items.length > 0) {
             const firstItem = items[0]
             console.log('trying to get first item color')
@@ -40,7 +40,7 @@ function DropDownMenu(props) {
         else {
             setCurTitle('Nothing here. Create a list/add problems')
         }
-    },[items, setCurTitle])
+    },[items])
 
     const menuVisibilityHandler = (event) => {
         event.preventDefault()
