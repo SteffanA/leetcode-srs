@@ -47,15 +47,9 @@ const problemsRetrieve = (state, action) => {
 
 // Set the current problem to one from the current list
 const problemsSetCurrent = (state, action) => {
-    // Update the curProblems list such that curProblem is first
-    // TODO: As time goes by.... I'm thinking that I don't like this approach
-    // and that going back to passing a title is cleaner...
-    const updatedCurProblems = state.curProblems.filter((prob) => prob._id !== action.curProblem._id)
-    updatedCurProblems.splice(0,0,action.curProblem)
     return updateObject(state, {
         curProblem: action.curProblem,
         curProblemName: action.curProblem.name,
-        curProblems: updatedCurProblems,
         loading: false,
     })
 }

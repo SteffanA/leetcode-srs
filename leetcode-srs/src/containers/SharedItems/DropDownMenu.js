@@ -11,59 +11,26 @@ function DropDownMenu(props) {
 
     const {
         updateCurItem,
-        items
+        items,
+        titleItem,
     } = props
 
     const [curTitle, setCurTitle] = useState('Nothing here. Create a list/add problems')
     const [titleColor, setTitleColor] = useState(null)
 
-    // Update curTitle when items changes
+    // Update the title based on the passed prop
     useEffect(() => {
-        console.debug('in use effect for drop down menu')
-        if (items && items.length > 0) {
-            const firstItem = items[0]
-            console.log('trying to get first item color')
-            console.log(firstItem['color'])
-            console.log(firstItem.color)
-            setCurTitle(firstItem.name)
-            // Check if there's a color to set
-            if (firstItem['color'] || firstItem.color) {
-                // Set the title color
-                console.log('Setting title color')
-                setTitleColor(firstItem.color)
-            }
-            else {
-                // Reset title color to null
-                console.log('Title color set to null')
-                setTitleColor(null)
+        if (titleItem) {
+            setCurTitle(titleItem.name)
+            if (titleItem.color) {
+                setTitleColor(titleItem.color)
             }
         }
         else {
             setCurTitle('Nothing here. Create a list/add problems')
+            setTitleColor(null)
         }
-    },[items, curTitle, titleColor])
-
-    // useDeepCompareEffectNoCheck(() => {
-    //     console.debug('in use DEEP effect for drop down menu')
-    //     if (items && items.length > 0) {
-    //         const firstItem = items[0]
-    //         setCurTitle(firstItem.name)
-    //         // Check if there's a color to set
-    //         if (firstItem['color'] || firstItem.color) {
-    //             // Set the title color
-    //             console.log('Setting title color')
-    //             setTitleColor(firstItem.color)
-    //         }
-    //         else {
-    //             // Reset title color to null
-    //             console.log('Title color set to null')
-    //             setTitleColor(null)
-    //         }
-    //     }
-    //     else {
-    //         setCurTitle('Nothing here. Create a list/add problems')
-    //     }
-    // }, [items, curTitle, titleColor])
+    }, [titleItem])
 
     const menuVisibilityHandler = (event) => {
         event.preventDefault()

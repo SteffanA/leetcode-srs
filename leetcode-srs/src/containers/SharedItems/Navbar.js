@@ -50,7 +50,7 @@ const Navbar = props => {
                 </NavLink>
                 {/* Under title link to next problem*/}
                 {/* Under title link to List's create list*/}
-                {props.isAuth && <NavLink to='/create-lists'>Create/Edit {props.user}'s Lists</NavLink>}
+                {props.isAuth && <NavLink to='/manage-lists'>Manage {props.user}'s Lists</NavLink>}
             </div>
             <div className={classes.Right}>
                 {props.isAuth && <NavLink activeClassName={classes.active} to='/logout'>Logout</NavLink>}

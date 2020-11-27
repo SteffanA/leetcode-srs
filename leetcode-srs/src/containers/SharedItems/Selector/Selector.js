@@ -7,7 +7,6 @@ import deepEqual from 'deep-equal'
 import DropDownMenu from '../DropDownMenu'
 import * as listActions from '../../../store/actions/lists'
 import * as problemActions from '../../../store/actions/problems'
-import { addDaysToDate } from '../../../shared/utility'
 
 /*
 TODO: Instead of using showLists/showProblems,
@@ -16,7 +15,10 @@ we actually want/need
 
 So basically using it as a wrapper for the DropDownMenu? Just handling the sort?
 Not sure if we even need this
+Update: Making this generic would work, and yeah, it basically just becomes a wrapper
+for the DropDownMenu at that point. Not a priority.
 /*
+
 This component allows the user to:
 
 Select a list from a drop down menu of lists associated with them
@@ -34,37 +36,46 @@ const Selector = props => {
         lists,
         getLists,
         problems,
+        curProblem,
         getProblemsSorted,
         updateCurList,
         updateCurProblem,
-        probsTON,
-        setProblems,
     } = props
 
-    // When this component mounts, try to get the lists
+    // Add state items so we can update the selector titles quicker
+    // than waiting for the redux to update
+    const [problemTitleItem, setProblemTitleItem] = useState(null)
+    const [listTitleItem, setlistTitleItem] = useState(null)
+
+    // When this component mounts, try to get the lists if we haven't already
     useEffect(() => {
         if (showLists && auth && !lists) {
+            // Nullify the list title item until we get lists
+            setlistTitleItem(null)
             getLists()
         }
-        console.log('Lists UseEffect ran')
     }, [showLists, auth, lists])
+
+    // Set the title item properties when we update the redux
+    useEffect(()=> {
+        setProblemTitleItem(curProblem)
+        setlistTitleItem(curList)
+    }, [curProblem, curList])
 
     // Update our problems whenever the curList changes
     useDeepCompareEffect(() =>{
         if (curList) {
+            // Nullify problem title until we get new problems
+            setProblemTitleItem(null)
             getProblemsSorted(curList)
-            // TODO: Maybe just add hacky behavior back for MVP
         }
-        console.log('Updated selector from useDeep on curList')
     }, [lists, curList, getProblemsSorted])
 
 // JSX Elements
-    console.log('Lists are now:')
-    console.log(lists)
     return (
         <div>
-            {showLists && <DropDownMenu items={lists} updateCurItem={updateCurList}/>}
-            {showProblems &&<DropDownMenu items={problems} updateCurItem={updateCurProblem}/>}
+            {showLists && <DropDownMenu items={lists} updateCurItem={updateCurList} titleItem={listTitleItem}/>}
+            {showProblems &&<DropDownMenu items={problems} updateCurItem={updateCurProblem} titleItem={problemTitleItem}/>}
         </div>
     )
 }
@@ -73,10 +84,9 @@ const mapStateToProps = (state) => {
     return {
         curProblem: state.problems.curProblem,
         problems: state.problems.curProblems,
-        probsTON: state.problems.problemIdToTimeOfNextSub,
         lists: state.lists.usersLists,
         curList: state.lists.curList,
-        error: state.lists.error,
+        error: state.lists.error, // TODO: Use this? Or drop it from map
         auth: state.auth.token !== null,
     }
 }
@@ -85,7 +95,6 @@ const mapDispatchToProps = dispatch => {
     return {
         getLists: () => dispatch(listActions.listsGetAll()),
         getProblemsSorted: (list) => dispatch(problemActions.problemsGetAllForListSorted(list)),
-        setProblems: (problems) => dispatch(problemActions.problemSetProblems(problems)),
         updateCurList: (list) => dispatch(listActions.listSetCurrent(list)),
         updateCurProblem: (problem) => dispatch(problemActions.problemSetCurrent(problem)),
     }

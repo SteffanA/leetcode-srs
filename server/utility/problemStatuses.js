@@ -81,7 +81,6 @@ exports.addColorToProblemsBasedOnTON = (user, problems) => {
     // Create a map of problem ID to status based on user's statuses
     const probIdToStatus = new Map()
     for (const [index, status] of statuses.entries()) {
-        console.log(status.problem.toString())
         probIdToStatus.set(status.problem.toString(), status)
     }
     // Make a deep copy of the info for the problems so we

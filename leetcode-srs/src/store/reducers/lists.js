@@ -19,16 +19,10 @@ const listStart = (state, action) => {
 
 // Set the current list (presumably to one of the ones in userLists)
 const listSetCurrent = (state, action) => {
-    // In addition to updating the current list,
-    // set the list provided to the front of lists
-    const updateList = state.usersLists.filter((list) => list._id !== action.curList._id)
-    // Now add the curList to the head
-    updateList.splice(0,0,action.curList)
     return updateObject(state, {
         curList: action.curList,
         curListName: action.curList.name,
         curListPublic: action.curList.public,
-        usersLists: updateList,
         loading: false,
     })
 }
