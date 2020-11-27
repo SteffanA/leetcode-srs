@@ -14,6 +14,7 @@ exports.addDaysToDate = (date, days) => {
     return date;
 }
 
+//Sorts the provided statuses based on the time of next submission
 exports.sortStatusByNextSubmission = (aStatus, bStatus) => {
     if (aStatus && bStatus) {
         // There is an existing status for both. Compare the time
@@ -23,11 +24,15 @@ exports.sortStatusByNextSubmission = (aStatus, bStatus) => {
         // The is a status for only one, or neither
         if (aStatus) {
             // A has a status, so it must be done later than b.
-            return 0
+            return -1
+        }
+        else if (bStatus) {
+            // B has a status, it must be done later than A
+            return 1
         }
         else {
-            // Either B has the status, or neither do. return a in either case
-            return -1
+            // Both DNE
+            return 0
         }
     }
 }

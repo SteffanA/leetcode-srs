@@ -7,7 +7,7 @@ const initialState = {
     curProblems: null,
     error: null,
     loading: false,
-    problemIdToTimeToNextSub: null,
+    problemIdToTimeOfNextSub: null,
 }
 
 // Start up problem retrieval process
@@ -39,7 +39,7 @@ const problemsRetrieve = (state, action) => {
         curProblem: action.firstProblem,
         curProblemName: firstProbName,
         curProblems: action.problems,
-        problemIdToTimeToNextSub: action.problemIdToTimeToNextSub,
+        problemIdToTimeOfNextSub: action.problemIdToTimeOfNextSub,
         error: null,
         loading: false,
     })
@@ -54,9 +54,9 @@ const problemsSetCurrent = (state, action) => {
     })
 }
 
-const problemsSetTTN = (state, action) => {
+const problemsSetTON = (state, action) => {
     return updateObject(state, {
-        problemIdToTimeToNextSub: action.problemIdToTimeToNextSub,
+        problemIdToTimeOfNextSub: action.problemIdToTimeOfNextSub,
     })
 }
 
@@ -66,7 +66,7 @@ const problemsClear = (state, action) => {
         curProblem: null,
         curProblemName: null,
         curProblems: null,
-        problemIdToTimeToNextSub: null,
+        problemIdToTimeOfNextSub: null,
         error: null,
         loading: false,
     })
@@ -78,7 +78,7 @@ export const problemReducer = (state=initialState, action) => {
         case actions.PROBLEMS_ERROR: return problemsError(state, action)
         case actions.PROBLEMS_RETRIEVE: return problemsRetrieve(state, action)
         case actions.PROBLEMS_SET_CURRENT: return problemsSetCurrent(state, action)
-        case actions.PROBLEMS_SET_TTN: return problemsSetTTN(state, action)
+        case actions.PROBLEMS_SET_TON: return problemsSetTON(state, action)
         case actions.PROBLEMS_CLEAR: return problemsClear(state, action)
         default: return state
     }

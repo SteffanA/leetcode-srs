@@ -72,3 +72,42 @@ exports.updateProblemStatus = async (user, time_multiplier, result, index) => {
 
     return user.problem_statuses[index]
 }
+
+// Adds a 'color' field to the object of problems based on the
+// time of next submission
+exports.addColorToProblemsBasedOnTON = (user, problems) => {
+    const now = new Date(Date.now())
+    const statuses = user.problem_statuses
+    // Create a map of problem ID to status based on user's statuses
+    const probIdToStatus = new Map()
+    for (const [index, status] of statuses.entries()) {
+        probIdToStatus.set(status.problem.toString(), status)
+    }
+    // Make a deep copy of the info for the problems so we
+    // can add a color property to it
+    let prob_copy = []
+    problems.map((prob) => {
+        prob_copy.push(Object.assign({}, prob.toObject()))
+    })
+    for (let prob of prob_copy) {
+        const status = probIdToStatus.get(prob._id.toString())
+        if (status) {
+            // Get the time of next submission
+            const ton = status.next_submission
+            const tonAsDate = new Date(ton)
+            let color = 'green'
+            if (tonAsDate < addDaysToDate(now, 3)) {
+                color = 'red'
+            }
+            else if (tonAsDate < addDaysToDate(now, 7)) {
+                color = 'yellow'
+            }
+            Object.assign(prob, {'color' : color})
+        }
+        else {
+            // Assume not done.
+            Object.assign(prob, {'color' : 'red'})
+        }
+    }
+    return prob_copy
+}

@@ -43,8 +43,10 @@ const App = props => {
         <Switch>
           <Route exact path="/auth" component={Auth} />
           <Route exact path="/logout" component={Logout} />
-          <PrivateRoute exact path="/create-lists" component={ListEditor} />
+          <PrivateRoute exact path="/manage-lists" component={ListEditor} />
           <Route exact path="/view-public-lists" component={ListsViewer}/>
+          {/* Land any random URL on a page w/ Navbar*/}
+          <Route path="/" component={null}/>
         </Switch>
       </section>
     </Fragment>

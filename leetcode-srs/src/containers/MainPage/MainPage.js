@@ -27,7 +27,7 @@ const MainPage = (props) => {
         curProblem,
         problems,
         isAuth,
-        setTTN,
+        setTON,
     } = props
 
     // State used to determine if the form/timer elements are visible
@@ -178,8 +178,8 @@ const MainPage = (props) => {
             // We need to update our problems for the list in our redux to
             // reflect the new problem states
             const probIds = problems.map(prob => prob._id)
-            const probTTN = await statusAPI.getProblemToNextSubTime(probIds)
-            setTTN(probTTN)
+            const probTON = await statusAPI.getProblemToNextSubTime(probIds)
+            setTON(probTON)
             // Now refresh the page - this seems a bit hacky, but it works.
             window.open(process.env.REACT_APP_HOST_URL, "_self")
         } catch (error) {
@@ -360,7 +360,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        setTTN: (ttnObj) => dispatch(problemActions.problemsSetTimeToNextSubmissions(ttnObj)),
+        setTON: (tonObj) => dispatch(problemActions.problemsSetTimeToNextSubmissions(tonObj)),
     }
 }
 
