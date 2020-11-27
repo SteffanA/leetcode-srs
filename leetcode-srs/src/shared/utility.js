@@ -139,3 +139,16 @@ export const getTimeToNextSubmissionToProblemMap = async (problems) => {
         }
     }
 }
+
+// Run a particular function at some given date in the future
+export const runAtDate = (date, func) => {
+    var now = (new Date()).getTime();
+    var then = date.getTime();
+    var diff = Math.max((then - now), 0);
+    if (diff > 0x7FFFFFFF) {//setTimeout limit is MAX_INT32=(2^31-1)
+        setTimeout(function() {runAtDate(date, func);}, 0x7FFFFFFF);
+    }
+    else {
+        setTimeout(func, diff);
+    }
+}

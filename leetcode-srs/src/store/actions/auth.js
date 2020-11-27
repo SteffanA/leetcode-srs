@@ -2,6 +2,7 @@ import * as actionTypes from './actionTypes'
 import axios from 'axios'
 import { problemsClear } from './problems'
 import { listClear } from './lists'
+import {runAtDate} from '../../shared/utility'
 
 // Functions for our auth actions are here
 
@@ -22,19 +23,20 @@ const authSuccess = (token, name) => {
 }
 
 // Logout our user when token expires
-const checkAuthTimeout = (expiresIn) => {
+const checkAuthTimeout = (expireDate) => {
     return dispatch => {
-        console.log('Expires in: ' + expiresIn)
-        // TODO: Is this even required...? Seems to handle expired token okay
-        // Un-commenting it breaks autologin; need to understand why
-        // setTimeout(() => {
-        //     dispatch(logout())
-        // }, expiresIn*1000)
+        // Helper function that we can pass to the run@ utility so it correctly
+        // triggers the dispatch
+        const logoutHelperFunc = () => {
+            dispatch(logoutHandler())
+        }
+        runAtDate(expireDate, logoutHelperFunc)
     }
 }
 
 // Handle user logout & signal reducer
 const logout = () => {
+    console.log('Logging out')
     return {
         type: actionTypes.AUTH_LOGOUT,
     }
@@ -60,8 +62,7 @@ export const checkAuthState = () => {
         else {
             // We have a token stored; check if it's still valid
             // TODO: This is all definitely wrong now; we need to fix.
-            const expirationDate = Date.now()+(localStorage.getItem('expirationDate')*1000)
-            console.log('expire data ', expirationDate)
+            const expirationDate = new Date(localStorage.getItem('expirationDate'))
             // Check if token has already expired
             if (expirationDate > new Date()) {
                 // Still valid, let's login with it
@@ -69,7 +70,7 @@ export const checkAuthState = () => {
                 // Mark us successfully logged in
                dispatch(authSuccess(token, name))
                // Start our auth timeout timer
-               dispatch(checkAuthTimeout(expirationDate - Date.now()))
+               dispatch(checkAuthTimeout(expirationDate))
             }
             else {
                 // Expired
@@ -100,18 +101,20 @@ export const auth = (email, password, isRegister, name='') => {
             // Standard login
             url = url + 'auth'
         }
-        
-        console.log(url)
+
         // Send our request to the backend
         // TODO: Do we need to implement an API key to prevent malicious request sending? Probably.
         // Add as a param; url += ?key=API_KEY
         axios.post(url, authData)
             .then(response => {
+                // Set the local storage items for future logins
                 localStorage.setItem('token', response.data.token)
-                localStorage.setItem('expirationDate', response.data.timeout)
+                let newDate = new Date()
+                newDate.setSeconds(newDate.getSeconds() + response.data.timeout)
+                localStorage.setItem('expirationDate', newDate.toString())
                 localStorage.setItem('userId', response.data.username)
                 dispatch(authSuccess(response.data.token, response.data.username))
-                dispatch(checkAuthTimeout(response.data.timeout))
+                dispatch(checkAuthTimeout(newDate))
             })
             .catch(err => {
                 console.log('auth error of ', err)

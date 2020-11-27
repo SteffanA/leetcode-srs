@@ -30,9 +30,6 @@ const App = props => {
     if (!isAuth) {
       onTryAutoSignIn()
     }
-    else {
-      console.log('IS auth already has a positive value')
-    }
   }, [isAuth, onTryAutoSignIn])
 
   return (

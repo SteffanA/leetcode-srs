@@ -85,8 +85,6 @@ const getProblemsForList = (url, listID) => {
                 reject('No problems available.')
             }
             else {
-                console.info('Successful get of all problems for list: ' + listID)
-                console.info(response.data)
                 resolve(response.data)
             }
         }).catch(error => {
