@@ -3,6 +3,8 @@ import {getTokenOrNull} from '../utility'
 
 // Contains API calls that can be reused in various contexts for List objects
 
+const base_url = process.env.REACT_APP_HOST_URL + '/api/lists'
+
 // Get all lists stored in our database for the current user
 export const getAllLists = () => {
     // Get the user's token from local storage
@@ -13,6 +15,8 @@ export const getAllLists = () => {
     }
     else {
         // Get the user's lists
+        // Note this URL is actually on the User's API
+        // TODO: Does this make sense to move?
         const url = process.env.REACT_APP_HOST_URL + '/api/users/lists'
         const config = {
             headers: {
@@ -45,7 +49,6 @@ export const createNewList = (name, isPublic) => {
     if (token === null) {
         return 'User not logged in!'
     }
-    const url = process.env.REACT_APP_HOST_URL + '/api/lists'
     const body = {
         "name": name,
         "public": isPublic.localeCompare('public') === 0 ? true : false,
@@ -58,7 +61,7 @@ export const createNewList = (name, isPublic) => {
         }
     }
     return new Promise((resolve, reject) => {
-        axios.post(url, body, config
+        axios.post(base_url, body, config
         ).then(response => {
             resolve(response.data)
         }).catch(err => {
@@ -94,7 +97,7 @@ export const updateListsProblems = (updatedProblems, curListID) => {
         console.error('Cur listID undefined!')
         return 'No curListID provided.'
     }
-    const url = process.env.REACT_APP_HOST_URL + '/api/lists/bulk/' + curListID
+    const url = base_url + '/bulk/' + curListID
     const config = {
         headers: {
             'x-auth-token': token,
@@ -125,7 +128,7 @@ export const setPublic = async (listID) => {
     if (token === null) {
         return 'User not logged in!'
     }
-    const url = process.env.REACT_APP_HOST_URL + '/api/lists/' + listID
+    const url = base_url + '/' + listID
     const config = {
         headers: {
             'x-auth-token': token,
@@ -150,7 +153,7 @@ export const setPublic = async (listID) => {
 
 // Search all public lists by name
 export const searchPublicLists = async (term) => {
-    const url = process.env.REACT_APP_HOST_URL + '/api/lists/public/search/' + term
+    const url = base_url + '/public/search/' + term
     const config = {
         headers: {
             'content-type': 'application/json',
@@ -172,7 +175,6 @@ export const searchPublicLists = async (term) => {
 
 // Get all existing public lists
 export const getPublicLists = async () => {
-    const url = process.env.REACT_APP_HOST_URL + '/api/lists/'
     const config = {
         headers: {
             'content-type': 'application/json',
@@ -180,7 +182,7 @@ export const getPublicLists = async () => {
     }
 
     return new Promise((resolve, reject) => {
-        axios.get(url, config).then(
+        axios.get(base_url, config).then(
             response => {
                 console.log(response)
                 resolve(response.data)
@@ -200,7 +202,7 @@ export const clonePublicList = async (listID) => {
     if (token === null) {
         return 'User not logged in!'
     }
-    const url = process.env.REACT_APP_HOST_URL + '/api/lists/copy/' + listID
+    const url = base_url + '/copy/' + listID
     const config = {
         headers: {
             'content-type': 'application/json',
@@ -215,6 +217,64 @@ export const clonePublicList = async (listID) => {
                 resolve(response.data)
             }
         ).catch(err => {
+            console.debug(err)
+            reject(err.message)
+        })
+    })
+}
+
+// Deletes a private list that logged in user owns
+export const deletePrivateList = async (listID) => {
+    const token = getTokenOrNull()
+    // Can't make updates without having a token
+    if (token === null) {
+        return 'User not logged in!'
+    }
+    const url = base_url + '/' + listID
+    const config = {
+        headers: {
+            'content-type': 'application/json',
+            'x-auth-token': token,
+        }
+    }
+
+    return new Promise((resolve, reject) => {
+        axios.delete(url, config).then(
+            response => {
+                console.log(response)
+                resolve(response.data)
+            }
+        ).catch(err => {
+            console.debug(err)
+            reject(err.message)
+        })
+    })
+}
+
+// Renames a private list that logged in user owns
+export const renamePrivateList = async (listID, newName) => {
+    const token = getTokenOrNull()
+    // Can't make updates without having a token
+    if (token === null) {
+        return 'User not logged in!'
+    }
+    const url = base_url + '/' + listID
+    const config = {
+        headers: {
+            'x-auth-token': token,
+            'content-type': 'application/json',
+        }
+    }
+    const body = {
+        "name" : newName,
+    }
+
+    return new Promise((resolve, reject) => {
+        axios.put(url, body, config
+        ).then(response => {
+            console.log(response)
+            resolve(response)
+        }).catch(err => {
             console.debug(err)
             reject(err.message)
         })

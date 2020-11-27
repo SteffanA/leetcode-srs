@@ -61,12 +61,7 @@ const listClear = (state, action) => {
 // and make curList our newly added list
 const listAddNewList = (state, action) => {
     return updateObject(state, {
-        // Use the unified format of id and name
-        curList: {
-            id: action.list._id,
-            name: action.list.name,
-            public: action.list.public,
-        },
+        curList: action.list,
         curListName: action.list.name,
         curListPublic: action.list.public,
         // Update the array of user's lists

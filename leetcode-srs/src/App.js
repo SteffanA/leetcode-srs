@@ -8,7 +8,7 @@ import MainPage from './containers/MainPage/MainPage';
 import Navbar from './containers/SharedItems/Navbar'
 import Auth from './containers/Modals/Login/Auth'
 import Logout from './containers/Auth/Logout'
-import ListEditor from './containers/ListEditor/ListEditor'
+import ListsManager from './containers/ListsManager/ListsManager';
 import ListsViewer from './containers/ListsViewer/ListsViewer'
 
 import * as actions from './store/actions/index'
@@ -40,7 +40,7 @@ const App = props => {
         <Switch>
           <Route exact path="/auth" component={Auth} />
           <Route exact path="/logout" component={Logout} />
-          <PrivateRoute exact path="/manage-lists" component={ListEditor} />
+          <PrivateRoute exact path="/manage-lists" component={ListsManager} />
           <Route exact path="/view-public-lists" component={ListsViewer}/>
           {/* Land any random URL on a page w/ Navbar*/}
           <Route path="/" component={null}/>
