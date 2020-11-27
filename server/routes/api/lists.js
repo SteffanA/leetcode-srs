@@ -279,7 +279,7 @@ async (req, res) => {
 router.put('/:id', [auth],
 async (req, res) => {
     try {
-        console.log('Trying to update a problem')
+        console.log('Trying to update a list')
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(404).send({errors: [{msg: 'List not found.'}]})
         }
@@ -324,6 +324,7 @@ async (req, res) => {
 router.delete('/:id', [auth],
 async (req, res) => {
     try {
+        console.log('Deleting a list' + req.params.id)
         // Get our User object
         const user = await User.findById(req.user.id)
         // Get our List object
@@ -352,6 +353,20 @@ async (req, res) => {
 
         // Remove the list 
         await list.remove()
+        // Remove the list from the User's lists
+        const index = user.lists.map(curList => curList._id.toString()).indexOf(req.params.id)
+        if (index === -1) {
+            // This list isn't part of the user's lists
+            // This should never be hit.
+            console.log('Hit a statement we should never hit.')
+            console.log('Check out how we hit a list not in user\'s lists when deleting list')
+            console.log('User: ' + user._id)
+            console.log('List:' + req.params.id)
+            return res.status(404).json({errors: [{msg: 'List not a part of user\'s Lists.'}]})
+        }
+        // Remove the list from the lists array
+        user.lists.splice(index, 1)
+        await user.save()
 
         return res.json({msg: 'List removed'})
     } catch (error) {

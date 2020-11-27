@@ -100,12 +100,14 @@ const Auth = props => {
             //TODO: Transform this to somehow use our checkValidity function?
             if (password.value !== password2.value) {
                 // TODO - throw an error
+                alert('Passwords do not match!')
                 console.log('pass values dont match ' + password.value + password2.value)
                 return
             }
             if (name.value === '') {
                 console.log('name value is empty')
                 // TODO: Throw an error
+                alert('Name required!')
                 return
             }
         }

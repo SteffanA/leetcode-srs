@@ -19,11 +19,9 @@ router.get('/', async (req, res) => {
         end = null
         if (req.query.start) {
             start = req.query.start
-            console.log('Have a query start of ' + start)
         }
         if (req.query.end) {
             end = req.query.end
-            console.log('Have a query end of ' + end)
         }
         // NOTE: We're finding based on id, NOT _id! _id is the DB id, whereas id is the leetcode
         // problem ID!
@@ -31,19 +29,15 @@ router.get('/', async (req, res) => {
         // TODO: Figure out if there's a way to pass null into gte/lte w/o causing problems
         // such that this logic can be condensed to a single query again
         if (start && end){
-            console.log('start end find')
             problems = await Problem.find().where('id').gte(start).lte(end)
         }
         else if (start) {
-            console.log('start find')
             problems = await Problem.find().where('id').gte(start)
         }
         else if (end) {
-            console.log('end find')
             problems = await Problem.find().where('id').lte(end)
         }
         else {
-            console.log('everything find')
             problems = await Problem.find()
         }
         
@@ -96,7 +90,6 @@ router.get('/name/:search', async (req, res) => {
                 {problem_text: {$regex: req.params.search, $options: 'i'}},
             ]}
             ).sort({id: 1})
-        console.log('Got problems for term ' + req.params.search)
         return res.json({problems})
     } catch (error) {
         console.error(error.message)

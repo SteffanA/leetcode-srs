@@ -69,13 +69,6 @@ export const listsGetAll = () => {
         dispatch(listStart())
         try {
             const response = await api.getAllLists()
-            if (response === undefined || response === null || typeof(response) === 'string') {
-                // Clear out the old lists if we failed to get any
-                dispatch(listClear())
-                dispatch(listError(response))
-                return
-            }
-
             let firstList = null
             if (response.length > 0) {
                 firstList = response[0]
@@ -99,12 +92,8 @@ export const listsCreateNewList = (name, isPublic) => {
         dispatch(listStart())
         try {
             const response = await api.createNewList(name, isPublic)
-            // TODO: Do I need the below w/ trycatch?
-            if (response === undefined || response === null || typeof(response) === 'string') {
-                // Failed to update the list for some reason
-                dispatch(listError(response))
-                return
-            }
+            console.log('Create response:')
+            console.log(response)
             dispatch(listsPostListSuccess(response))
         } catch (error) {
             // Failed to update the list for some reason
@@ -119,13 +108,6 @@ export const listsUpdateProblems = (updatedProblems, curListID) => {
         dispatch(listStart())
         try {
             const response = await api.updateListsProblems(updatedProblems, curListID)
-            // TODO: Is the below needed within trycatch?
-            // TODO: What is our response here anyway?
-            if (response === undefined || response === null || typeof(response) === 'string') {
-                // Failed to update the list for some reason
-                dispatch(listError(response))
-                return
-            }
             // Update the current list object to reflect the results
             dispatch(listsUpdatedProblemsSuccess())
         } catch (error) {

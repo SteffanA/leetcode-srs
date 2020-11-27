@@ -99,10 +99,17 @@ export const problemsGetAllForListSorted = (list) => {
         }
         try {
             const response = await api.getAllProblemsForListSorted(list._id)
-            const firstProblem = response[0]
-            const problemIds = response.map((problem) => problem._id)
-            const probToTime = await getProblemToNextSubTime(problemIds)
-            dispatch(problemsGetProblemsSuccess(response, firstProblem, probToTime))
+            console.log(response)
+            if (Array.isArray(response) && response.length > 0) {
+                const firstProblem = response[0]
+                const problemIds = response.map((problem) => problem._id)
+                const probToTime = await getProblemToNextSubTime(problemIds)
+                dispatch(problemsGetProblemsSuccess(response, firstProblem, probToTime))
+            }
+            else {
+                // Successful call,but list contains no problems
+                dispatch(problemsGetProblemsSuccess(null, null, null))
+            }
         } catch (error) {
             console.error('Error getting problems for list sorted.')
             console.error(error)

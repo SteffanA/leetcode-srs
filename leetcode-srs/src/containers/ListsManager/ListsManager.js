@@ -1,8 +1,7 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import * as listActions from '../../store/actions/lists'
-import * as problemActions from '../../store/actions/problems'
 
 import Input from '../UI/Input/Input'
 import Button from '../UI/Button/Button'
@@ -10,8 +9,10 @@ import Selector from '../SharedItems/Selector/Selector'
 
 import { checkValidity, updateObject } from '../../shared/utility'
 import Modal from 'react-modal'
+import {confirmAlert} from 'react-confirm-alert'
+import 'react-confirm-alert/src/react-confirm-alert.css';
 import ProblemViewer from '../Modals/ProblemViewer/ProblemViewer'
-import {setPublic} from '../../shared/api_calls/lists'
+import * as listAPI from '../../shared/api_calls/lists'
 import ProblemTable from '../SharedItems/ProblemTable/ProblemTable'
 
 
@@ -25,7 +26,7 @@ This component is used to:
 
 Modal.setAppElement('#root')
 
-const ListEditor = props => {
+const ListsManager = props => {
 
 // Hooks and deconstructions
     const [listState, setListState] = useState({
@@ -77,9 +78,9 @@ const ListEditor = props => {
         newListControls,
     } = listState
 
-    // State of our modals, ProblemViewer and SetPublic
-    const [problemViewerOpen, setProblemViewerOpen] = useState(false)
-    const [publicOpen, setPublicOpen] = useState(false)
+    // State determining if we open the list editor modal and/or the contents
+    // of the current list
+    const [listEditorOpen, setListEditorOpen] = useState(false)
     const [viewListContents, setViewListContents] = useState(false)
     
 
@@ -100,8 +101,16 @@ const ListEditor = props => {
         const newListPublicity = isPublic.value
 
         // Send new list to DB
-        console.log('Sending new list to DB')
+        console.debug('Sending new list to DB')
+        // TODO: Do we need to check for failures?
         props.createList(newListName, newListPublicity)
+        // Reset the form to default
+        const updatedControls = newListControls
+        updatedControls.name.value = ''
+        updatedControls.name.touched = false
+        updatedControls.name.valid = false
+        updatedControls.isPublic.value = 'private'
+        setListState({...listState, updatedControls})
     }
 
     // Handle an input change on a form element
@@ -124,12 +133,8 @@ const ListEditor = props => {
     }
 
     // Set a list to be a public list
-    const setListPublic = async (e, list) => {
-        e.preventDefault()
-        console.log('Setting list public')
-        // const res = await setListPublic(listID)
-        // const res = await feedReducer(listID)
-        await setPublic(list.id).then((res) => {
+    const setListPublic = async (list) => {
+        await listAPI.setPublic(list._id).then((res) => {
             if (typeof(res) === String || res === null || res === undefined) {
                 // Send an alert on failure to update
                 alert('Could not set list public, try again later.')
@@ -137,48 +142,79 @@ const ListEditor = props => {
             }
             else {
                 console.log('Successful set public')
-                // Set the modal to close on success
-                setPublicOpen(false)
                 // Update the state of the list in redux
                 list.public = true
                 props.updateCurrentList(list)
             }
         }).catch((err) => {
-            console.debug(err)
+            console.debug('Failed to set list public')
+            console.error(err)
             alert('Could not set list public, try again later.')
-            console.log('Failed to set list public')
         })
     }
 
-    // Modal functions for the ProblemViewer and SetPublic modals
+    // Permanently deletes a user's private list.
+    const deleteList = async (list) => {
+        console.log('Deleting list')
+        console.log(list)
+        await listAPI.deletePrivateList(list._id).then((res) => {
+            alert('List ' + list.name + ' has been permanently deleted!')
+            // Get the updated lists array, and reload the page as a side effect
+            props.getLists()
+        }).catch((err) => {
+            console.debug('Failed to delete list.')
+            console.error(err)
+            alert('Could not delete list, please try again later.')
+        })
+    }
+
+    // Modal functions for the ProblemViewer
 
     // Open/close problem viewer modal
-    const openProblemViewer = (event) => {
+    const openListEditor = (event) => {
         event.preventDefault()
-        setProblemViewerOpen(true)
-        console.log('opened PV')
+        setListEditorOpen(true)
     }
-    const closeProblemViewer = () => {
-        setProblemViewerOpen(false)
-        console.log('PV is closed')
+    const closeListEditor = () => {
+        setListEditorOpen(false)
     }
 
-    // Set list public Modal open/close
-    const openPublicModal = (event) => {
-        event.preventDefault()
-        setPublicOpen(true)
-        console.log('opened public modal')
+    // Open an alert confirming if user wants to set list public
+    const promptListPublic = () => {
+        // Confirm the user wants to actually set the list public first
+        confirmAlert({
+            title: 'Confirm Set Public',
+            message: 'Are you sure? Setting a list public cannot be reversed! Public lists are visible by anyone, but can only be edited by you.  You cannot change the name of a public list.',
+            buttons: [
+                {
+                label: 'Yes',
+                onClick: () => setListPublic(props.curList)
+                },
+                {
+                label: 'No',
+                onClick: null
+                }
+            ]
+        });
     }
-    const closePublicModal = () => {
-        setPublicOpen(false)
-        console.log('public modal is closed')
-    }
-
-    // Cleanup function for after the modal has been opened
-    const afterOpenModal = () => {
-        // references are now sync'd and can be accessed.
-        // subtitle.style.color = '#f00';
-        console.log('After open PV')
+    
+    // Open an alert confirming if user wants to delete the list
+    const promptDeleteList = () => {
+        // Confirm the user wants to actually set the list public first
+        confirmAlert({
+            title: 'Confirm Delete List',
+            message: 'Are you sure? Deleting a list is permanent!',
+            buttons: [
+                {
+                label: 'Yes',
+                onClick: () => deleteList(props.curList)
+                },
+                {
+                label: 'No',
+                onClick: null
+                }
+            ]
+        });
     }
     
     // Setup for problem table - add Time of Next field, generated by the
@@ -243,32 +279,42 @@ const ListEditor = props => {
         </form>
     )
 
-    let viewListContentsBtn = (
+    const viewListContentsBtn = (
         <Button btnType="Success" clicked={() => setViewListContents(!viewListContents)}>
             {viewListContents ? ('Hide ' + props.curListName + '\'s Problems') :
                                 ('Show ' + props.curListName + '\s Problems')}
         </Button>
     )
 
+    const deleteListBtn = (
+        <Button btnType="Danger" clicked={promptDeleteList}>
+            Delete List
+        </Button>
+    )
+
+    const listEditorModal = (
+        <Modal
+            isOpen={listEditorOpen}
+            onAfterOpen={null}
+            onRequestClose={closeListEditor}
+            contentLabel="Problem Viewer Modal"
+        >
+            <div>
+                <Button btnType="Danger" clicked={closeListEditor}>Exit List Editor</Button>
+            </div>
+            <div>
+                <h1>Editing List: {props.curListName}</h1>
+                <ProblemViewer/>
+            </div>
+        </Modal>
+    )
+
     return (
         <div>
             {newListFormVisible && newListForm}
             <Selector showLists={true} showProblems={false}/>
-            <Button btnType="Success" clicked={openProblemViewer}>Edit Selected List</Button>
-            <Modal
-                isOpen={problemViewerOpen}
-                onAfterOpen={afterOpenModal}
-                onRequestClose={closeProblemViewer}
-                contentLabel="Problem Viewer Modal"
-            >
-                <div>
-                    <Button btnType="Danger" clicked={closeProblemViewer}>Exit List Editor</Button>
-                </div>
-                <div>
-                    <h1>Editing List: {props.curListName}</h1>
-                    <ProblemViewer/>
-                </div>
-            </Modal>
+            <Button btnType="Success" clicked={openListEditor}>Edit Selected List</Button>
+            {listEditorModal}
             <br/>
             <div>
                 <h4>{props.curListName} is: </h4>
@@ -276,32 +322,19 @@ const ListEditor = props => {
                 {/* If the current list is private, offer the option to set it public
                 TODO: Instead of a modal, replace with a standard pop-up?
                 */}
-                {!props.curListPublic && <Button btnType="Success" clicked={openPublicModal}>Set Selected List Public</Button>}
-                <Modal
-                    isOpen={publicOpen}
-                    onAfterOpen={afterOpenModal}
-                    onRequestClose={closePublicModal}
-                    contentLabel="Set Public List Modal"
-                >
-                    <div>
-                        <Button btnType="Success" clicked={closePublicModal}>Back to List Editor</Button>
-                    </div>
-                    <div>
-                        <h1>Really set {props.curListName} public? This cannot be reversed!</h1>
-                        <p>Public lists can be viewed by anyone logged in!</p>
-                        <Button btnType="Danger" clicked={(event) => setListPublic(event,props.curList)}>Set Public</Button>
-                    </div>
-                </Modal>
+                {!props.curListPublic && <Button btnType="Success" clicked={promptListPublic}>Set Selected List Public</Button>}
                 {/* Show the problems currently in the list */}
                 <br/>
                 {viewListContentsBtn}
                 {viewListContents && <ProblemTable problems={props.curProblems} extraFields={problemTableFields}/>}
+                <br/>
+                {!props.curListPublic && deleteListBtn}
             </div>
         </div>
     )
 }
 
-ListEditor.propTypes = {
+ListsManager.propTypes = {
     curListName: PropTypes.string.isRequired,
     curList: PropTypes.object.isRequired,
     curListPublic: PropTypes.bool.isRequired,
@@ -324,8 +357,9 @@ const mapDispatchToProps = (dispatch) => {
     return {
         createList: (name, isPublic) => dispatch(listActions.listsCreateNewList(name, isPublic)),
         updateCurrentList: (list) => dispatch(listActions.listSetCurrent(list)),
+        getLists: () => dispatch(listActions.listsGetAll()),
     }
 }
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(ListEditor)
+export default connect(mapStateToProps, mapDispatchToProps)(ListsManager)
