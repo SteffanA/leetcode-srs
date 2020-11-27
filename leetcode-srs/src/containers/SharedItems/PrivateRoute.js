@@ -5,11 +5,11 @@ import { Route, Redirect } from 'react-router-dom'
 
 // Take the component and any other params passed in
 const PrivateRoute = ({component: Component, isAuth, loading, ...rest}) => ( 
-    // Create a route - if not auth'd and not loading, redirect to login
+    // Create a route - if not auth'd and not loading, redirect to landing page
     // Otherwise, redirect to whatever our component was, passing down the props
     <Route {...rest} 
     render={props => !isAuth && !loading ? 
-        <Redirect to='/login'/>
+        <Redirect to='/'/>
         : (<Component {...props} />)
     }/>
  )
