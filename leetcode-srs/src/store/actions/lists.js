@@ -5,7 +5,6 @@ import * as api from '../../shared/api_calls/lists'
 
 // Start up the List retrieve processes
 const listStart = () => {
-    console.log('starting list process')
     return {
         type: actions.LISTS_START,
     }

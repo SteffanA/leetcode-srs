@@ -143,17 +143,12 @@ export const getTimeToNextSubmissionToProblemMap = async (problems) => {
 // Run a particular function at some given date in the future
 export const runAtDate = (date, func) => {
     var now = (new Date()).getTime();
-    console.log('Now is: ')
-    console.log(new Date(now).toString())
     var then = date.getTime();
     var diff = Math.max((then - now), 0);
     if (diff > 0x7FFFFFFF) {//setTimeout limit is MAX_INT32=(2^31-1)
-        console.log('recursing')
         setTimeout(function() {runAtDate(date, func);}, 0x7FFFFFFF);
     }
     else {
-        console.log('Not recursing')
-        console.log(diff)
         setTimeout(func, diff);
     }
 }

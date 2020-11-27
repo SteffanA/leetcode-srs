@@ -25,19 +25,12 @@ const authSuccess = (token, name) => {
 // Logout our user when token expires
 const checkAuthTimeout = (expireDate) => {
     return dispatch => {
-        console.log('Expires in: ' + expireDate)
-        // runAtDate(expireDate, dispatch(logout()))
-        // runAtDate(expireDate, logout())
-        // runAtDate(expireDate, logoutHandler) // Also real close to working, same issue of nto triggering auth change in redux
-        // runAtDate(expireDate, dispatch(logoutHandler)) //triggers, but 'dispatch is not a function' in logouthandler
-        const func = () => {
-            console.log('In func')
+        // Helper function that we can pass to the run@ utility so it correctly
+        // triggers the dispatch
+        const logoutHelperFunc = () => {
             dispatch(logoutHandler())
-            // tried with logoutHandler no ()
         }
-        runAtDate(expireDate, func) // Calls logout handler, doesn't trigger dispatch within it tho
-        // dispatch(runAtDate(expireDate, logoutHandler)) // Doesn't work at all
-        // runAtDate(expireDate, logout) // Close to working! Triggers logout properly, but no auth change
+        runAtDate(expireDate, logoutHelperFunc)
     }
 }
 
@@ -70,7 +63,6 @@ export const checkAuthState = () => {
             // We have a token stored; check if it's still valid
             // TODO: This is all definitely wrong now; we need to fix.
             const expirationDate = new Date(localStorage.getItem('expirationDate'))
-            console.log('expire data ', expirationDate.toString())
             // Check if token has already expired
             if (expirationDate > new Date()) {
                 // Still valid, let's login with it
@@ -109,20 +101,17 @@ export const auth = (email, password, isRegister, name='') => {
             // Standard login
             url = url + 'auth'
         }
-        
-        console.log(url)
+
         // Send our request to the backend
         // TODO: Do we need to implement an API key to prevent malicious request sending? Probably.
         // Add as a param; url += ?key=API_KEY
         axios.post(url, authData)
             .then(response => {
-                console.log(response)
+                // Set the local storage items for future logins
                 localStorage.setItem('token', response.data.token)
                 let newDate = new Date()
                 newDate.setSeconds(newDate.getSeconds() + response.data.timeout)
                 localStorage.setItem('expirationDate', newDate.toString())
-                console.log('set expirationDate to')
-                console.log(newDate.toString())
                 localStorage.setItem('userId', response.data.username)
                 dispatch(authSuccess(response.data.token, response.data.username))
                 dispatch(checkAuthTimeout(newDate))
@@ -138,9 +127,7 @@ export const auth = (email, password, isRegister, name='') => {
 // Logout handler handles all cleanup work we need to execute when
 // logging out, followed by dispatching our logout action
 export const logoutHandler = () => {
-    console.log('In logout handler')
     return dispatch => {
-        console.log('logout handler dispatch')
         // Remove local storage info
         localStorage.removeItem('token')
         localStorage.removeItem('expirationDate')
