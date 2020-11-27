@@ -5,7 +5,7 @@ const intialState = {
     token: null, // User's auth token
     userId: null, // User's ID
     error: null, // Auth error
-    loading: false, // Loading auth result
+    loading: true, // Loading auth result
 }
 
 // Start authentication process - reset error & set loading
@@ -37,6 +37,7 @@ const authLogout = (state, action) => {
     return updateObject(state, {
         token: null,
         userId: null,
+        loading: false,
     })
 }
 
