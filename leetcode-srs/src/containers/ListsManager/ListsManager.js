@@ -72,14 +72,43 @@ const ListsManager = props => {
         formValid: true, //TODO: Delete this if not used
     })
 
+    const [renameFormState, setRenameFormState] = useState({
+        // Visibility for our forms
+        renameListFormVisible: false,
+        // The controls for our forms
+        renameListControls: {
+            // New name of the list
+            name: {
+                elementType: 'input',
+                elementConfig: {
+                    type: 'name',
+                    placeholder: 'List\'s New Name'
+                },
+                value: '',
+                validation: {
+                    required: true,
+                    minLength: 1,
+                },
+                valid: false,
+                touched: false,
+            },
+        },
+        renameFormValid: true, //TODO: Delete this if not used
+    })
+
     // Deconstruct our listState
     const {
         newListFormVisible,
         newListControls,
     } = listState
 
-    // State determining if we open the list editor modal and/or the contents
-    // of the current list
+    const {
+        renameListFormVisible,
+        renameListControls,
+        renameFormValid
+    } = renameFormState
+
+    // States for determining visibility of certain elements on the page
     const [listEditorOpen, setListEditorOpen] = useState(false)
     const [viewListContents, setViewListContents] = useState(false)
     
@@ -114,22 +143,23 @@ const ListsManager = props => {
     }
 
     // Handle an input change on a form element
-    const inputChangedHandler = (event, controlKey) => {
+    // TODO: Could we move this to utility?
+    const inputChangedHandler = (event, setter, state, controls, controlKey) => {
         // Update the control linked to the control key
-        const updatedControl = updateObject(newListControls[controlKey], {
+        const updatedControl = updateObject(controls[controlKey], {
             // Update the value
             value: event.target.value,
             // Check if validity changes
-            valid: checkValidity(event.target.value, newListControls[controlKey].validation),
+            valid: checkValidity(event.target.value, controls[controlKey].validation),
             // Note that the element has now been touched
             touched: true,
         })
         //Attach updated control to our original control
-        const updatedControls = newListControls
+        const updatedControls = controls
         updatedControls[controlKey] = updatedControl
         
         // Update our state
-        setListState({...listState, updatedControls})
+        setter({...state, updatedControls})
     }
 
     // Set a list to be a public list
@@ -155,8 +185,6 @@ const ListsManager = props => {
 
     // Permanently deletes a user's private list.
     const deleteList = async (list) => {
-        console.log('Deleting list')
-        console.log(list)
         await listAPI.deletePrivateList(list._id).then((res) => {
             alert('List ' + list.name + ' has been permanently deleted!')
             // Get the updated lists array, and reload the page as a side effect
@@ -168,7 +196,32 @@ const ListsManager = props => {
         })
     }
 
-    // Modal functions for the ProblemViewer
+    const renameList = async (list, newName) => {
+        console.log('Renaming list')
+        console.log(list)
+        console.log(newName)
+        // Validate our newName
+        if (checkValidity(newName, renameListControls.name.validation)) {
+            await listAPI.renamePrivateList(list._id, newName).then((res) => {
+                // Reset the form to default
+                const updatedControls = renameListControls
+                updatedControls.name.value = ''
+                updatedControls.name.touched = false
+                updatedControls.name.valid = false
+                // Update the list array to reflect the new name across redux
+                props.getLists()
+            }).catch((err) => {
+                console.debug('Failed to rename list.')
+                console.error(err)
+                alert('Could not rename list, please try again later.')
+            })
+        }
+        else {
+            alert('Name is invalid, must be 1+ character long.')
+        }
+    }
+
+    // Modal functions for the ProblemEditor
 
     // Open/close problem viewer modal
     const openListEditor = (event) => {
@@ -208,6 +261,24 @@ const ListsManager = props => {
                 {
                 label: 'Yes',
                 onClick: () => deleteList(props.curList)
+                },
+                {
+                label: 'No',
+                onClick: null
+                }
+            ]
+        });
+    }
+    // Open an alert confirming if user wants to rename the list
+    const promptRenameList = () => {
+        // Confirm the user wants to actually set the list public first
+        confirmAlert({
+            title: 'Confirm Rename List',
+            message: 'Are you sure you want to rename the list to ' + renameListControls.name.value + '?',
+            buttons: [
+                {
+                label: 'Yes',
+                onClick: () => renameList(props.curList, renameListControls.name.value)
                 },
                 {
                 label: 'No',
@@ -264,7 +335,27 @@ const ListsManager = props => {
             invalid={!formElement.config.valid}
             shouldValidate={formElement.config.validation}
             touched={formElement.config.touched}
-            changed={(event) => inputChangedHandler(event, formElement.id)}
+            changed={(event) => inputChangedHandler(event, setListState, listState, newListControls, formElement.id)}
+        />
+    ))
+
+    const renameFormElements = []
+    for (let key in renameListControls) {
+        renameFormElements.push({
+            id: key,
+            config: renameListControls[key]
+        })
+    }
+    const renameListFormElements = renameFormElements.map(formElement => (
+        <Input
+            key= {formElement.id}
+            elementType = {formElement.config.elementType}
+            elementConfig={formElement.config.elementConfig}
+            value={formElement.config.value}
+            invalid={!formElement.config.valid}
+            shouldValidate={formElement.config.validation}
+            touched={formElement.config.touched}
+            changed={(event) => inputChangedHandler(event, setRenameFormState, renameFormState, renameListControls, formElement.id)}
         />
     ))
 
@@ -279,10 +370,28 @@ const ListsManager = props => {
         </form>
     )
 
+    let renameForm = (
+        <div>
+            {renameListFormElements}
+            <Button 
+                btnType="Success"
+                clicked={() => promptRenameList()}>
+                    Rename {props.curListName}
+            </Button>
+        </div>
+    )
+
     const viewListContentsBtn = (
         <Button btnType="Success" clicked={() => setViewListContents(!viewListContents)}>
             {viewListContents ? ('Hide ' + props.curListName + '\'s Problems') :
                                 ('Show ' + props.curListName + '\s Problems')}
+        </Button>
+    )
+
+    const viewRenameFormBtn = (
+        <Button btnType="Success" clicked={() => setRenameFormState({...renameFormState, renameListFormVisible : !renameListFormVisible})}>
+            {renameFormState.renameListFormVisible? 'Hide Renamer' :
+                                'Rename ' + props.curListName}
         </Button>
     )
 
@@ -319,15 +428,18 @@ const ListsManager = props => {
             <div>
                 <h4>{props.curListName} is: </h4>
                 <h4 style={{color: 'red'}}>{props.curListPublic ? 'Public' : 'Private'}</h4>
-                {/* If the current list is private, offer the option to set it public
-                TODO: Instead of a modal, replace with a standard pop-up?
-                */}
+                {/* If the current list is private, offer the option to set it public*/}
                 {!props.curListPublic && <Button btnType="Success" clicked={promptListPublic}>Set Selected List Public</Button>}
+                <br/>
+                {/* If current list is private, offer ability to rename*/}
+                {!props.curListPublic && viewRenameFormBtn}
+                {!props.curListPublic && renameFormState.renameListFormVisible && renameForm}
                 {/* Show the problems currently in the list */}
                 <br/>
                 {viewListContentsBtn}
                 {viewListContents && <ProblemTable problems={props.curProblems} extraFields={problemTableFields}/>}
                 <br/>
+                {/* If current list is private, offer ability to delete it. */}
                 {!props.curListPublic && deleteListBtn}
             </div>
         </div>
