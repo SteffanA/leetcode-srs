@@ -384,7 +384,7 @@ const ListsManager = props => {
     const viewListContentsBtn = (
         <Button btnType="Success" clicked={() => setViewListContents(!viewListContents)}>
             {viewListContents ? ('Hide ' + props.curListName + '\'s Problems') :
-                                ('Show ' + props.curListName + '\s Problems')}
+                                ('Show ' + props.curListName + '\'s Problems')}
         </Button>
     )
 

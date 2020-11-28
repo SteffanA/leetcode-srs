@@ -2,7 +2,6 @@ import React, {useEffect, useState}  from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import useDeepCompareEffect from 'use-deep-compare-effect'
-import deepEqual from 'deep-equal'
 
 import DropDownMenu from '../DropDownMenu'
 import * as listActions from '../../../store/actions/lists'
@@ -104,7 +103,7 @@ const mapDispatchToProps = dispatch => {
 Selector.propTypes = {
     auth: PropTypes.bool.isRequired,
     getLists: PropTypes.func.isRequired,
-    lists: PropTypes.array.isRequired,
+    lists: PropTypes.array,
     updateCurList: PropTypes.func.isRequired,
     curList: PropTypes.object,
     curProblem: PropTypes.object,
