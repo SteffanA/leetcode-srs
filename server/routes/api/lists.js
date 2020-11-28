@@ -221,7 +221,6 @@ router.post('/', [auth, [
         user.lists.push(list._id)
         await user.save()
 
-        console.log('Added new list for ' + user.name)
         return res.json(list)
     } catch (error) {
         console.error('Create a new List' + error.message)
@@ -310,7 +309,6 @@ async (req, res) => {
 
         // Save the updated list
         const updatedList = await list.save()
-        console.log('Updated list attributes for id ' + req.params.id)
         return res.json(updatedList)
     } catch (error) {
         console.error('Update list attributes: ' + error.message)
@@ -324,7 +322,6 @@ async (req, res) => {
 router.delete('/:id', [auth],
 async (req, res) => {
     try {
-        console.log('Deleting a list' + req.params.id)
         // Get our User object
         const user = await User.findById(req.user.id)
         // Get our List object
