@@ -427,7 +427,7 @@ const ListsManager = props => {
     // Items that only make sense to show if we have a list selected
     const listEditorItems = (
         <div>
-            <Button btnType="Success" clicked={openListEditor}>Edit Selected List</Button>
+            <Button btnType="Success" clicked={openListEditor}>Edit Selected List (add or remove problems)</Button>
             {listEditorModal}
             <br/>
             <div>

@@ -42,8 +42,6 @@ const SubmissionHistory = props => {
         try {
            const statuses = await statusAPI.getUsersProblemStatuses()
            statusArray.current = statuses // We'll lose this but its okay
-           console.log(statuses)
-           console.log('Got statuses')
         } catch (error) {
             statusArray.current = null
             alert('Could not load problem statuses, try again later.')
@@ -81,7 +79,6 @@ const SubmissionHistory = props => {
             alert('Could not retrieve problems, try again later.')
             console.error(error)
         }
-        console.log('Done getting problems')
     }, [statusArray, setProblems, setLoadingProblems])
 
     // Load the user's problem statuses and problem info
@@ -90,7 +87,6 @@ const SubmissionHistory = props => {
         const loadInfo = async () => {
             await getStatuses()
             await getProblemsFromStatuses()
-            console.log('Refresh loadInfo')
         }
         setLoadingSubmissions(true)
         setLoadingProblems(true)

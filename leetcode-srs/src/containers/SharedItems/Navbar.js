@@ -41,8 +41,7 @@ const Navbar = props => {
     return (
         <div className={classes.Navbar}>
             <div className={classes.Left}>
-                {props.isAuth && <div className={classes.NavLink}>Settings</div>}
-                {/* Link to settings modal*/}
+                <NavLink className={classes.NavLink} to='/view-public-lists'>View Public Lists</NavLink>
             </div>
             <div className={classes.Center}>
                 <NavLink to='/' className={classes.Title}>
@@ -71,9 +70,6 @@ const Navbar = props => {
                 {props.isAuth && <NavLink className={classes.NavLink} to='/submissions'>Submission History</NavLink> }
             </div> 
             {/* TODO: Use this to fix css module stuff <button >Test button. i should be blue.</button>*/}
-            <div>
-                <NavLink className={classes.NavLink} to='/view-public-lists'>View Public Lists</NavLink>
-            </div>
 
         </div>
     )

@@ -35,24 +35,6 @@ const problemsSetTONSuccess = (probToTON) => {
     }
 }
 
-const handleGenericProblemGetResponse = (response) => {
-    return dispatch => {
-        if (response === undefined || response === null || typeof(response) === 'string') {
-            // Failed to gather problems for some reason
-            // Clear out the problems if we failed to retrieve any. If we're swapping between lists,
-            // this might happen and we don't want to display problems associated w/ another list.
-            console.log('Errored response for generic problem dispatch: ')
-            console.log(response)
-            dispatch(problemsClear())
-            dispatch(problemError(response))
-            return
-        }
-        // Otherwise we got problems successfully
-        const firstProblem = response[0]
-        dispatch(problemsGetProblemsSuccess(response, firstProblem, null))
-    }
-}
-
 // BEGIN EXPORTS
 
 
@@ -81,9 +63,16 @@ export const problemsGetAllForList = (list) => {
             dispatch(problemError('No list provided.'))
             return
         }
-        // TODO: Does the below replace a trycatch effectively?
-        const response = await api.getAllProblemsForList(list._id)
-        dispatch(handleGenericProblemGetResponse(response))
+        try {
+            const response = await api.getAllProblemsForList(list._id)
+            const firstProblem = response[0]
+            dispatch(problemsGetProblemsSuccess(response, firstProblem, null))
+        } catch (error) {
+            console.error('Error getting all for list.')
+            console.error(error)
+            dispatch(problemsClear())
+            dispatch(problemError(error.response))
+        }
     }
 }
 
@@ -113,7 +102,7 @@ export const problemsGetAllForListSorted = (list) => {
             console.error('Error getting problems for list sorted.')
             console.error(error)
             dispatch(problemsClear())
-            dispatch(problemError(error))
+            dispatch(problemError(error.response))
         }
     }
 }
@@ -123,10 +112,18 @@ export const problemsGetAll = () => {
     return async dispatch => {
          // Start the problem process
          dispatch(problemStart)
+
          // Get all problems
-         
-        const response = await api.getAllProblems()
-        dispatch(handleGenericProblemGetResponse(response))
+        try {
+            const response = await api.getAllProblems()
+            const firstProblem = response[0]
+            dispatch(problemsGetProblemsSuccess(response, firstProblem, null))
+        } catch (error) {
+            console.error('Error getting all problems.')
+            console.error(error)
+            dispatch(problemsClear())
+            dispatch(problemError(error.response))
+        }
     }
 }
 
@@ -138,8 +135,16 @@ export const problemsGetSome = (start, end) => {
          dispatch(problemStart)
 
          // Get our subset of problems
-        const response = await api.getSubsetOfProblems(start, end)
-        dispatch(handleGenericProblemGetResponse(response))
+        try {
+            const response = await api.getSubsetOfProblems(start, end)
+            const firstProblem = response[0]
+            dispatch(problemsGetProblemsSuccess(response, firstProblem, null))
+        } catch (error) {
+            console.error('Error getting subset of problems.')
+            console.error(error)
+            dispatch(problemsClear())
+            dispatch(problemError(error.response))
+        }
     }
 }
 
@@ -151,8 +156,16 @@ export const problemsGetSearch = (term) => {
          dispatch(problemStart)
          
          // Get our subset of problems containing the search term
-        const response = await api.getProblemSearchResults(term)
-        dispatch(handleGenericProblemGetResponse(response))
+        try {
+            const response = await api.getProblemSearchResults(term)
+            const firstProblem = response[0]
+            dispatch(problemsGetProblemsSuccess(response, firstProblem, null))
+        } catch (error) {
+            console.error('Error getting search results for problems.')
+            console.error(error)
+            dispatch(problemsClear())
+            dispatch(problemError(error.response))
+        }
     }
 }
 
@@ -176,7 +189,7 @@ export const problemSetProblems = (problems) => {
             const probToTime = await getProblemToNextSubTime(problemIds)
             dispatch(problemsGetProblemsSuccess(problems, firstProblem, probToTime))
         } catch (error) {
-            dispatch(problemError(error))
+            dispatch(problemError(error.response))
         }
     }
 }
