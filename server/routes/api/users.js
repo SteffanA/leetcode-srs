@@ -12,6 +12,54 @@ const mongoose = require('mongoose')
 const router = express.Router()
 dotenv.config({path: '../.env'}) // So we can read environ vars
 
+
+// @route  GET /api/users/:id
+// @desc   Retrieve a user's details
+// @access Private
+router.get('/', [auth], 
+async (req, res) => {
+    try {
+        // Get the User by the passed auth ID
+        const user = await User.findById(req.user.id).select(['-password', '-__v', '-_id'])
+        // Ensure we could find them
+        if (!user) {
+            return res.status(404).json({errors: [{msg: 'User not found.'}]})
+        }
+        // Return the user as JSON
+        return res.json(user)
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
+    }
+})
+
+// @route  GET /api/users/lists
+// @desc   Retrieve a user's lists
+// @access Private
+router.get('/lists', [auth], 
+async (req, res) => {
+    try {
+        // Get the User by the passed auth ID
+        const user = await User.findById(req.user.id)
+        // Ensure we could find them
+        if (!user) {
+            return res.status(404).json({errors: [{msg: 'User not found.'}]})
+        }
+
+        // Get all the List objects from the stored IDs and add to array
+        const lists = []
+        for (let listID of user.lists) {
+            const list = await List.findById(listID)
+            lists.push(list)
+        }
+        // Return the user's lists as JSON
+        return res.json(lists)
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
+    }
+})
+
 // @route  POST api/users
 // @desc   Register user
 // @access Public
@@ -171,54 +219,6 @@ async (req, res) => {
         return res.json(user.lists)
     } catch (error) {
         console.error(error.message)
-        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
-    }
-})
-
-// @route  GET /api/users/:id
-// @desc   Retrieve a user's details
-// @access Private
-router.get('/', [auth], 
-async (req, res) => {
-    try {
-        // Get the User by the passed auth ID
-        const user = await User.findById(req.user.id).select(['-password', '-__v', '-_id'])
-        // Ensure we could find them
-        if (!user) {
-            return res.status(404).json({errors: [{msg: 'User not found.'}]})
-        }
-        // Return the user as JSON
-        return res.json(user)
-    } catch (error) {
-        console.log(error.message)
-        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
-    }
-})
-
-
-// @route  GET /api/users/lists
-// @desc   Retrieve a user's lists
-// @access Private
-router.get('/lists', [auth], 
-async (req, res) => {
-    try {
-        // Get the User by the passed auth ID
-        const user = await User.findById(req.user.id)
-        // Ensure we could find them
-        if (!user) {
-            return res.status(404).json({errors: [{msg: 'User not found.'}]})
-        }
-
-        // Get all the List objects from the stored IDs and add to array
-        const lists = []
-        for (let listID of user.lists) {
-            const list = await List.findById(listID)
-            lists.push(list)
-        }
-        // Return the user's lists as JSON
-        return res.json(lists)
-    } catch (error) {
-        console.log(error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })

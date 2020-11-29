@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
         return res.json(problems)
     } catch (error) {
         console.error(error.message)
-        return res.status(500).send('Server error.')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -70,7 +70,7 @@ router.get('/:id', async (req, res) => {
         return res.json({problem})
     } catch (error) {
         console.error('Get problem by id err: ' + error.message)
-        return res.status(500).send('Server error.')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -93,7 +93,7 @@ router.get('/name/:search', async (req, res) => {
         return res.json({problems})
     } catch (error) {
         console.error(error.message)
-        return res.status(500).send('Server error.')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -113,7 +113,7 @@ router.post('/', [auth, [
     const validationErrors = validationResult(req)
     if (!validationErrors.isEmpty) {
         // Something was missing, send an error
-        return res.status(400).json({errors : errors.array()})
+        return res.status(400).json({errors : validationErrors.array()})
     }
     try {
         // Get user, ensure is admin user.
@@ -159,7 +159,7 @@ router.post('/', [auth, [
         return res.json(problem)
     } catch (error) {
         console.error(error.message)
-        return res.status(500).send('Server error.')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -177,7 +177,7 @@ router.put('/bulk', [
     const validationErrors = validationResult(req)
     if (!validationErrors.isEmpty) {
         // Something was missing, send an error
-        return res.status(400).json({errors : errors.array()})
+        return res.status(400).json({errors : validationErrors.array()})
     }
     try {
         // Convert all the ID strings to Mongoose object IDs
@@ -193,7 +193,7 @@ router.put('/bulk', [
         return res.json({problems})
     } catch (error) {
         console.error('Bulk problem get err: ' + error.message)
-        return res.status(500).send('Server error.')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -207,7 +207,7 @@ router.put('/', [auth, [
     const validationErrors = validationResult(req)
     if (!validationErrors.isEmpty) {
         // Something was missing, send an error
-        return res.status(400).json({errors : errors.array()})
+        return res.status(400).json({errors : validationErrors.array()})
     }
     try {
         // Get user, ensure is admin user.
@@ -250,7 +250,7 @@ router.put('/', [auth, [
         return res.json(updatedProblem)
     } catch (error) {
         console.error(error.message)
-        return res.status(500).send('Server error.')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 

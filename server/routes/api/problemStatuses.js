@@ -23,7 +23,7 @@ router.get('/', auth, async (req, res) => {
         return res.json(user.problem_statuses)
     } catch (error) {
         console.error(error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -48,7 +48,7 @@ router.get('/:problem_id', auth, async (req, res) => {
         return res.json(user.problem_statuses[index])
     } catch (error) {
         console.error(error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -63,7 +63,7 @@ router.put('/next_times', [auth, [
     const validationErrors = validationResult(req)
     if (!validationErrors.isEmpty) {
         // Something was missing, send an error
-        return res.status(400).json({errors : errors.array()})
+        return res.status(400).json({errors : validationErrors.array()})
     }
     try {
         const user = await User.findById(req.user.id)
@@ -92,7 +92,7 @@ router.put('/next_times', [auth, [
         return res.json(Object.fromEntries(problemToTime))
     } catch (e) {
         console.error('Error getting next sub times: ' + e.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -150,7 +150,7 @@ router.put('/:problem_id', [auth,[
         }
     } catch (error) {
         console.error(error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -214,7 +214,7 @@ async (req, res) => {
         return res.json(user.problem_statuses[index])
     } catch (error) {
         console.error(error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 

@@ -76,7 +76,7 @@ router.post('/', [
         console.log('User authenticated.')
     } catch (error) {
         console.error(error.message)
-        return res.status(500).send('Server Error.')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
