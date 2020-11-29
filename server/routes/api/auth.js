@@ -15,7 +15,7 @@ const router = express.Router()
 // @desc   Authenticate user & retrieve token
 // @access Public
 router.post('/', [
-    check('email', 'Registered email address is required').isEmail(),
+    // check('name', 'Login name is required').not().isEmpty(),
     check('password', 'Password is required').exists()
 ], async(req, res) => {
     // Validate that our checks were successful
@@ -28,15 +28,25 @@ router.post('/', [
     // No validation errors, proceed
 
     // Pull out request parameters
-    const {email, password} = req.body
+    const {name, password, email} = req.body
     try {
         // First, check that the user actually exists
-        let user = await User.findOne({email: email})
-        if (!user) {
-            // Couldn't find the user, send a bad request back.
-            return res.status(400).json({errors: [{msg: 'Invalid credentials.'}]})
+        let user = null
+        // Allow login with either email or name
+        if (name) {
+            user = await User.findOne({name: name})
+            if (!user) {
+                // Couldn't find the user, send a bad request back.
+                return res.status(400).json({errors: [{msg: 'Invalid credentials.'}]})
+            }
         }
-
+        else if (email) {
+            user = await User.findOne({email: email})
+            if (!user) {
+                // Couldn't find the user, send a bad request back.
+                return res.status(400).json({errors: [{msg: 'Invalid credentials.'}]})
+            }
+        }
         // User exists. Now validate password matches what's on file
         const isMatch = await bcrypt.compare(password, user.password)
         if (!isMatch) {

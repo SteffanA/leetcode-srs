@@ -2,7 +2,7 @@ const User = require('../../models/User')
 const List = require('../../models/Lists')
 
 const express = require('express')
-const {check, validationResult} = require('express-validator')
+const {check, validationResult, oneOf} = require('express-validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
@@ -15,17 +15,26 @@ dotenv.config({path: '../.env'}) // So we can read environ vars
 // @route  POST api/users
 // @desc   Register user
 // @access Public
-router.post('/', [
+router.post('/', [oneOf([
     // Validation checks to ensure we get data expected.
-    check('name', 'Name is required.').not().isEmpty(),
-    check('email', 'Please include a valid email.').not().isEmpty(),
+    check('name', 'Name or email is required.').not().isEmpty(),
+    check('email', 'Email or name is required').not().isEmpty()
+]),
     check('password', 'Please enter a password with at least 6 characters.').isLength({min: 6})
 ], async (req, res) => {
     // Check that our... checks are valid
     const validationErrors = validationResult(req)
     if (!validationErrors.isEmpty()) {
         // Send bad request if we have any errors.
-        return res.status(400).json({ errors: errors.array() })
+        // Since we have a oneOf check, sanitize the error output for the frontend
+        let errorArray = []
+        if (validationErrors.array()[0].nestedErrors) {
+            errorArray = validationErrors.array()[0].nestedErrors.map(item => ({'msg': item.msg}))
+        }
+        else {
+            errorArray = validationErrors.array()
+        }
+        return res.status(400).json({ errors: errorArray })
     }
 
     // Parse out the required information from the request body
@@ -33,11 +42,18 @@ router.post('/', [
 
     try {
         // Check if the user already exists
-        let user = await User.findOne({email: email})
+        let user = await User.findOne({name: name})
+        if (user) {
+            // Found this user - send bad request
+            return res.status(400).json({errors: [ {msg: 'User already exists for this name'}]})
+        }
+        // Check that the email isn't already in use.
+        user = await User.findOne({email: email})
         if (user) {
             // Found this user - send bad request
             return res.status(400).json({errors: [ {msg: 'User already exists for this email'}]})
         }
+
 
         // Create our user
         user = new User({

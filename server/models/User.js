@@ -12,7 +12,7 @@ const UserSchema = new mongoose.Schema({
     // User's email address
     email: {
         type: String,
-        required: true,
+        required: false,
         unique: true,
     },
     // Hashed password
