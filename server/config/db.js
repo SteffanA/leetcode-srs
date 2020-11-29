@@ -35,7 +35,7 @@ const connectDB = async () => {
             pass: `${process.env.MONGODB_PASS}`,
             dbName: `${process.env.DATABASE_NAME}`,
         })
-        console.log('MongoDB connected...')
+        console.log(`MongoDB connected on ${process.env.MONGODB_HOST} via port ${process.env.MONGODB_PORT}...`)
     } catch (error) {
         console.log('Failed to connect to the database with error: ')
         console.log(error.message)

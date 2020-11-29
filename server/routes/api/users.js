@@ -48,17 +48,18 @@ router.post('/', [oneOf([
             return res.status(400).json({errors: [ {msg: 'User already exists for this name'}]})
         }
         // Check that the email isn't already in use.
-        user = await User.findOne({email: email})
-        if (user) {
-            // Found this user - send bad request
-            return res.status(400).json({errors: [ {msg: 'User already exists for this email'}]})
+        if (email) {
+            user = await User.findOne({email: email})
+            if (user) {
+                // Found this user - send bad request
+                return res.status(400).json({errors: [ {msg: 'User already exists for this email'}]})
+            }
         }
-
 
         // Create our user
         user = new User({
             name: name,
-            email: email,
+            email: (email === '' ? null : email),
             password: password,
             // Creation date will be made by default to NOW
         })
@@ -98,7 +99,7 @@ router.post('/', [oneOf([
         console.log('User registered')
     } catch (error) {
         console.error('Error registering: ', error.message)
-        return res.status(500).send('Server error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -134,7 +135,7 @@ async (req, res) => {
         return res.json(user.lists)
     } catch (error) {
         console.error(error.message)
-        return res.status(500).send('Server error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -170,7 +171,7 @@ async (req, res) => {
         return res.json(user.lists)
     } catch (error) {
         console.error(error.message)
-        return res.status(500).send('Server error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -190,7 +191,7 @@ async (req, res) => {
         return res.json(user)
     } catch (error) {
         console.log(error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -218,7 +219,7 @@ async (req, res) => {
         return res.json(lists)
     } catch (error) {
         console.log(error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
