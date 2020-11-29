@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import PropTypes from 'prop-types'
 import {connect} from 'react-redux'
 
@@ -10,7 +10,6 @@ import * as statusAPI from '../../shared/api_calls/problemStatuses'
 import * as problemAPI from '../../shared/api_calls/problems'
 import * as subAPI from '../../shared/api_calls/submissions'
 import SubmissionTable from '../SharedItems/SubmissionTable/SubmissionTable'
-import useDeepCompareEffect, { useDeepCompareEffectNoCheck } from 'use-deep-compare-effect'
 
 /*
 This page displays a list of all problems with
@@ -23,99 +22,94 @@ const SubmissionHistory = props => {
     const {
         isAuth,
     } = props
+
 // Hooks
+    // Store our submissions/problems retrieved
     const [problems, setProblems] = useState(null)
-    const [statuses, setStatuses] = useState(null)
     const [submissions, setSubmissions] = useState(null)
-    const [loading, setLoading] = useState(false)
+    // Store the loading status for our two tables
+    const [loadingSubmission, setLoadingSubmissions] = useState(false)
+    const [loadingProblems, setLoadingProblems] = useState(false)
+    // Determine if modal is open for submission viewer
     const [subViewerOpen, setSubViewerOpen] = useState(false)
 
-    let stats = null
+    const statusArray = useRef(null)
 
-    // Use effect-supporting functions
+    // UseEffect supporting functions
 
     // Get all problem statuses for the logged in user
     const getStatuses = useCallback(async () => {
-        console.log('Getting statuses')
         try {
            const statuses = await statusAPI.getUsersProblemStatuses()
-           setStatuses(statuses) 
-           stats = statuses // We'll lose this but its okay
+           statusArray.current = statuses // We'll lose this but its okay
            console.log(statuses)
            console.log('Got statuses')
         } catch (error) {
-            setStatuses(null)
+            statusArray.current = null
             alert('Could not load problem statuses, try again later.')
             console.error(error)
         }
-    }, [])
+    }, [statusArray])
 
     // Get the full problem objects linked to each status
     const getProblemsFromStatuses = useCallback(async () => {
-        console.log('Getting problems')
         try {
-            const ourStats = (statuses ? statuses : stats)
-            console.log(ourStats)
-            if (ourStats) {
-                const probIds = ourStats.map((status) => {
+            console.log(statusArray.current)
+            if (statusArray.current) {
+                const probIds = statusArray.current.map((status) => {
                     return status.problem
                 })
                 if (probIds) {
                     const probs = await problemAPI.getProblemsFromIDs(probIds)
                     console.log(probs)
                     setProblems(probs)
+                    setLoadingProblems(false)
                 }
                 else {
-                    console.log('Null stats')
                     setProblems(null)
+                    setLoadingProblems(false)
                 }
-                console.log('Got problems')
             }
             // Statuses is null or undefined, just reset problems
             else {
-                console.log('Null statuses')
                 setProblems(null)
+                setLoadingProblems(false)
             }
         } catch (error) {
             setProblems(null)
+            setLoadingProblems(false)
             alert('Could not retrieve problems, try again later.')
             console.error(error)
         }
         console.log('Done getting problems')
-    }, [statuses])
+    }, [statusArray, setProblems, setLoadingProblems])
+
+    // Load the user's problem statuses and problem info
     useEffect(() => {
-        // TODO: Need to re-init states?
         // Get all the user's problem statuses on page load
         const loadInfo = async () => {
             await getStatuses()
             await getProblemsFromStatuses()
             console.log('Refresh loadInfo')
         }
+        setLoadingSubmissions(true)
+        setLoadingProblems(true)
         if (isAuth) {
             loadInfo()
         }
         // If not auth, don't try to load anything
-    }, [isAuth])
-
-    // useDeepCompareEffectNoCheck(() => {
-    //     console.log('Deep')
-    // }, [problems])
-    
+    }, [isAuth, setLoadingProblems, setLoadingSubmissions, getStatuses, getProblemsFromStatuses])
 
     // Get all submissions linked to a problem for the logged in user
-    // TODO: Not sure how to handle setLoading, expirement
     const getSubmissionsForProblem = async (problemID) => {
-        // Start by setting loading true
-        // setLoading(true)
         // get all the submissions for a particular problem
         try {
             const subs = await subAPI.getSubmissionsFromProblemID(problemID)
             setSubmissions(subs)
             // Set loading back to false
-            setLoading(false)
+            setLoadingSubmissions(false)
         } catch (error) {
             setSubmissions(null)
-            // setLoading(false)
             alert('Could not get submissions for problem, please try again later.')
             console.error(error)
         }
@@ -127,13 +121,12 @@ const SubmissionHistory = props => {
     const closeSubViewer = () => {
         setSubViewerOpen(false)
         setSubmissions(false)
-        setLoading(true)
+        setLoadingSubmissions(true)
     }
 
     // Open the submission viewer and try to get submissions for the problem
     const openSubViewer = async (problemID) => {
         setSubViewerOpen(true)
-        // setLoading(true)
         await getSubmissionsForProblem(problemID)
     }
 
@@ -167,7 +160,7 @@ const SubmissionHistory = props => {
                 <Button btnType="Danger" clicked={closeSubViewer}>Exit Submission Viewer</Button>
             </div>
             <div>
-                <SubmissionTable submissions={submissions} extraFields={null} loading={loading}/>
+                <SubmissionTable submissions={submissions} extraFields={null} loading={loadingSubmission}/>
             </div>
         </Modal>
     )
@@ -175,7 +168,7 @@ const SubmissionHistory = props => {
     return (
         <div>
             <h2>Submission History:</h2>
-            <ProblemTable problems={problems} extraFields={problemTableFields}/>
+            <ProblemTable problems={problems} extraFields={problemTableFields} loading={loadingProblems}/>
             {submissionViewerModal}
         </div>
     )

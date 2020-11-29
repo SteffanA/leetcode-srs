@@ -1,6 +1,8 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import PropTypes from 'prop-types'
 import Spinner from '../../UI/Spinner/Spinner'
+import Prism from 'prismjs'
+import '../../../shared/css/prism_default.css'
 
 
 // Creates a generic table for visualizing submissions
@@ -22,11 +24,16 @@ export const SubmissionTable = (props) => {
         generator: <function that generates the cell output when provided a submission>
     }
     */
+
+    useEffect(() => {
+        // Highlight our code data with Prism on page load
+        Prism.highlightAll()
+    })
     
     // Map the result to a string
     const resultMapping = {
-        true : 'Success',
-        false: 'Unsuccessful'
+        true : [(<span style={{color: 'green'}}>Success</span>)],
+        false : [(<span style={{color: 'red'}}>Unsuccessful</span>)],
     }
     
     let subs = null
@@ -50,7 +57,12 @@ export const SubmissionTable = (props) => {
                     <td>{new Date(sub.time_spent * 1000).toISOString().substr(11, 8)}</td>
                     <td>{sub.mem_used}</td>
                     <td>{sub.execution_time}</td>
-                    <td><pre><code>{sub.text}</code></pre></td>
+                    <td><pre>
+                            <code className="language-python">
+                                {sub.text}
+                            </code>
+                        </pre>
+                    </td>
                     {extras}
                 </tr>
             )
@@ -81,13 +93,15 @@ export const SubmissionTable = (props) => {
 
     return (
         <div>
+            {!loading && (
             <table>
                 <tbody>
                     {titles}
-                    {loading && <Spinner/>}
-                    {!loading && subs}
+                    {subs}
                 </tbody>
             </table>
+            )}
+            {loading && <Spinner/>}
         </div>
     )
 }

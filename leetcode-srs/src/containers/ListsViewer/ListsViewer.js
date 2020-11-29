@@ -5,6 +5,7 @@ import Modal from 'react-modal'
 import ProblemTable from '../SharedItems/ProblemTable/ProblemTable'
 import * as api from '../../shared/api_calls/lists'
 import {getProblemsFromIDs} from '../../shared/api_calls/problems'
+import Spinner from '../UI/Spinner/Spinner'
 
 // TODO: Generize this a bit, I'll want to reuse this for viewing
 // private lists too as a part of LCS-4
@@ -20,10 +21,14 @@ export const ListsViewer = (props) => {
     const [searchTerm, setSearchTerm] = useState(INIT_SEARCH_TERM)
     const [problems, setProblems] = useState([])
     const [problemsOpen, setProblemsOpen] = useState(false)
+    // States for if we're loading the lists or problems in the list
+    const [loadingLists, setLoadingLists] = useState(false)
+    const [loadingProblems, setLoadingProblems] = useState(false)
 
     // Submission handler to pass to our search bar
     const handleSubmit = async (event, term) => {
         event.preventDefault()
+        setLoadingLists(true)
         // Ignore requests that match the init
         // TODO: Need a cleaner way to handle this, same as in ProblemViewer
         if (term.localeCompare(INIT_SEARCH_TERM) !== 0) {
@@ -35,6 +40,7 @@ export const ListsViewer = (props) => {
                 setLists([])
             }
         }
+        setLoadingLists(false)
     }
 
     // Initialize our page results
@@ -49,9 +55,11 @@ export const ListsViewer = (props) => {
                 alert('Failed to get Public lists - ' + e)
                 setLists([])
             }
+            setLoadingLists(false)
         }
         // Fill in the page results with either all public lists,
         // or the current search term
+        setLoadingLists(true)
         if (searchTerm.localeCompare(INIT_SEARCH_TERM) === 0) {
             getPublicLists()
         }
@@ -85,7 +93,8 @@ export const ListsViewer = (props) => {
         // Grab the problems for the list and store it in curProblems
         // Probs is an array containing an Object with just the _id field
         // We need to create an array of the full Problem objects
-
+        setProblemsOpen(true)
+        setLoadingProblems(true)
         const ids = probs.map(prob => prob._id)
         try {
             const fullProbs = await getProblemsFromIDs(ids)
@@ -95,7 +104,7 @@ export const ListsViewer = (props) => {
             console.log('Error getting problems from IDS in listViewer ' + e)
             setProblems([])
         }
-        setProblemsOpen(true)
+        setLoadingProblems(false)
     }
 
     const closeProblems = (event) => {
@@ -135,6 +144,7 @@ export const ListsViewer = (props) => {
     return (
         <div>
             <SearchBar defaultText={INIT_SEARCH_TERM} handleSubmit={handleSubmit} termGetter={updateSearchTerm}/>
+            {!loadingLists && (
             <table>
                 <tbody>
                     <tr>
@@ -146,6 +156,8 @@ export const ListsViewer = (props) => {
                     {listsOutput}
                 </tbody>
             </table>
+            )}
+            {loadingLists && <Spinner/>}
             <Modal
                 isOpen={problemsOpen}
                 onAfterOpen={null}
@@ -155,7 +167,7 @@ export const ListsViewer = (props) => {
                 <div>
                     <Button btnType="Success" clicked={closeProblems}>Back to Public List Viewer</Button>
                 </div>
-                <ProblemTable problems={problems} extraFields={null}/>
+                <ProblemTable problems={problems} extraFields={null} loading={loadingProblems}/>
             </Modal>
         </div>
     )

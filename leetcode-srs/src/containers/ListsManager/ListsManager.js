@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import * as listActions from '../../store/actions/lists'
@@ -111,7 +111,13 @@ const ListsManager = props => {
     // States for determining visibility of certain elements on the page
     const [listEditorOpen, setListEditorOpen] = useState(false)
     const [viewListContents, setViewListContents] = useState(false)
-    
+    // Determine if we show the various list editing tools or not
+    const [showEditingTools, setShowEditingTools] = useState(false)
+
+    // Determine if we show our editing tools based on if we have a curList
+    useEffect(() => {
+        setShowEditingTools(props.curList === null ? false : true)
+    }, [props.curList, setShowEditingTools])
 
     
 // Functions
@@ -418,30 +424,37 @@ const ListsManager = props => {
         </Modal>
     )
 
-    return (
+    // Items that only make sense to show if we have a list selected
+    const listEditorItems = (
         <div>
-            {newListFormVisible && newListForm}
-            <Selector showLists={true} showProblems={false}/>
             <Button btnType="Success" clicked={openListEditor}>Edit Selected List</Button>
             {listEditorModal}
             <br/>
             <div>
-                <h4>{props.curListName} is: </h4>
-                <h4 style={{color: 'red'}}>{props.curListPublic ? 'Public' : 'Private'}</h4>
+                <h4>
+                    {props.curListName} is: <span style={{color: 'red'}}>{props.curListPublic ? 'Public' : 'Private'}</span>
+                </h4>
                 {/* If the current list is private, offer the option to set it public*/}
                 {!props.curListPublic && <Button btnType="Success" clicked={promptListPublic}>Set Selected List Public</Button>}
-                <br/>
                 {/* If current list is private, offer ability to rename*/}
-                {!props.curListPublic && viewRenameFormBtn}
+                {!props.curListPublic && <br/> && viewRenameFormBtn}
                 {!props.curListPublic && renameFormState.renameListFormVisible && renameForm}
                 {/* Show the problems currently in the list */}
                 <br/>
                 {viewListContentsBtn}
-                {viewListContents && <ProblemTable problems={props.curProblems} extraFields={problemTableFields}/>}
+                {viewListContents && <ProblemTable problems={props.curProblems} extraFields={problemTableFields} loading={false}/>}
                 <br/>
                 {/* If current list is private, offer ability to delete it. */}
                 {!props.curListPublic && deleteListBtn}
             </div>
+        </div>
+    )
+
+    return (
+        <div>
+            {newListFormVisible && newListForm}
+            <Selector showLists={true} showProblems={false}/>
+            {showEditingTools && listEditorItems}
         </div>
     )
 }

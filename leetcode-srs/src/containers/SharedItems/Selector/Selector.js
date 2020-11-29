@@ -71,10 +71,18 @@ const Selector = props => {
     }, [lists, curList, getProblemsSorted])
 
 // JSX Elements
+
+    // Only display once we have a list
     return (
         <div>
-            {showLists && <DropDownMenu items={lists} updateCurItem={updateCurList} titleItem={listTitleItem}/>}
-            {showProblems &&<DropDownMenu items={problems} updateCurItem={updateCurProblem} titleItem={problemTitleItem}/>}
+            {showLists && lists && <DropDownMenu items={lists} updateCurItem={updateCurList} titleItem={listTitleItem}/>}
+            {showProblems && lists && <DropDownMenu items={problems} updateCurItem={updateCurProblem} titleItem={problemTitleItem}/>}
+            {/* If trying to show lists or problems, but no lists exist, prompt user to add.*/}
+            {(showLists || showProblems) && !lists && 
+            <a href='/manage-lists' style={{color: 'red'}}>
+                Lists loading or no lists exist.  If you haven't added a list, add one at the manage lists page.
+            </a>
+            }
         </div>
     )
 }
