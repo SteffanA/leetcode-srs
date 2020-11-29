@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
         return res.json(lists)
     } catch (error) {
         console.error('Get all public lists: ' + error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -40,7 +40,7 @@ router.get('/own', auth, async (req, res) => {
         return res.json(lists)
     } catch (error) {
         console.error('Get all of logged in user\'s lists: ' + error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -62,7 +62,7 @@ router.get('/public/id/:id', async (req, res) => {
         return res.json(list)
     } catch (error) {
         console.error('Get a public list: ' + error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -81,7 +81,7 @@ router.get('/public/search/:term', async (req, res) => {
         return res.json(lists)
     } catch (error) {
         console.error('Search public lists: ' + error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -103,7 +103,7 @@ router.get('/private/:id', auth, async (req, res) => {
         return res.json(list)
     } catch (error) {
         console.error('Get a public or private list: ' + error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -174,7 +174,7 @@ async (req, res) => {
         return await res.json(problems)
     } catch (error) {
         console.log('Get all problems for list: ' + error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -224,7 +224,7 @@ router.post('/', [auth, [
         return res.json(list)
     } catch (error) {
         console.error('Create a new List' + error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -268,7 +268,7 @@ async (req, res) => {
         return res.json(newList)
     } catch (error) {
         console.error('Copy a list: ' + error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -312,63 +312,7 @@ async (req, res) => {
         return res.json(updatedList)
     } catch (error) {
         console.error('Update list attributes: ' + error.message)
-        return res.status(500).send('Server Error')
-    }
-})
-
-// @route  DELETE api/lists/id
-// @desc   Delete an existing list
-// @access Private
-router.delete('/:id', [auth],
-async (req, res) => {
-    try {
-        // Get our User object
-        const user = await User.findById(req.user.id)
-        // Get our List object
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(404).send({errors: [{msg: 'List not found.'}]})
-        }
-        const list = await List.findById(req.params.id)
-
-        // Ensure our list exists
-        if (!list) {
-            return res.status(404).send({errors: [{msg: 'List not found.'}]})
-        }
-        
-        // Check that this list belongs to the user
-        if (user._id.toString() != list.creator.toString()) {
-            return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
-        }
-        // Check that this list is not public
-        if (list.public) {
-            // Do not allow deletion of public lists.
-            // Other users may have this list in their list of lists, so
-            // we want to ensure that we don't suddenly erase it from them.
-            // Return forbidden request
-            return res.status(403).json({errors: [{msg: 'Cannot delete a public list.'}]})
-        }
-
-        // Remove the list 
-        await list.remove()
-        // Remove the list from the User's lists
-        const index = user.lists.map(curList => curList._id.toString()).indexOf(req.params.id)
-        if (index === -1) {
-            // This list isn't part of the user's lists
-            // This should never be hit.
-            console.log('Hit a statement we should never hit.')
-            console.log('Check out how we hit a list not in user\'s lists when deleting list')
-            console.log('User: ' + user._id)
-            console.log('List:' + req.params.id)
-            return res.status(404).json({errors: [{msg: 'List not a part of user\'s Lists.'}]})
-        }
-        // Remove the list from the lists array
-        user.lists.splice(index, 1)
-        await user.save()
-
-        return res.json({msg: 'List removed'})
-    } catch (error) {
-        console.error('Delete list: ' + error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -414,7 +358,7 @@ async (req, res) => {
         return res.json(updatedList)
     } catch (error) {
         console.error('Add problem to list: ' + error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -458,7 +402,7 @@ async (req, res) => {
         return res.json(updatedList)
     } catch (error) {
         console.error('Remove problem from list: ' + error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -478,7 +422,7 @@ async (req, res) => {
     const validationErrors = validationResult(req)
     if (!validationErrors.isEmpty) {
         // Something was missing, send an error
-        return res.status(400).json({errors : errors.array()})
+        return res.status(400).json({errors : validationErrors.array()})
     }
     try {
         console.log(req.body)
@@ -556,10 +500,65 @@ async (req, res) => {
         })
     } catch (error) {
         console.error("Bulk list update error: " + error.message)
-        return res.status(500).send('Server Error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
+// @route  DELETE api/lists/id
+// @desc   Delete an existing list
+// @access Private
+router.delete('/:id', [auth],
+async (req, res) => {
+    try {
+        // Get our User object
+        const user = await User.findById(req.user.id)
+        // Get our List object
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
+        const list = await List.findById(req.params.id)
+
+        // Ensure our list exists
+        if (!list) {
+            return res.status(404).send({errors: [{msg: 'List not found.'}]})
+        }
+        
+        // Check that this list belongs to the user
+        if (user._id.toString() != list.creator.toString()) {
+            return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
+        }
+        // Check that this list is not public
+        if (list.public) {
+            // Do not allow deletion of public lists.
+            // Other users may have this list in their list of lists, so
+            // we want to ensure that we don't suddenly erase it from them.
+            // Return forbidden request
+            return res.status(403).json({errors: [{msg: 'Cannot delete a public list.'}]})
+        }
+
+        // Remove the list 
+        await list.remove()
+        // Remove the list from the User's lists
+        const index = user.lists.map(curList => curList._id.toString()).indexOf(req.params.id)
+        if (index === -1) {
+            // This list isn't part of the user's lists
+            // This should never be hit.
+            console.log('Hit a statement we should never hit.')
+            console.log('Check out how we hit a list not in user\'s lists when deleting list')
+            console.log('User: ' + user._id)
+            console.log('List:' + req.params.id)
+            return res.status(404).json({errors: [{msg: 'List not a part of user\'s Lists.'}]})
+        }
+        // Remove the list from the lists array
+        user.lists.splice(index, 1)
+        await user.save()
+
+        return res.json({msg: 'List removed'})
+    } catch (error) {
+        console.error('Delete list: ' + error.message)
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
+    }
+})
 
 
 module.exports = router

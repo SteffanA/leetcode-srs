@@ -34,7 +34,7 @@ router.get('/lc/:leetcode_id', auth, async (req, res) => {
         return res.json(allSubs)
     } catch (error) {
         console.error(error)
-        return res.status(500).send('Server error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -63,7 +63,7 @@ router.get('/:problem_id', auth, async (req, res) => {
         return res.json(allSubs)
     } catch (error) {
         console.error(error)
-        return res.status(500).send('Server error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
@@ -132,7 +132,7 @@ router.post('/:problem_id', [auth, [
         return res.json(newSub)
     } catch (error) {
         console.error(error)
-        return res.status(500).send('Server error')
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
 
