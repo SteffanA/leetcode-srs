@@ -73,9 +73,8 @@ router.post('/', [
                 return res.json({ token, timeout, username })
             }
         )
-        console.log('User authenticated.')
     } catch (error) {
-        console.error(error.message)
+        console.error('Error when authing user ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
