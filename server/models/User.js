@@ -12,8 +12,13 @@ const UserSchema = new mongoose.Schema({
     // User's email address
     email: {
         type: String,
-        required: true,
-        unique: true,
+        required: false,
+        // Allow for null emails multiple times
+        index: {
+            unique: true,
+            partialFilterExpression: { email: {$type: 'string'}},
+        },
+        default: null,
     },
     // Hashed password
     password: {

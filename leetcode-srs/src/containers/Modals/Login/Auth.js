@@ -19,16 +19,28 @@ const Auth = props => {
         isRegister: true,
         // Controls for the login/register form
         controls: {
+            // Username
+            name: {
+                elementType: 'input',
+                elementConfig: {
+                    type: 'username',
+                    placeholder: 'User Name <Required if registering>'
+                },
+                value: '',
+                // Validation intentionally missing for now
+                valid: true,
+                touched: false,
+            },
             // User's email
             email: {
                 elementType: 'input',
                 elementConfig: {
                     type: 'email',
-                    placeholder: 'Email Address'
+                    placeholder: 'Email Address (not required)'
                 },
                 value: '',
                 validation: {
-                    required: true,
+                    required: false,
                     isEmail: true,
                 },
                 valid: false,
@@ -54,25 +66,13 @@ const Auth = props => {
                 elementType: 'input',
                 elementConfig: {
                     type: 'password',
-                    placeholder: 'Confirm Password <Required if registering>',
+                    placeholder: 'Confirm Password <Required if registering, case sensitive>',
                 },
                 value: '',
                 //Validation intentionally missing for now
                 valid: true,
                 touched: false,
             },
-            // Username
-            name: {
-                elementType: 'input',
-                elementConfig: {
-                    type: 'username',
-                    placeholder: 'User Name <Required if registering>'
-                },
-                value: '',
-                // Validation intentionally missing for now
-                valid: true,
-                touched: false,
-            }
         }
     })
 
@@ -99,15 +99,11 @@ const Auth = props => {
         if (isRegister) {
             //TODO: Transform this to somehow use our checkValidity function?
             if (password.value !== password2.value) {
-                // TODO - throw an error
                 alert('Passwords do not match!')
-                console.log('pass values dont match ' + password.value + password2.value)
                 return
             }
-            if (name.value === '') {
-                console.log('name value is empty')
-                // TODO: Throw an error
-                alert('Name required!')
+            if (name.value === '' && email.value === '') {
+                alert('Name or email required!')
                 return
             }
         }
@@ -149,8 +145,7 @@ const Auth = props => {
     let errorMessage = null
     if (props.error) {
         //Output our error message
-        //TODO: Is this the right way to access our error message? Check api
-        errorMessage = <p>{props.error.message}</p>
+        errorMessage = <p style={{color: 'red'}}>{props.error.msg}</p>
     }
 
     // Make an array with all form elements with a key identifier

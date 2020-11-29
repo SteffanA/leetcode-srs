@@ -81,20 +81,19 @@ export const checkAuthState = () => {
     }   
 }
 
-export const auth = (email, password, isRegister, name='') => {
+export const auth = (email='', password, isRegister, name) => {
     return dispatch => {
         // Start the auth process
         dispatch(authStart())
 
         const authData = {
-            email: email,
+            name: name,
             password: password,
+            email: email,
         }
         let url = process.env.REACT_APP_HOST_URL + '/api/'
         // Change API endpoint and body depending on if we're registering or logging in
         if (isRegister) {
-            // Name is also required when registering
-            authData.name = name
             url = url + 'users'
         }
         else {
@@ -118,7 +117,7 @@ export const auth = (email, password, isRegister, name='') => {
             })
             .catch(err => {
                 console.log('auth error of ', err)
-                dispatch(authFail(err))
+                dispatch(authFail(err.response.data.errors[0]))
             })
         
     }
