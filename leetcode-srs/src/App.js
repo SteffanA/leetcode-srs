@@ -10,6 +10,7 @@ import Auth from './containers/Modals/Login/Auth'
 import Logout from './containers/Auth/Logout'
 import ListsManager from './containers/ListsManager/ListsManager';
 import ListsViewer from './containers/ListsViewer/ListsViewer'
+import SubmissionHistory from './containers/SubmissionHistory/SubmissionHistory'
 
 import * as actions from './store/actions/index'
 
@@ -42,6 +43,7 @@ const App = props => {
           <Route exact path="/logout" component={Logout} />
           <PrivateRoute exact path="/manage-lists" component={ListsManager} />
           <Route exact path="/view-public-lists" component={ListsViewer}/>
+          <PrivateRoute exact path="/submissions" component={SubmissionHistory} />
           {/* Land any random URL on a page w/ Navbar*/}
           <Route path="/" component={null}/>
         </Switch>

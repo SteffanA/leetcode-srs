@@ -10,7 +10,7 @@ const router = express.Router()
 
 
 
-// @route  GET api/problem_status/:problem_id
+// @route  GET api/problem_status/
 // @desc   Get all problem statuses for a user
 // @access Private
 router.get('/', auth, async (req, res) => {

@@ -1,4 +1,5 @@
 const express = require('express')
+// const session = require('express-session')
 const connectDB = require('./config/db')
 const https = require('https') // For secure hosting
 const fs = require('fs') // For getting HTTPS cert and key
@@ -51,5 +52,6 @@ if (SECURE) {
     .listen(PORT, () => console.log(`Secure server started on port ${PORT}`))
 }
 else {
+    // app.use(session({cookie: {sameSite: 'strict'},}))
     app.listen(PORT, () => console.log(`Server started on port ${PORT}`))
 }

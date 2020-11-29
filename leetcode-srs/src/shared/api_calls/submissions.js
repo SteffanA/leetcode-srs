@@ -33,3 +33,32 @@ export const addNewSubmission = (sub, prob_id) => {
         })
     })
 }
+
+// Get all submissions for a particular problem for a user based
+// on the problem ID
+export const getSubmissionsFromProblemID = (probID) => {
+    const token = getTokenOrNull()
+    // Submissions are linked to a user and require a token
+    if (token === null) {
+        return 'User not logged in!'
+    }
+
+    const url = BASE_URL + probID
+
+    const config = {
+        headers: {
+            'x-auth-token': token,
+            'content-type': 'application/json',
+        }
+    }
+
+    return new Promise((resolve, reject) => {
+        axios.get(url, config
+        ).then(response => {
+            resolve(response.data)
+        }).catch(err => {
+            console.debug(err)
+            reject(err.message)
+        })
+    })
+}

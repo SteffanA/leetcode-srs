@@ -113,7 +113,6 @@ const Auth = props => {
         }
 
         // We can use the same function for login and register.
-        console.log('about to auth')
         props.auth(email.value, password.value, isRegister, name.value)
     }
 
