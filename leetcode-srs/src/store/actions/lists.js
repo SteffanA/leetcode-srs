@@ -107,7 +107,7 @@ export const listsUpdateProblems = (updatedProblems, curListID) => {
         // Start the lists process
         dispatch(listStart())
         try {
-            const response = await api.updateListsProblems(updatedProblems, curListID)
+            await api.updateListsProblems(updatedProblems, curListID)
             // Update the current list object to reflect the results
             dispatch(listsUpdatedProblemsSuccess())
         } catch (error) {

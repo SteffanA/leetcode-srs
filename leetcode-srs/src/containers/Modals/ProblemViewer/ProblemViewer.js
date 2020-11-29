@@ -42,6 +42,8 @@ export const ProblemViewer = (props) => {
         setSearchTerm
     ] = useState('')
 
+    const [loadingProblems, setLoadingProblems] = useState(false)
+
     // Constants definining the index of states within the currentProblemsAndState 
     // mapped arrays
     const TOUCHED_INDEX = 0 // Has problem been touched (made to add or remove)
@@ -103,7 +105,10 @@ export const ProblemViewer = (props) => {
                     console.debug(error)
                     alert('Failed to load problems. Please try again later.')
                 }
+                setLoadingProblems(false)
             }
+
+            setLoadingProblems(true)
             getProblems()
         }
         else {
@@ -120,6 +125,7 @@ export const ProblemViewer = (props) => {
     // We will replace the problems displayed on the page with the results
     const handleSubmit = async (event, searchTermy) => {
         event.preventDefault()
+        setLoadingProblems(true)
         // TODO: Not sure if this is a great approach to take,
         // considering it's not out of the realm of possibility for
         // an actual LC problem to be called this.
@@ -145,6 +151,7 @@ export const ProblemViewer = (props) => {
                 alert('Search failed - please try again later.')
             }
         }
+        setLoadingProblems(false)
     }
 
     // Use this to override any enter key press on the page
@@ -295,7 +302,7 @@ export const ProblemViewer = (props) => {
         <div>
             <SearchBar defaultText="Search for a Problem" handleSubmit={handleSubmit} termGetter={updateSearchTerm}/>
             <Input elementType="submit" value="Save Changes" clicked={saveChanges}/>
-            <ProblemTable problems={curProblemResults} extraFields={extraProblemFields}/>
+            <ProblemTable problems={curProblemResults} extraFields={extraProblemFields} loading={loadingProblems}/>
             {/*TODO: Add support for these results - will likely need to update the API
                         to allow for selective result filtering - aka, grab results 10-20
                         Also, add a button for selecting number of results displayed? 

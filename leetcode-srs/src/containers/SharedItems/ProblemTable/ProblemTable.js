@@ -1,6 +1,7 @@
-import React, { useEffect} from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import {createLink} from '../../../shared/utility'
+import Spinner from '../../UI/Spinner/Spinner'
 
 
 // Creates a generic table for visualizing problems
@@ -11,8 +12,8 @@ export const ProblemTable = (props) => {
     const {
         problems, //problems to insert into the table
         extraFields, // Explained below
+        loading, // if table info is still loading
     } = props
-
     /*
     Extra fields is an array of mappings containing the following: 
     {
@@ -29,7 +30,7 @@ export const ProblemTable = (props) => {
     }
     
     let probs = null
-    if (problems) {
+    if (!loading && problems) {
         probs = problems.map(prob => {
             // Generate additional table columns for all the extra fields to append
             let extras = null
@@ -57,7 +58,7 @@ export const ProblemTable = (props) => {
     }
     
     let extraTitles = null
-    if (extraFields) {
+    if (!loading && extraFields) {
         extraTitles = extraFields.map(field => {
             return (
                 <th key={field['title']}>{field['title']}</th>
@@ -76,12 +77,15 @@ export const ProblemTable = (props) => {
 
     return (
         <div>
+            {!loading && (
             <table>
                 <tbody>
                     {titles}
                     {probs}
                 </tbody>
             </table>
+            )}
+            {loading && <Spinner/>}
         </div>
     )
 }

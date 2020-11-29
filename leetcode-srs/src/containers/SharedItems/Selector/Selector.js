@@ -2,7 +2,6 @@ import React, {useEffect, useState}  from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import useDeepCompareEffect from 'use-deep-compare-effect'
-import deepEqual from 'deep-equal'
 
 import DropDownMenu from '../DropDownMenu'
 import * as listActions from '../../../store/actions/lists'
@@ -72,10 +71,18 @@ const Selector = props => {
     }, [lists, curList, getProblemsSorted])
 
 // JSX Elements
+
+    // Only display once we have a list
     return (
         <div>
-            {showLists && <DropDownMenu items={lists} updateCurItem={updateCurList} titleItem={listTitleItem}/>}
-            {showProblems &&<DropDownMenu items={problems} updateCurItem={updateCurProblem} titleItem={problemTitleItem}/>}
+            {showLists && lists && <DropDownMenu items={lists} updateCurItem={updateCurList} titleItem={listTitleItem}/>}
+            {showProblems && lists && <DropDownMenu items={problems} updateCurItem={updateCurProblem} titleItem={problemTitleItem}/>}
+            {/* If trying to show lists or problems, but no lists exist, prompt user to add.*/}
+            {(showLists || showProblems) && !lists && 
+            <a href='/manage-lists' style={{color: 'red'}}>
+                Lists loading or no lists exist.  If you haven't added a list, add one at the manage lists page.
+            </a>
+            }
         </div>
     )
 }
@@ -104,7 +111,7 @@ const mapDispatchToProps = dispatch => {
 Selector.propTypes = {
     auth: PropTypes.bool.isRequired,
     getLists: PropTypes.func.isRequired,
-    lists: PropTypes.array.isRequired,
+    lists: PropTypes.array,
     updateCurList: PropTypes.func.isRequired,
     curList: PropTypes.object,
     curProblem: PropTypes.object,

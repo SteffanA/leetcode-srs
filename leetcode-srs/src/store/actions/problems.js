@@ -99,7 +99,6 @@ export const problemsGetAllForListSorted = (list) => {
         }
         try {
             const response = await api.getAllProblemsForListSorted(list._id)
-            console.log(response)
             if (Array.isArray(response) && response.length > 0) {
                 const firstProblem = response[0]
                 const problemIds = response.map((problem) => problem._id)

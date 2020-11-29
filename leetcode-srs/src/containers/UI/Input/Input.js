@@ -34,6 +34,12 @@ const input = (props) => {
                 value={props.value}
                 onChange={props.changed}/>
             break
+        case('textareapython'):
+            inputElement = <textarea className={inputClasses.join(' ') + ' class="prism-live language-python"'} 
+                {...props.elementConfig} 
+                value={props.value}
+                onChange={props.changed}/>
+            break
         case('select'):
             inputElement = <select className={inputClasses.join(' ')}
                 value={props.value}

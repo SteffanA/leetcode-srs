@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
-import { useDeepCompareEffect, useDeepCompareEffectNoCheck } from 'use-deep-compare-effect'
 
 import classes from './DropDownMenu.module.css'
 
@@ -113,8 +112,8 @@ function DropDownMenu(props) {
 
 
 DropDownMenu.propTypes = {
-    title: PropTypes.string.isRequired,
-    items: PropTypes.array.isRequired,
+    title: PropTypes.string,
+    items: PropTypes.array,
     updateCurItem: PropTypes.func.isRequired,
 }
 

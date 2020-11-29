@@ -9,13 +9,42 @@ const {createProblemStatus, updateProblemStatus} = require('../../utility/proble
 
 const router = express.Router()
 
+// @route  GET api/submissions/lc/:leetcode_id
+// @desc   Retrieve all submissions for a particular problem based on LeetCode id
+// @access Private
+router.get('/lc/:leetcode_id', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id)
+        const problem = await Problem.findOne({id: req.params.leetcode_id})
+        // Check the problem actually exists
+        if (!problem) {
+            return res.status(404).json({errors: [{msg: 'Problem does not exist.'}]})
+        }
+        // Try to find the status related to the problem given
+        const index = user.problem_statuses.map((status) => {
+                return status.problem.toString()})
+                .indexOf(problem._id.toString())
+        // Check that the status exists for this problem
+        if (index === -1) {
+            return res.status(404).json({errors: [{msg: 'No data for this problem.'}]})
+        }
+        const submissions = user.problem_statuses[index].submissions
+        const allSubs = await Submission.find().where('_id').in(submissions)
+
+        return res.json(allSubs)
+    } catch (error) {
+        console.error(error)
+        return res.status(500).send('Server error')
+    }
+})
+
 // @route  GET api/submissions/:problem_id
-// @desc   Retrieve all submissions for a particular problem
+// @desc   Retrieve all submissions for a particular problem based on MonogoDB _id
 // @access Private
 router.get('/:problem_id', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id)
-        const problem = await Problem.findOne({id: req.params.problem_id})
+        const problem = await Problem.findOne({_id: req.params.problem_id})
         // Check the problem actually exists
         if (!problem) {
             return res.status(404).json({errors: [{msg: 'Problem does not exist.'}]})

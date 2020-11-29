@@ -2,6 +2,7 @@ import React, {useState, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import classes from './MainPage.module.css'
 import { connect } from 'react-redux'
+// import Prism from 'prismjs'
 
 import {createLink, checkValidity, updateObject} from '../../shared/utility'
 import Selector from '../SharedItems/Selector/Selector'
@@ -47,7 +48,7 @@ const MainPage = (props) => {
         controls: {
             // Recorded submission
             code: {
-                elementType: 'textarea',
+                elementType: 'textareapython',
                 elementConfig: {
                     type: 'text',
                     placeholder: 'Submitted Code'
@@ -148,6 +149,20 @@ const MainPage = (props) => {
             currentProblemLink.current = createLink(curProblem.link)
         }
     }, [curProblem])
+
+    // Load the prism-live script
+    // useEffect(() => {
+    //     let scripts = [
+    //         {src : 'prism-live.js?load=python'}
+    //     ]
+
+    //     scripts.map(item => {
+    //         const script = document.createElement("script")
+    //         script.src = item.src
+    //         script.async = true
+    //         document.body.appendChild(script)
+    //     })
+    // })
 
     
 // Handler functions
