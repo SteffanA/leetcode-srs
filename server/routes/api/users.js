@@ -28,7 +28,7 @@ async (req, res) => {
         // Return the user as JSON
         return res.json(user)
     } catch (error) {
-        console.log(error.message)
+        console.log('Error when getting user by id ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
@@ -55,7 +55,7 @@ async (req, res) => {
         // Return the user's lists as JSON
         return res.json(lists)
     } catch (error) {
-        console.log(error.message)
+        console.log('Error when getting user\'s lists ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
@@ -182,7 +182,7 @@ async (req, res) => {
         // Return the updated lists array
         return res.json(user.lists)
     } catch (error) {
-        console.error(error.message)
+        console.error('Error when adding list to user\'s lists: ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
@@ -218,7 +218,7 @@ async (req, res) => {
         // Return updated lists
         return res.json(user.lists)
     } catch (error) {
-        console.error(error.message)
+        console.error('Error when removing list from user\'s lists: ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })

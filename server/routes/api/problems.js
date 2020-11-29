@@ -48,7 +48,7 @@ router.get('/', async (req, res) => {
 
         return res.json(problems)
     } catch (error) {
-        console.error(error.message)
+        console.error('Error when getting all problems ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
@@ -92,7 +92,7 @@ router.get('/name/:search', async (req, res) => {
             ).sort({id: 1})
         return res.json({problems})
     } catch (error) {
-        console.error(error.message)
+        console.error('Error when getting problems via search ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
@@ -158,7 +158,7 @@ router.post('/', [auth, [
         const problem = await newProblem.save()
         return res.json(problem)
     } catch (error) {
-        console.error(error.message)
+        console.error('Error when posting new LC problem ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
@@ -249,7 +249,7 @@ router.put('/', [auth, [
         const updatedProblem = await existingProblem.save()
         return res.json(updatedProblem)
     } catch (error) {
-        console.error(error.message)
+        console.error('Error when updating LC problem ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })

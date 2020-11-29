@@ -22,7 +22,7 @@ router.get('/', auth, async (req, res) => {
         }
         return res.json(user.problem_statuses)
     } catch (error) {
-        console.error(error.message)
+        console.error('Error when getting all statuses for a user ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
@@ -47,7 +47,7 @@ router.get('/:problem_id', auth, async (req, res) => {
         }
         return res.json(user.problem_statuses[index])
     } catch (error) {
-        console.error(error.message)
+        console.error('Error when getting status for a problem ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
@@ -149,7 +149,7 @@ router.put('/:problem_id', [auth,[
             return res.json(new_status)
         }
     } catch (error) {
-        console.error(error.message)
+        console.error('Error when updating problem status ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
@@ -213,7 +213,7 @@ async (req, res) => {
 
         return res.json(user.problem_statuses[index])
     } catch (error) {
-        console.error(error.message)
+        console.error('Error resetting problem status ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })
