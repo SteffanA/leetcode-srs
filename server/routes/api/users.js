@@ -130,8 +130,8 @@ router.post('/', [oneOf([
         }
 
         // Set our timeout for the token
-        // Default to an hour, unless in development mode
-        const timeout = process.env.DEVELOPMENT ? 360000 : 3600
+        // Default to 10 hours, unless in development mode
+        const timeout = process.env.DEVELOPMENT ? 360000 : 36000
         // Sign our token
         jwt.sign(
             payload,
@@ -141,7 +141,7 @@ router.post('/', [oneOf([
                 // Send token to client on callback
                 if (err) {throw err}
                 // No error, return token
-                return res.json({token})
+                return res.json({token, timeout, username: name})
             },
         )
         console.log('User registered')
