@@ -9,7 +9,7 @@ COPY ./package.json ./
 RUN npm install
 # Copy everything in the container
 COPY . .
-# Debug add bash
+# Enable the below to add bash for debugging.
 # RUN apk add --no-cache bash coreutils grep sed
 # Start up the server
 CMD ["npm", "run", "start"]
