@@ -52,14 +52,12 @@ const SubmissionHistory = props => {
     // Get the full problem objects linked to each status
     const getProblemsFromStatuses = useCallback(async () => {
         try {
-            console.log(statusArray.current)
             if (statusArray.current) {
                 const probIds = statusArray.current.map((status) => {
                     return status.problem
                 })
                 if (probIds) {
                     const probs = await problemAPI.getProblemsFromIDs(probIds)
-                    console.log(probs)
                     setProblems(probs)
                     setLoadingProblems(false)
                 }

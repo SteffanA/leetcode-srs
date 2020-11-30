@@ -81,6 +81,7 @@ export const checkAuthState = () => {
     }   
 }
 
+// Login or register the user.
 export const auth = (email='', password, isRegister, name) => {
     return dispatch => {
         // Start the auth process
@@ -102,8 +103,6 @@ export const auth = (email='', password, isRegister, name) => {
         }
 
         // Send our request to the backend
-        // TODO: Do we need to implement an API key to prevent malicious request sending? Probably.
-        // Add as a param; url += ?key=API_KEY
         axios.post(url, authData)
             .then(response => {
                 // Set the local storage items for future logins
