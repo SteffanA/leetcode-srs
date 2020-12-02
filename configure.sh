@@ -1,4 +1,45 @@
 #!/bin/sh
+# Function for writing user input env variables into env file
+# Read the .env file line by line, skipping comments, erasing anything after
+# =, and then adding user input after the =
+# Writes to a temp file first, then replaces the .env with the temp and removes
+# the temp
+get_env_input () {
+    envFile=$1
+    tempFile=$2
+    while IFS= read -r line
+    do
+        # Check if this is a comment line - if so, simply print it.
+        if [[ $line =~ ^#.* ]]; then
+            echo "$line"
+            # Also print to our output file
+            echo "$line" >> $output
+        # Else ask for a value to provide for the variable
+        else
+            echo "Enter the value you would like to provide for:"
+            # Grab just the environmental variable
+            # Use sed to find the first =, then replace all non-equal after with
+            # an empty string
+            curVar = sed 's/=[^=]*$//' $line
+            read -p "$curVar" inputVar
+            echo
+            # Write the curVar and inputVar into our output file
+            echo -n "$curVar" >> $tempFile
+            echo "$inputVar" >> $tempFile
+        fi
+    done < "$envFile"
+    # Replace the env file with our temp file
+    cp $tempFile $envFile
+    # Delete the temp file
+    rm $tempFile
+}
+
+envFile = ./leetcode-srs/.env
+# Use a temp file for adding our output to
+output = ./leetcode-srs/.env-temp
+echo
+get_env_input($envFile, $output)
+exit(1)
 
 # Install the npm modules for the server and frontend
 (cd ./server/ && npm install)
@@ -17,8 +58,17 @@ then
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]
     then
-        echo "This feature is a TODO.  You'll have to edit by hand for now!"
-        # Do 
+        echo "Adding variables for the React frontend"
+        envFile = ./leetcode-srs/.env
+        # Use a temp file for adding our output to
+        output = ./leetcode-srs/.env-temp
+        echo
+        get_env_input($envFile, $output)
+        echo "Adding variables for the rest of the application"
+        $envFile= ./.env
+        $output = ./.env-temp
+        echo
+        get_env_input($envFile, $output)
     fi
 fi
 echo "Would you like to fill your database with LeetCode problems?" -n 1 -r
