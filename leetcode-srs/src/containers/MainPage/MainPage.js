@@ -351,16 +351,22 @@ const MainPage = (props) => {
     return (
         <div className={classes.MainPage}>
             {!isAuth && <div>You are not logged in. Log in or register above.</div>}
-            {isAuth && <Selector showLists={true} showProblems={true} />}
-            {formVisible && form}
-            {(!formVisible && isAuth && curProblem) && problemLinkButton}
+            <div className={classes.Selector}>
+                {isAuth && <Selector showLists={true} showProblems={true} />}
+            </div>
+            <div className={classes.StartButton}>
+                {(!formVisible && isAuth && curProblem) && problemLinkButton}
+            </div>
+            <div className={classes.ResultForm}>
+                {formVisible && form}
+                {(formValid && formVisible) && submitResultsButton}
+            </div>
             <br/>
-            <div>
+            <div className={classes.Timer}>
                 {timerVisible && timer.current}
                 <br/>
                 {formVisible && timerVisButton} {timerVisible && importTimeToFormButton}
             </div>
-            {(formValid && formVisible) && submitResultsButton}
         </div>
     )
 }

@@ -1,3 +1,28 @@
 .MainPage{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    
+}
 
+.Selector {
+    order: 1;
+    position: relative;
+}
+
+.StartButton {
+    order: 2;
+    display: grid;
+}
+
+.ResultForm {
+    order: 2;
+    display: grid;
+    width: 100%;
+}
+
+.Timer {
+    order: 3;
+    display: grid;
+    width: 100%;
 }
