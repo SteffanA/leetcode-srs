@@ -13,7 +13,7 @@ const app = express()
 // Connect to our DB
 connectDB()
 // Init our middleware
-app.use(express.json({extended: true}))
+app.use(express.json({extended: true, limit: '50mb'}))
 
 // Setup the API
 app.get('/', (req, res) => res.send('API running.'))

@@ -97,8 +97,6 @@ then
         docker-compose up -d mongo server
         # Mark that we have containers running we'll need to clean up
         dockerRunning="1"
-	# Give the containers some time to boot before running imports
-	sleep 10
     else
         echo "Skipping running containers."
         echo

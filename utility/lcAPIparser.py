@@ -1,6 +1,6 @@
 '''
-Last Run: 12/02/2020
-Last Updated: 12/02/2020
+Last Run: 12/03/2020
+Last Updated: 12/03/2020
 
 This takes the results of the LeetCode api page and transforms it into the data we want
 This helper script may or may not work depending on if LC changes their API structure.
@@ -101,10 +101,14 @@ class helper:
         if question_info:
             # Define our server URL endpoints here:
             base_server_url = os.getenv('SERVER_BASE_URL')
-            problem_post_url = base_server_url + '/api/problems/bulk'
-            problem_get_url = base_server_url + '/api/problems'
-            login_url = base_server_url + '/api/auth'
-            register_url = base_server_url + '/api/users'
+            server_port = os.getenv('SERVER_PORT')
+            server_url = base_server_url + ':' + server_port
+
+            problem_post_url = server_url + '/api/problems/bulk'
+            problem_get_url = server_url + '/api/problems'
+            login_url = server_url + '/api/auth'
+            register_url = server_url+ '/api/users'
+
             # Get a login token for the admin user
             admin_email = os.getenv('ADMIN_EMAIL')
             admin_pass = os.getenv('ADMIN_PASS')
