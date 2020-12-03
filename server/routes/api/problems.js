@@ -163,6 +163,91 @@ router.post('/', [auth, [
     }
 })
 
+// @route  POST /api/problems/bulk
+// @desc   Adds new LeetCode problems to the database
+// @access Admin
+router.post('/bulk', [auth, [
+    check('problems', 'Must submit array of problems.').isArray(),
+    check('problems.*.id', 'Problem must have valid id.').not().isEmpty(),
+    check('problems.*.name', 'Problem must have a name').not().isEmpty(),
+    check('problems.*.problem_text', 'Problem must have accompanying text').not().isEmpty(),
+    check('problems.*.link', 'Must include link to problem').not().isEmpty(),
+    check('problems.*.difficulty', 'Problem must have a difficulty level').isNumeric(),
+    check('problems.*.is_premium', 'Problem must be marked premium or not').isBoolean(),
+]], async (req, res) => {
+    // Check our request contains required fields
+    const validationErrors = validationResult(req)
+    if (!validationErrors.isEmpty) {
+        // Something was missing, send an error
+        return res.status(400).json({errors : validationErrors.array()})
+    }
+    try {
+        // Get user, ensure is admin user.
+        //TODO: Learn the real way to make admin routes
+        // If admin, allow. If not, unauthorized msg
+        const user = await User.findById(req.user.id)
+        const admin_email = process.env.ADMIN_EMAIL
+        if (!user || user.email != admin_email) {
+            return res.status(401).json({msg: 'Access denied'})
+        }
+
+        const {
+            problems
+        } = req.body
+
+        // Valid admin - for each problem, create the problem and post it.
+        // Keep track of which problems we were able to add and which we
+        // were unable to
+        const notAdded = []
+        const added = []
+        for (let problem of problems) {
+            const {
+                id,
+                name,
+                problem_text,
+                link,
+                test_case,
+                start_code,
+                difficulty,
+                is_premium,
+            } = problem
+
+            // Check if the problem already exists before saving
+            const existingProblem = await Problem.findOne({id: id})
+            if (existingProblem) {
+                notAdded.push(id)
+                // Move on to the next problem
+                continue
+            }
+
+            const newProblem = new Problem({
+                id: id,
+                name: name,
+                problem_text: problem_text,
+                link: link,
+                test_case: test_case,
+                start_code: start_code,
+                difficulty: difficulty,
+                is_premium: is_premium
+            })
+
+            // Send to DB
+            try {
+                await newProblem.save()
+                added.push(id)
+            } catch (error) {
+                console.log('Couldn\'t save problem with id ' + id + 'during bulk additions.')
+                notAdded.push(id)
+            }
+        }
+        // Return the results of which problems we could add and which we couldn't
+        return res.json({'NotAdded' : notAdded, 'Added:' : added})
+    } catch (error) {
+        console.error('Error when posting new LC problems ' + error.message)
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
+    }
+})
+
 
 // @route  PUT /api/problems/bulk
 // @desc   Get multiple problems by ids
