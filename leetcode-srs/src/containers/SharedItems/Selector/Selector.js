@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 
-import DropDownMenu from '../DropDownMenu'
+import DropDownMenu from '../DropDownMenu/DropDownMenu'
 import * as listActions from '../../../store/actions/lists'
 import * as problemActions from '../../../store/actions/problems'
 

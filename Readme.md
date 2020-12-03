@@ -3,13 +3,9 @@
 
  
 
-This is a web application designed to provide Spaced Repetition Studying
+This is a web application designed to provide Spaced Repetition Studying for LeetCode problems.  Spaced repetition studying works by showing you the same
 
-for LeetCode problems.  Spaced repetition studying works by showing you the same
-
-problem multiple times over different periods of time, ensuring that you don't
-
-repeat the same problem too many times, while also ensuring you re-visit a
+problem multiple times over different periods of time, ensuring that you don't repeat the same problem too many times, while also ensuring you re-visit a
 
 problem right before you may forget how to approach it.  [This project is currently live on my website.](http://lcs.steffan.duckdns.org/)
 

@@ -4,11 +4,11 @@ import PropTypes from 'prop-types'
 import classes from './Navbar.module.css'
 import {connect} from 'react-redux'
 import Modal from 'react-modal'
-import Auth from '../Modals/Login/Auth'
-import Button from '../UI/Button/Button'
+import Auth from '../../Modals/Login/Auth'
+import Button from '../../UI/Button/Button'
 
 /*
-need links to:
+Provide links to:
     Main page
     Login/Logout
     Register (combine with login)
