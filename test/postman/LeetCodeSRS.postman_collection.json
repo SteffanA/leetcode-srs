@@ -1,0 +1,1064 @@
+{
+	"info": {
+		"_postman_id": "64e9f618-4a03-4b92-9ef9-c966e0fc51c3",
+		"name": "LeetCodeSRS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Users & Auth",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\" : \"Steffan\",\n\t\"email\": \"test@test.com\",\n\t\"password\": 123456\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users"
+							],
+							"query": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User Successfully",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"test@test.com\",\n\t\"password\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "https://192.168.1.63:5000/api/auth",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"1",
+								"63"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add a List to User's lists",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/users/add/5e4879c14aa2473054e56472",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"add",
+								"5e4879c14aa2473054e56472"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove List from User's lists",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/users/remove/5e4879c14aa2473054e56472",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"remove",
+								"5e4879c14aa2473054e56472"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a User's info",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MzM5OTkwNywiZXhwIjoxNTgzNDAzNTA3fQ.la35OaTLNaWiBqTNkMMlxYM6RQhHvHz0-Q62bHVKumo",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://192.168.1.63:5000/api/users/",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"1",
+								"63"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Problems",
+			"item": [
+				{
+					"name": "Get a Problem",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"description": "a (currently) valid token",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "https://192.168.1.63:5000/api/problems/1471",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"1",
+								"63"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"problems",
+								"1471"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add a new Problem",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"id\": 1471,\n\t\"name\": \"Maximum Students Taking Exam\",\n\t\"problem_text\": \"Test text\",\n\t\"link\": \"maximum-students-taking-exam\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/problems/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"problems",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update a Problem",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"id\": 1471,\n\t\"problem_text\": \"No problem text yet.\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/problems/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"problems",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all Problems",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/problems/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"problems",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Problems matching Text",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get Problems from list of IDs",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"problems\": [\r\n        \"5e4a1a4f330bb065406410a1\",\r\n        \"5e47cbb97d84234ee0b6d0f3\"\r\n    ]\r\n}",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/problems/bulk",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"problems",
+								"bulk"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Lists",
+			"item": [
+				{
+					"name": "Add a new List",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MzU1NzQ1NiwiZXhwIjoxNTgzOTE3NDU2fQ.PyT9EtM3Hqm9pGVwT9wJDiG9Qyzc0FGsF5VrXdSXGhY",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"first list test\",\n\t\"public\": true\n}"
+						},
+						"url": {
+							"raw": "https://192.168.1.63:5000/api/lists/",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"1",
+								"63"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"lists",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a List",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/lists/5e487cdc7c392a33183b9a6f",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"lists",
+								"5e487cdc7c392a33183b9a6f"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Problem to List",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/lists/add/5e48878fccd03d4b08f5762f/1471",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"lists",
+								"add",
+								"5e48878fccd03d4b08f5762f",
+								"1471"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Problem from List",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/lists/remove/5e48878fccd03d4b08f5762f/1471",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"lists",
+								"remove",
+								"5e48878fccd03d4b08f5762f",
+								"1471"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update existing List",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MzMxOTQwOSwiZXhwIjoxNTgzMzIzMDA5fQ.9TpWJuKqc6irNKcN5hhCplpMvzHUsor0eSq637vEd1c",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Updated name2\"\n}\n"
+						},
+						"url": {
+							"raw": "https://192.168.1.63:5000/api/lists/5e48878fccd03d4b08f5762f",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"1",
+								"63"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"lists",
+								"5e48878fccd03d4b08f5762f"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Copy a List",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/lists/copy/5e48878fccd03d4b08f5762f",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"lists",
+								"copy",
+								"5e48878fccd03d4b08f5762f"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all public Lists",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://192.168.1.63:5000/api/lists/",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"1",
+								"63"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"lists",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all Lists a User owns",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/lists/own",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"lists",
+								"own"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a public List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/lists/5e4879c14aa2473054e56472",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"lists",
+								"5e4879c14aa2473054e56472"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a private List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/lists/private/5e489bee3217e847c0879f79",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"lists",
+								"private",
+								"5e489bee3217e847c0879f79"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all Lists a User owns",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://192.168.1.63:5000/api/lists/own",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"1",
+								"63"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"lists",
+								"own"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all Problems for a List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MzM5OTkwNywiZXhwIjoxNTgzNDAzNTA3fQ.la35OaTLNaWiBqTNkMMlxYM6RQhHvHz0-Q62bHVKumo",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://192.168.1.63:5000/api/lists/5e48878fccd03d4b08f5762f/problems",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"1",
+								"63"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"lists",
+								"5e48878fccd03d4b08f5762f",
+								"problems"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk update List problems",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTYwMzY5MTUyMSwiZXhwIjoxNjA0MDUxNTIxfQ.il0vLCsksnRfZYXZzcPWLXIkoRGrz0fBlJWs0LNH0u4",
+								"type": "text"
+							},
+							{
+								"key": "content-type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"problems\" : [\r\n    {\r\n        \"id\" : \"5e47cbb97d84234ee0b6d0f3\",\r\n        \"add\" : true\r\n    },\r\n    {\r\n        \"id\" : \"5e4a197d330bb06540640c56\",\r\n        \"add\" : false\r\n    }\r\n]}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/lists/bulk/5e489bee3217e847c0879f79",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"lists",
+								"bulk",
+								"5e489bee3217e847c0879f79"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search a Public List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/lists/public/search/test",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"lists",
+								"public",
+								"search",
+								"test"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Problem Status",
+			"item": [
+				{
+					"name": "Create or update a ProblemStatus",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"result\": \"success\",\n\t\"time_multiplier\": 1.5\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/problem_status/1471",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"problem_status",
+								"1471"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset a User's ProblemStatus for a Problem",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/problem_status/reset/1471",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"problem_status",
+								"reset",
+								"1471"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a specific ProblemStatus",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/problem_status/1471",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"problem_status",
+								"1471"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all ProblemStatuses for a User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/problem_status/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"problem_status",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Next_Submission for List of Problems",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Submissions",
+			"item": [
+				{
+					"name": "Add Submission to User's ProblemStatus for a Problem",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"text\": \"Sample code\",\n\t\"result\": false,\n\t\"time_spent\": 902\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/submissions/1471",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"submissions",
+								"1471"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all Submissions for a Problem",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU0Nzg4NjRkNjc3MzUwNGM4Y2E5M2VmIn0sImlhdCI6MTU4MTc0ODk0NiwiZXhwIjoxNTgyMTA4OTQ2fQ.EekHQKQOlVeI0CWC9B7U5uWyno9dZNv_Y00pGNLZC3Y",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/submissions/1471",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"submissions",
+								"1471"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
