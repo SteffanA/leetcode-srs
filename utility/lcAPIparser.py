@@ -1,6 +1,6 @@
 '''
-Last Run: 11/30/2020
-Last Updated: 11/30/2020
+Last Run: 12/02/2020
+Last Updated: 12/02/2020
 
 This takes the results of the LeetCode api page and transforms it into the data we want
 This helper script may or may not work depending on if LC changes their API structure.
@@ -15,8 +15,8 @@ from datetime import date # For getting the current date
 class helper:
     def __init__(self):
         # Setup environmental variables
-        cur_dir_path = os.path.dirname(os.path.abspath(__file__))
-        env_path = os.path.join(cur_dir_path, os.path.normpath('..\\.env'))
+        cur_dir_path = os.path.normpath(os.path.dirname(os.path.abspath(__file__)))
+        env_path = os.path.normpath(os.path.join(cur_dir_path, os.path.normpath('../.env')))
         load_dotenv(dotenv_path=env_path)
 
     '''
@@ -83,45 +83,95 @@ class helper:
     def parse(self, file_location: str = None):
         lc_url = 'https://leetcode.com/api/problems/algorithms/'
         question_info = None
-        # question_info = True
         if not file_location:
             print('No file passed, grabbing info directly')
             lc_res = get(url=lc_url).json()
-            question_info = lc_res.get('stat_status_pairs', None)
+            question_info = None
+            try:
+                question_info = lc_res.get('stat_status_pairs', None)
+            except Exception:
+                print('Could not retrieve question info from LC')
+                self.update_header_dates(True)
+                raise
+                exit(1)
         else:
             with open(file_location, 'r') as file:
                 asJson = json.load(file)
                 question_info = asJson.get('stat_status_pairs', None)
         if question_info:
+            # Define our server URL endpoints here:
+            base_server_url = os.getenv('SERVER_BASE_URL')
+            problem_post_url = base_server_url + '/api/problems/bulk'
+            problem_get_url = base_server_url + '/api/problems'
+            login_url = base_server_url + '/api/auth'
+            register_url = base_server_url + '/api/users'
             # Get a login token for the admin user
             admin_email = os.getenv('ADMIN_EMAIL')
             admin_pass = os.getenv('ADMIN_PASS')
-            login_url = os.getenv('LOGIN_URL')
+            admin_name = os.getenv('ADMIN_NAME')
+
             body = json.dumps({
+                'name': admin_name,
                 'email': admin_email,
                 'password': admin_pass
             })
-            # Get auth user token.
             headers = {
                 'Content-Type': 'application/json'
             }
-            login_res = post(url=login_url, headers=headers, data=body).json()
-            if not login_res.get('token', None):
-                print('No token receieved. Wrong credentials?')
-                return
-            token = login_res['token']
+
+            # Try to register the user first, in case of first time setup
+            register_res = None
+            token = None 
+            try:
+                register_res = post(url=register_url, headers=headers, data=body).json()
+                if register_res.get('token', False):
+                    token = register_res.get('token')
+            except Exception:
+                print('Unable to register user.')
+                print(register_url)
+                print(headers)
+                # print(body)
+                self.update_header_dates(True)
+                raise
+                exit(1)
+
+            # Get auth user token if register didn't provide it
+            if not token:
+                login_res = None
+                try:
+                    login_res = post(url=login_url, headers=headers, data=body).json()
+                except Exception:
+                    print('Unable to login to server.')
+                    print(login_url)
+                    print(headers)
+                    # print(body)
+                    self.update_header_dates(True)
+                    raise
+                    exit(1)
+                if not login_res.get('token', None):
+                    print('No token receieved. Wrong credentials?')
+                    self.update_header_dates(True)
+                    exit(1)
+                token = login_res['token']
 
 
-            # Setup url and headers for POSTing a new problem and GETing our cur problems
-            get_url = os.getenv('PROBLEM_GET_URL')
-            post_url= os.getenv('PROBLEM_POST_URL')
+            # Setup headers for POSTing a new problem and GETing our cur problems
             headers = {
                 'x-auth-token': token,
                 'Content-Type': 'application/json'
             }
 
             # Get all problems currently in the database
-            all_probs_res = get(url=get_url, headers=headers).json()
+            all_probs_res = None
+            try:
+                all_probs_res = get(url=problem_get_url, headers=headers).json()
+            except Exception:
+                print('Couldn\'t get all problems from the server.')
+                print(problem_get_url)
+                print(headers)
+                self.update_header_dates(True)
+                raise
+                exit(1)
             # All we really care about is the 'id' values for the problems
             existing_problem_ids = set()
             for prob in all_probs_res:
@@ -145,12 +195,23 @@ class helper:
             # Convert to JSON so we can POST it to the DB
             blocks_as_json = json.dumps(blocks_as_dict)
             # POST to server
-            prob_add_res = post(url=post_url, headers=headers, data=blocks_as_json).json()
+            prob_add_res = None
+            try:
+                prob_add_res = post(url=problem_post_url, headers=headers, data=blocks_as_json).json()
+            except Exception:
+                print('Unable to POST problems to server.')
+                print(problem_post_url)
+                print(headers)
+                self.update_header_dates(True)
+                raise
+                exit(1)
             print(prob_add_res)
             if prob_add_res.get('errors', None):
                 # Some kind of error.
                 print('Errors when adding problems in bulk.')
                 print(str(prob_add_res['errors']))
+                self.update_header_dates(True)
+                exit(1)
             # Update the last run/last tested dates
             self.update_header_dates()
         else:

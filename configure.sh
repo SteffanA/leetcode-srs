@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Function for writing user input for specified env vars into .env file
 # Reads the sample .env line by line, outputting comments as whole,
@@ -94,19 +94,21 @@ then
     then
         # Run MongoDB container only
         echo "Running MongoDB and server containers..."
-        docker-compose up mongo server -d
+        docker-compose up -d mongo server
         # Mark that we have containers running we'll need to clean up
         dockerRunning="1"
+	# Give the containers some time to boot before running imports
+	sleep 10
     else
         echo "Skipping running containers."
         echo
     fi
     # Run the python import script, but ensure requirements are met first
     echo "Installing python script requirements.."
-    python -m pip install -r requirements.txt
+    python3 -m pip install -r ./utility/requirements.txt
     echo "Running problem import script..."
     echo
-    python ./utility/lcAPIparser.py
+    python3 ./utility/lcAPIparser.py
 fi
 # Cleanup
 if [[ "$dockerRunning" == "1" ]]
