@@ -1,13 +1,14 @@
-import React, {Fragment, useEffect} from 'react';
+import React, {useEffect} from 'react';
 import { Switch, Route } from 'react-router-dom'
 import { connect } from 'react-redux'
-import PrivateRoute from './containers/SharedItems/PrivateRoute'
-import './App.css';
+import PrivateRoute from './containers/SharedItems/PrivateRoute/PrivateRoute'
+import classes from './App.module.css';
 
 import MainPage from './containers/MainPage/MainPage';
-import Navbar from './containers/SharedItems/Navbar'
+import Navbar from './containers/SharedItems/NavBar/Navbar'
+import Footer from './containers/SharedItems/Footer/Footer';
 import Auth from './containers/Modals/Login/Auth'
-import Logout from './containers/Auth/Logout'
+import Logout from './containers/Logout/Logout'
 import ListsManager from './containers/ListsManager/ListsManager';
 import ListsViewer from './containers/ListsViewer/ListsViewer'
 import SubmissionHistory from './containers/SubmissionHistory/SubmissionHistory'
@@ -34,7 +35,7 @@ const App = props => {
   }, [isAuth, onTryAutoSignIn])
 
   return (
-    <Fragment>
+    <div className={classes.App}>
       <Navbar />
       <Route exact path="/" component={MainPage} />
       <section className="container">
@@ -48,7 +49,8 @@ const App = props => {
           <Route path="/" component={null}/>
         </Switch>
       </section>
-    </Fragment>
+      <Footer/>
+    </div>
   );
 }
 
