@@ -1,15 +1,17 @@
 #Step 1 - build the production version of the app
 FROM node:alpine as builder
+# Make the workdir folder
+RUN mkdir /client
 WORKDIR '/client'
 COPY ./package.json ./
 RUN npm install
 COPY . .
 # Build the project
-CMD ["npm", "run", "build"]
+RUN npm run build
 
 # Step 2 - Create our nginx instance to route our react app stuff
 FROM nginx:alpine
-COPY ../nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 # Remove the default index page from nginx
 RUN rm -rf /usr/share/nginx/html/*
 

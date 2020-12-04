@@ -87,15 +87,15 @@ services:
       - ./leetcode-srs:/client
     # Use both the default .env and the .env for the leetcode-srs client
     env_file:
-      - ./leetcode-srs/.env
       - .env
-    environment:
+      - ./leetcode-srs/.env
+    #environment:
       # What should client port actually be...?
-      - CLIENT_PORT=3000
-      - API_PORT=${SERVER_PORT}
-      - REACT_APP_API_URL=${REACT_APP_API_URL}
-      - REACT_APP_API_PROTOCOL=${REACT_APP_API_PROTOCOL}
-      - REACT_APP_API_PORT=${SERVER_PORT}
-      - REACT_APP_HOST_URL=${REACT_APP_HOST_URL}
+      # - CLIENT_PORT=3000
+      # - API_PORT=${SERVER_PORT}
+      # - REACT_APP_API_URL=${REACT_APP_API_URL}
+      # - REACT_APP_API_PROTOCOL=${REACT_APP_API_PROTOCOL}
+      # - REACT_APP_API_PORT=${SERVER_PORT}
+      # - REACT_APP_HOST_URL=${REACT_APP_HOST_URL}
     ports:
       - ${NGINX_PORT}:80
