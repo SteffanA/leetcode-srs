@@ -7,13 +7,15 @@ COPY ./package.json ./
 RUN npm install
 COPY . .
 # Build the project
+#CMD ["npm", "run", "build"]
 RUN npm run build
 
 # Step 2 - Create our nginx instance to route our react app stuff
 FROM nginx:alpine
-COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+#COPY --from=builder /client/dist /usr/share/nginx/html
+#COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 # Remove the default index page from nginx
-RUN rm -rf /usr/share/nginx/html/*
+#RUN rm -rf /usr/share/nginx/html/*
 
 # Copy our built app from step 1
 COPY --from=builder /client/build /usr/share/nginx/html
