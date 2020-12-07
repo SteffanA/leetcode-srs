@@ -39,8 +39,6 @@ const problemsSetTONSuccess = (probToTON) => {
 
 
 export const problemSetCurrent = (problem) => {
-    console.log('prob set current')
-    console.log(problem)
     return {
         type: actions.PROBLEMS_SET_CURRENT,
         curProblem: problem,
@@ -199,7 +197,6 @@ export const problemSetProblems = (problems) => {
 export const problemsSetTimeToNextSubmissions = (tonObj) => {
     return dispatch => {
         dispatch(problemStart)
-        console.log('Updating ton for probs')
         dispatch(problemsSetTONSuccess(tonObj))
     }
 }

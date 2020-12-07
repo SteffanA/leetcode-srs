@@ -85,7 +85,7 @@ export const ListsViewer = (props) => {
         event.preventDefault()
         try {
             const res = await api.clonePublicList(id)
-            console.log(res)
+            (process.env.NODE_ENV === 'development') && console.log(res)
             alert('List successfully cloned.')
         } catch (error) {
             alert('Unable to clone list, please try again later.')
@@ -107,7 +107,7 @@ export const ListsViewer = (props) => {
             setProblems(fullProbs)
         }
         catch (e) {
-            console.log('Error getting problems from IDS in listViewer ' + e)
+            (process.env.NODE_ENV === 'development') && console.log('Error getting problems from IDS in listViewer ' + e)
             setProblems([])
         }
         setLoadingProblems(false)
@@ -124,7 +124,7 @@ export const ListsViewer = (props) => {
 
     let listsOutput = null
     if (lists) {
-        console.log(lists)
+        (process.env.NODE_ENV === 'development') && console.log(lists)
         listsOutput = lists.map(list => {
             return (
                 <tr key={list._id}>

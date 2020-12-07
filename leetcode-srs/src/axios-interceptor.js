@@ -6,7 +6,7 @@ const instance = axios.create({
 })
 
 // TODO: If this doesn't work delete it
-if (process.env.DEBUG) {
+if ((process.env.NODE_ENV === 'development')) {
   instance.interceptors.request.use(function (config) {
       // Do something before request is sent
       console.log('Intercepted axios request is: ')

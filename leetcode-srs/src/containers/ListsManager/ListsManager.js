@@ -174,10 +174,10 @@ const ListsManager = props => {
             if (typeof(res) === String || res === null || res === undefined) {
                 // Send an alert on failure to update
                 alert('Could not set list public, try again later.')
-                console.log('Failed to set list public')
+                (process.env.NODE_ENV === 'development') && console.log('Failed to set list public')
             }
             else {
-                console.log('Successful set public')
+                (process.env.NODE_ENV === 'development') && console.log('Successful set public')
                 // Update the state of the list in redux
                 list.public = true
                 props.updateCurrentList(list)
@@ -203,9 +203,9 @@ const ListsManager = props => {
     }
 
     const renameList = async (list, newName) => {
-        console.log('Renaming list')
-        console.log(list)
-        console.log(newName)
+        (process.env.NODE_ENV === 'development') && console.log('Renaming list')
+        (process.env.NODE_ENV === 'development') && console.log(list)
+        (process.env.NODE_ENV === 'development') && console.log(newName)
         // Validate our newName
         if (checkValidity(newName, renameListControls.name.validation)) {
             await listAPI.renamePrivateList(list._id, newName).then((res) => {
