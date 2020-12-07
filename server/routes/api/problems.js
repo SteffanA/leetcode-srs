@@ -42,7 +42,6 @@ router.get('/', async (req, res) => {
         }
         
         if (!problems) {
-            console.log('No problems')
             return res.status(404).json({errors: [{msg: 'No problems found.'}]})
         }
 
@@ -87,7 +86,7 @@ router.get('/name/:search', async (req, res) => {
 router.get('/id/:id', async (req, res) => {
     try {
         if (req.params.id === 'undefined') {
-            console.log('Passed undefined ID')
+            return res.json({})
         }
         // Try to get the problem by ID
         const problem = await Problem.findOne({id: req.params.id})

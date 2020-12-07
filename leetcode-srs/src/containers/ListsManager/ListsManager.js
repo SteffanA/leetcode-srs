@@ -139,6 +139,12 @@ const ListsManager = props => {
         console.debug('Sending new list to DB')
         // TODO: Do we need to check for failures?
         props.createList(newListName, newListPublicity)
+        // If the user didn't have any lists to begin with,
+        // go ahead and refresh now, since our normal refresh via
+        // the Selector prop won't occur.
+        if (props.curList === 'undefined' || props.curList === null) {
+            window.open(process.env.REACT_APP_HOST_URL + '/manage-lists', "_self")
+        }
         // Reset the form to default
         const updatedControls = newListControls
         updatedControls.name.value = ''

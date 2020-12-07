@@ -104,7 +104,6 @@ router.put('/:problem_id', [auth,[
     check('time_multiplier', 'Multiplier for successful attempt required').isNumeric()
 ]], async (req, res) => {
     try {
-        console.log('Updating problem status for problem ' + req.params.problem_id)
         // Check our validators
         const validationErrors = validationResult(req)
         if (!validationErrors.isEmpty()) {

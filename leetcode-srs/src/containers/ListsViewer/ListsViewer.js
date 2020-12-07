@@ -7,6 +7,7 @@ import Modal from 'react-modal'
 import ProblemTable from '../SharedItems/ProblemTable/ProblemTable'
 import * as api from '../../shared/api_calls/lists'
 import {getProblemsFromIDs} from '../../shared/api_calls/problems'
+import {listsGetAll} from '../../store/actions/lists'
 import Spinner from '../UI/Spinner/Spinner'
 
 // TODO: Generize this a bit, I'll want to reuse this for viewing
@@ -85,9 +86,17 @@ export const ListsViewer = (props) => {
         event.preventDefault()
         try {
             const res = await api.clonePublicList(id)
-            (process.env.NODE_ENV === 'development') && console.log(res)
+            if (process.env.NODE_ENV === 'development') {
+                console.log(res)
+            }
             alert('List successfully cloned.')
+            // Update the Redux user's lists
+            props.getLists()
         } catch (error) {
+            if (process.env.NODE_ENV === 'development') {
+                console.log('Clone list error:')
+                console.log(error)
+            }
             alert('Unable to clone list, please try again later.')
         }
     }
@@ -193,4 +202,10 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, null)(ListsViewer)
+const mapDispatchToProps = (dispatch) => {
+    return {
+        getLists: () => dispatch(listsGetAll()),
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ListsViewer)
