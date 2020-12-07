@@ -33,17 +33,27 @@ export const SearchBar = (props) => {
     useEffect (() => {
         const timeOutId = setTimeout(async () => {
             console.log('Auto updating and querying with ' + query)
-            setSearchTerm(query)
-            // Update the prop as well
-            if (termGetter !== null) {
-                termGetter(query)
+            // If the query is undefined, set to blank string
+            let curQuery = query
+            if (!query) {
+                curQuery = ''
+                setQuery(curQuery)
+                setSearchTerm(curQuery)
             }
-            // Auto-update the results
-            // Use query since the search term may not be set in time
-            // for getProblemSearchResults to execute on the right text
-            // Create dummy event to prevent in the handleSubmit function
-            const e = new Event('Event')
-            handleSubmit(e, query)
+            // Don't submit if it's a undefined query
+            else {
+                setSearchTerm(curQuery)
+                // Update the prop as well
+                if (termGetter !== null) {
+                    termGetter(curQuery)
+                }
+                // Auto-update the results
+                // Use query since the search term may not be set in time
+                // for getXSearchResults to execute on the right text
+                // Create dummy event to prevent in the handleSubmit function
+                const e = new Event('Event')
+                handleSubmit(e, curQuery)
+            }
         }, 1000)
         return () => clearTimeout(timeOutId)
     }, [query])

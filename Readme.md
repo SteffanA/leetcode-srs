@@ -7,7 +7,7 @@ This is a web application designed to provide Spaced Repetition Studying for Lee
 
 problem multiple times over different periods of time, ensuring that you don't repeat the same problem too many times, while also ensuring you re-visit a
 
-problem right before you may forget how to approach it.  [This project is currently live on my website.](http://lcs.steffan.duckdns.org/)
+problem right before you may forget how to approach it.  [This project is currently live on my website.](https://lcs.steffan.duckdns.org/)
 
  
 
@@ -73,6 +73,11 @@ Hard requirements to run are:
 Soft Requirements:
  - [Python3](https://www.python.org/downloads/)
 
+
+The recommended development environment would be to run the database modules via the command 'docker-compose up -d mongo mongo-express', and run the server and client seperately by using the 'npm run server' command in ./server and using 'npm run start' in ./leetcode-srs .
+However, if you are developing only against the server or the client, you can add (respectively) 'server' or 'client' as an argument to the docker-compose.
+It is recommended to always ignore the nginx container until deploying.
+
  
 
 ***First-Time Setup***
@@ -122,7 +127,9 @@ Complete the first time setup, then:
 
 ***Deployment***
 
-TBD
+Deployment is simple - just fill in the .env files in the root and in ./leetcode-srs with valid credentials, then run 'docker-compose up -d' at the root, and you're up and running!
+
+One known issue is that the nginx reverse proxy does not currently handle HTTPS versions of the server very well - it is recommended to have the server HTTPS environmental variable set to blank for the time being.
 
 #
 

@@ -10,6 +10,8 @@ services:
     volumes:
       # Make sure our data is persistent
       - ./Database/mongodb_data:/data/db
+    env_file:
+      - .env
     ports:
       # Expose the mongo db outside the container
       - ${MONGODB_PORT}:27017
@@ -50,6 +52,8 @@ services:
       # Redirect anything else in our server folder to the container
       # Note that '/srv' is the working directory in the container
       - ./server:/srv
+    env_file:
+      - .env
     environment:
       - SERVER_PORT=${SERVER_PORT}
       - JWT_SECRET=${JWT_SECRET}
@@ -70,26 +74,31 @@ services:
       # Map external port to internal port. Use environ var
       - ${SERVER_PORT}:${SERVER_PORT}
 
-# # Client setup
-#   client:
-#     build:
-#       context: ./leetcode-srs
-#     restart: on-failure
-#     volumes:
-#       # Don't overwrite this folder
-#       - /leetcode-srs/node_modules
-#       # Redirect anything else in our frontend folder to the container
-#       # Note that '/client' is the working directory in the container
-#       - ./leetcode-srs:/client
-#     environment:
-#       # TODO: After frontend dev is finished, add anything required
+# Client setup
+  client:
+    build:
+      context: ./leetcode-srs
+    restart: on-failure
+    volumes:
+      # Don't overwrite this folder
+      - /leetcode-srs/node_modules
+      # Redirect anything else in our frontend folder to the container
+      # Note that '/client' is the working directory in the container
+      - ./leetcode-srs:/client
+    # Use both the default .env and the .env for the leetcode-srs client
+    env_file:
+      - .env
+      - ./leetcode-srs/.env
 
-# # nginx setup for exposing client
-#   nginx:
-#     # Should always be running
-#     restart: always
-#     build:
-#       context: ./nginx
-#     # Expose port outside the container
-#     ports:
-#       - ${NGINX_PORT}:80
+# Nginx reverse proxy setup
+  nginx:
+   depends_on:
+     - server
+     - client
+   build:
+     context: ./nginx
+   restart: on-failure
+   env_file:
+     - .env
+   ports:
+     - ${NGINX_PORT}:80

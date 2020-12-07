@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react'
+import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
 import SearchBar from '../SharedItems/SearchBar/SearchBar'
 import Button from '../UI/Button/Button'
 import Modal from 'react-modal'
@@ -31,9 +33,13 @@ export const ListsViewer = (props) => {
         setLoadingLists(true)
         // Ignore requests that match the init
         // TODO: Need a cleaner way to handle this, same as in ProblemViewer
-        if (term.localeCompare(INIT_SEARCH_TERM) !== 0) {
+        if (term && term.localeCompare(INIT_SEARCH_TERM) !== 0) {
             try {
                 const res = await api.searchPublicLists(term)
+                if (res.length === 0) {
+                    // No result returned - warn user.
+                    alert('No results for ' + term)
+                }
                 setLists(res)
             } catch (error) {
                 alert('Failed to get results for search: ' + error)
@@ -129,11 +135,14 @@ export const ListsViewer = (props) => {
                             View Problems
                         </Button>
                     </td>
-                    <td>
+                    {/*Only display cloning when logged in*/}
+                    { props.isAuth && 
+                    (<td>
                         <Button btnType="Success" clicked={(event) => cloneListHandler(event, list._id)}>
                             Clone List
                         </Button>
                     </td>
+                    )}
                 </tr>
             )
         })
@@ -151,7 +160,8 @@ export const ListsViewer = (props) => {
                         <th>List Name</th>
                         <th>Number of Problems</th>
                         <th>View</th>
-                        <th>Clone</th>
+                        {/*Only display cloning when logged in*/}
+                        {props.isAuth && (<th>Clone</th>)}
                     </tr>
                     {listsOutput}
                 </tbody>
@@ -173,4 +183,14 @@ export const ListsViewer = (props) => {
     )
 }
 
-export default ListsViewer
+ListsViewer.propTypes = {
+    isAuth: PropTypes.bool.isRequired,
+}
+
+const mapStateToProps = (state) => {
+    return {
+        isAuth: state.auth.token !== null,
+    }
+}
+
+export default connect(mapStateToProps, null)(ListsViewer)
