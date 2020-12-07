@@ -46,7 +46,7 @@ export const ProblemTable = (props) => {
             return (
                 <tr key={prob._id}>
                     <td> {prob.id} </td>
-                    <td><a href={createLink(prob.link)}>{prob.name}</a></td>
+                    <td><a href={createLink(prob.link)} target="_blank">{prob.name}</a></td>
                     <td><b>{difficultyMapping[prob.difficulty]}</b></td>
                     <td>{prob.problem_text}</td>
                     {extras}
