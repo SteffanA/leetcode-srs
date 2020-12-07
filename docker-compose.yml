@@ -89,16 +89,6 @@ services:
     env_file:
       - .env
       - ./leetcode-srs/.env
-    #environment:
-      # What should client port actually be...?
-      # - CLIENT_PORT=3000
-      # - API_PORT=${SERVER_PORT}
-      # - REACT_APP_API_URL=${REACT_APP_API_URL}
-      # - REACT_APP_API_PROTOCOL=${REACT_APP_API_PROTOCOL}
-      # - REACT_APP_API_PORT=${SERVER_PORT}
-      # - REACT_APP_HOST_URL=${REACT_APP_HOST_URL}
-    #ports:
-      #- ${NGINX_PORT}:80
 
 # Nginx reverse proxy setup
   nginx:

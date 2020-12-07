@@ -173,7 +173,7 @@ export const getProblemSearchResults = (term) => {
 
 // Get a problem via ID
 export const getProblemFromID = (id) => {
-    let url = process.env.REACT_APP_HOST_URL + '/api/problems/' + id
+    let url = process.env.REACT_APP_HOST_URL + '/api/problems/id/' + id
     const config = {
         headers: {
             'content-type': 'json',

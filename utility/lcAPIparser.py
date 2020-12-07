@@ -1,6 +1,6 @@
 '''
-Last Run: 12/03/2020
-Last Updated: 12/03/2020
+Last Run: 12/07/2020
+Last Updated: 12/07/2020
 
 This takes the results of the LeetCode api page and transforms it into the data we want
 This helper script may or may not work depending on if LC changes their API structure.
@@ -127,7 +127,7 @@ class helper:
             register_res = None
             token = None 
             try:
-                register_res = post(url=register_url, headers=headers, data=body).json()
+                register_res = post(url=register_url, headers=headers, data=body, verify=False).json()
                 if register_res.get('token', False):
                     token = register_res.get('token')
             except Exception:
@@ -143,7 +143,7 @@ class helper:
             if not token:
                 login_res = None
                 try:
-                    login_res = post(url=login_url, headers=headers, data=body).json()
+                    login_res = post(url=login_url, headers=headers, data=body, verify=False).json()
                 except Exception:
                     print('Unable to login to server.')
                     print(login_url)
@@ -168,7 +168,7 @@ class helper:
             # Get all problems currently in the database
             all_probs_res = None
             try:
-                all_probs_res = get(url=problem_get_url, headers=headers).json()
+                all_probs_res = get(url=problem_get_url, headers=headers, verify=False).json()
             except Exception:
                 print('Couldn\'t get all problems from the server.')
                 print(problem_get_url)
@@ -201,7 +201,7 @@ class helper:
             # POST to server
             prob_add_res = None
             try:
-                prob_add_res = post(url=problem_post_url, headers=headers, data=blocks_as_json).json()
+                prob_add_res = post(url=problem_post_url, headers=headers, data=blocks_as_json, verify=False).json()
             except Exception:
                 print('Unable to POST problems to server.')
                 print(problem_post_url)

@@ -33,6 +33,9 @@ const PORT = process.env.SERVER_PORT || 5000
 const SECURE = process.env.HTTPS
 
 if (SECURE) {
+    // TODO: The auto-deploy docker-compose doesn't connect to the HTTPS version
+    // of the server. Need to determine if a server issue, or reverse proxy one.
+
     // Create a HTTPS server
     /*
     Code assumes you have a cert with a passphrase.
@@ -52,6 +55,6 @@ if (SECURE) {
     .listen(PORT, () => console.log(`Secure server started on port ${PORT}`))
 }
 else {
-    // app.use(session({cookie: {sameSite: 'strict'},}))
+    // app.use(session({cookie: {sameSite: 'lax'},}))
     app.listen(PORT, () => console.log(`Server started on port ${PORT}`))
 }

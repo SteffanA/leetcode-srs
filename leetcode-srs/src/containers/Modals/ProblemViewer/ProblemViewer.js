@@ -141,10 +141,12 @@ export const ProblemViewer = (props) => {
             }
         }
         else {
-            // TODO: Need to handle errors gracefully
             try {
                 const results = await getProblemSearchResults(searchTermy)
                 setProblemResults(results)
+                if (results.length === 0) {
+                    alert('No results for  ' + searchTermy)
+                }
             } catch (error) {
                 console.debug('Error when trying to get search results.')
                 console.debug(error)

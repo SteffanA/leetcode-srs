@@ -71,7 +71,10 @@ router.get('/public/id/:id', async (req, res) => {
 // @access Public
 router.get('/public/search/:term', async (req, res) => {
     try {
-        console.log(req.params.term)
+        // If no term is passed, just return an empty array
+        if (!req.params.term) {
+            return res.json([])
+        }
         const lists = await List.find({$and:
             [
                 {public: true},
