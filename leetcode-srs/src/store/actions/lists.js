@@ -92,8 +92,8 @@ export const listsCreateNewList = (name, isPublic) => {
         dispatch(listStart())
         try {
             const response = await api.createNewList(name, isPublic)
-            console.log('Create response:')
-            console.log(response)
+            (process.env.NODE_ENV === 'development') && console.log('Create response:')
+            (process.env.NODE_ENV === 'development') && console.log(response)
             dispatch(listsPostListSuccess(response))
         } catch (error) {
             // Failed to update the list for some reason

@@ -30,11 +30,9 @@ const Navbar = props => {
     const openLogin = (event) => {
         event.preventDefault()
         setLoginOpen(true)
-        console.log('opened login')
     }
     const closeLogin = () => {
         setLoginOpen(false)
-        console.log('login is closed')
     }
 
     // JSX

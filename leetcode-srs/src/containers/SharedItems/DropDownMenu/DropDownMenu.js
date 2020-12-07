@@ -61,7 +61,7 @@ function DropDownMenu(props) {
         const matchingItems = items.filter(item => (item._id.localeCompare(id) === 0))
         if (!matchingItems) {
             // I don't see how this can happen - but let's handle it
-            console.log('Matching item not found - how did this happen?')
+            (process.env.NODE_ENV === 'development') && (process.env.NODE_ENV === 'development') && console.log('Matching item not found - how did this happen?')
         }
         else {
             // Update the cur item

@@ -32,7 +32,7 @@ export const SearchBar = (props) => {
     // given period
     useEffect (() => {
         const timeOutId = setTimeout(async () => {
-            console.log('Auto updating and querying with ' + query)
+            (process.env.NODE_ENV === 'development') && console.log('Auto updating and querying with ' + query)
             // If the query is undefined, set to blank string
             let curQuery = query
             if (!query) {
