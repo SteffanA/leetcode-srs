@@ -281,7 +281,6 @@ async (req, res) => {
 router.put('/:id', [auth],
 async (req, res) => {
     try {
-        console.log('Trying to update a list')
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(404).send({errors: [{msg: 'List not found.'}]})
         }
@@ -428,7 +427,6 @@ async (req, res) => {
         return res.status(400).json({errors : validationErrors.array()})
     }
     try {
-        console.log(req.body)
         // Get the list
         if (!mongoose.Types.ObjectId.isValid(req.params.list_id)) {
             return res.status(404).send({errors: [{msg: 'List not found.'}]})
@@ -455,9 +453,6 @@ async (req, res) => {
             const problem_info = problems[i]
             const id = problem_info['id']
             const adding = problem_info['add']
-            console.log(problem_info)
-            console.log(id)
-            console.log(adding)
             // Get the problem
             const problem = await Problem.findById(id)
 
