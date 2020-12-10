@@ -10,24 +10,11 @@
   opacity: 0.9;
 }
 
-.Navbar NavLink {
-  margin: 0;
-  box-sizing: border-box;
-  border-color: black;
-  border-style: solid;
-  border-width: 2px;
-  display: block;
-  width: 100%;
-  color: green;
-  text-decoration: none;
-  width: 100%;
-}
-
 .NavLink {
   margin: 0;
   box-sizing: border-box;
-  border-color: black;
-  border-style: solid;
+  /* border-color: black;
+  border-style: solid; */
   border-width: 2px;
   text-align: center;
   display: block;
@@ -45,7 +32,7 @@
 
 .Title {
   color: black;
-  font-size: large;
+  font-size: x-large;
   font-weight: bold;
   box-sizing: border-box;
   border-color: black;
