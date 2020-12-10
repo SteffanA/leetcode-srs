@@ -123,7 +123,7 @@ const ListsManager = props => {
 // Functions
 
     // Handle a generic form submission
-    const newListSubmitHandler = (event) => {
+    const newListSubmitHandler = async (event) => {
         event.preventDefault() // Prevent a page reload
         // Deconstruct our controls
         const {
@@ -136,15 +136,16 @@ const ListsManager = props => {
         const newListPublicity = isPublic.value
 
         // Send new list to DB
-        console.debug('Sending new list to DB')
-        // TODO: Do we need to check for failures?
-        props.createList(newListName, newListPublicity)
-        // If the user didn't have any lists to begin with,
-        // go ahead and refresh now, since our normal refresh via
-        // the Selector prop won't occur.
-        if (props.curList === 'undefined' || props.curList === null) {
-            window.open(process.env.REACT_APP_HOST_URL + '/manage-lists', "_self")
+        if (process.env.NODE_ENV === 'development') {
+            console.debug('Sending new list to DB')
         }
+        try {
+            await props.createList(newListName, newListPublicity)
+        } catch (error) {
+            alert('Error adding list, please try again later.')
+        }
+        // Update our lists
+        props.getLists()
         // Reset the form to default
         const updatedControls = newListControls
         updatedControls.name.value = ''
@@ -180,10 +181,15 @@ const ListsManager = props => {
             if (typeof(res) === String || res === null || res === undefined) {
                 // Send an alert on failure to update
                 alert('Could not set list public, try again later.')
-                (process.env.NODE_ENV === 'development') && console.log('Failed to set list public')
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('Failed to set list public')
+                }
+                
             }
             else {
-                (process.env.NODE_ENV === 'development') && console.log('Successful set public')
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('Successful set public')
+                }
                 // Update the state of the list in redux
                 list.public = true
                 props.updateCurrentList(list)
@@ -209,9 +215,11 @@ const ListsManager = props => {
     }
 
     const renameList = async (list, newName) => {
-        (process.env.NODE_ENV === 'development') && console.log('Renaming list')
-        (process.env.NODE_ENV === 'development') && console.log(list)
-        (process.env.NODE_ENV === 'development') && console.log(newName)
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Renaming list')
+            console.log(list)
+            console.log(newName)
+        }
         // Validate our newName
         if (checkValidity(newName, renameListControls.name.validation)) {
             await listAPI.renamePrivateList(list._id, newName).then((res) => {
