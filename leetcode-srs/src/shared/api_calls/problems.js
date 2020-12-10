@@ -40,7 +40,9 @@ export const bulkUpdateProblems = (listID, updatedProblems) => {
         axios.put(url, body, config
         ).then(response => {
             // Update the current list object to reflect the results
-            (process.env.NODE_ENV === 'development') && console.log(response)
+            if (process.env.NODE_ENV === 'development') {
+                console.log(response)
+            }
             resolve(response)
         }).catch(err => {
             console.debug(err)

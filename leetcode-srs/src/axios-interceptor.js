@@ -5,8 +5,7 @@ const instance = axios.create({
     // baseURL: process.env.REACT_APP_API_URL + ':' + process.env.REACT_APP_API_PORT + '/api'
 })
 
-// TODO: If this doesn't work delete it
-if ((process.env.NODE_ENV === 'development')) {
+if (false && (process.env.NODE_ENV === 'development')) {
   instance.interceptors.request.use(function (config) {
       // Do something before request is sent
       console.log('Intercepted axios request is: ')

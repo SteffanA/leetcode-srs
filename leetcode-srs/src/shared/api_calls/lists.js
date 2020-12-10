@@ -111,7 +111,9 @@ export const updateListsProblems = (updatedProblems, curListID) => {
     return new Promise((resolve, reject) => {
         axios.put(url, body, config
         ).then(response => {
-            (process.env.NODE_ENV === 'development') && console.log(response)
+            if (process.env.NODE_ENV === 'development') {
+                console.log(response)
+            }
             resolve(response)
         }).catch(err => {
             console.debug(err)
@@ -142,7 +144,9 @@ export const setPublic = async (listID) => {
     return new Promise((resolve, reject) => {
         axios.put(url, body, config
         ).then(response => {
-            (process.env.NODE_ENV === 'development') && console.log(response)
+            if (process.env.NODE_ENV === 'development') {
+                console.log(response)
+            }
             resolve(response)
         }).catch(err => {
             console.debug(err)
@@ -163,7 +167,9 @@ export const searchPublicLists = async (term) => {
     return new Promise((resolve, reject) => {
         axios.get(url, config).then(
             response => {
-                (process.env.NODE_ENV === 'development') && console.log(response)
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(response)
+                }
                 resolve(response.data)
             }
         ).catch(err => {
@@ -184,7 +190,9 @@ export const getPublicLists = async () => {
     return new Promise((resolve, reject) => {
         axios.get(base_url, config).then(
             response => {
-                (process.env.NODE_ENV === 'development') && console.log(response)
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(response)
+                }
                 resolve(response.data)
             }
         ).catch(err => {
@@ -213,7 +221,9 @@ export const clonePublicList = async (listID) => {
     return new Promise((resolve, reject) => {
         axios.post(url, null, config).then(
             response => {
-                (process.env.NODE_ENV === 'development') && console.log(response)
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(response)
+                }
                 resolve(response.data)
             }
         ).catch(err => {
@@ -241,7 +251,9 @@ export const deletePrivateList = async (listID) => {
     return new Promise((resolve, reject) => {
         axios.delete(url, config).then(
             response => {
-                (process.env.NODE_ENV === 'development') && console.log(response)
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(response)
+                }
                 resolve(response.data)
             }
         ).catch(err => {
@@ -272,7 +284,9 @@ export const renamePrivateList = async (listID, newName) => {
     return new Promise((resolve, reject) => {
         axios.put(url, body, config
         ).then(response => {
-            (process.env.NODE_ENV === 'development') && console.log(response)
+            if (process.env.NODE_ENV === 'development') {
+                console.log(response)
+            }
             resolve(response)
         }).catch(err => {
             console.debug(err)

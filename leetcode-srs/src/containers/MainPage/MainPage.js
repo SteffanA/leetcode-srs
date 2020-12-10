@@ -350,6 +350,7 @@ const MainPage = (props) => {
 
     return (
         <div className={classes.MainPage}>
+            {!isAuth && <div>You are not logged in. Log in or register above.</div>}
             {isAuth && <Selector showLists={true} showProblems={true} />}
             {formVisible && form}
             {(!formVisible && isAuth && curProblem) && problemLinkButton}

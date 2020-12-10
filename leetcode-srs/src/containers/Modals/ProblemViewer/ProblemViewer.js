@@ -115,7 +115,9 @@ export const ProblemViewer = (props) => {
             console.debug('ProblemViewer: problems already exist')
             console.debug(curProblemResults)
         }
-        (process.env.NODE_ENV === 'development') && console.log('Problem viewer refreshed')
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Problem viewer refreshed')
+        }
         // Setup the problem states for any new-in-view problems
         setInitialProblemStates()
     }, [curProblemResults, getProblemSearchResults, setProblemResults])
@@ -238,8 +240,10 @@ export const ProblemViewer = (props) => {
     // Update a selected problem state to either remove or
     // add it to a list based on what the current state already is
     const invertProblemState = (problem_id) => {
-        (process.env.NODE_ENV === 'development') && console.log('Updating problem with id ' + problem_id + ' in list with id ' +
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Updating problem with id ' + problem_id + ' in list with id ' +
              curList.id + 'to ' + !currentProblemsAndState.get(problem_id)[ADDING_INDEX])
+        }
         let updatedState = new Map(currentProblemsAndState)
         let newVals = new Array(2)
         /* Why do we invert touched index in addition to state?

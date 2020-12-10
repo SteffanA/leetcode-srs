@@ -116,7 +116,10 @@ export const ListsViewer = (props) => {
             setProblems(fullProbs)
         }
         catch (e) {
-            (process.env.NODE_ENV === 'development') && console.log('Error getting problems from IDS in listViewer ' + e)
+            if (process.env.NODE_ENV === 'development') {
+                console.log('Error getting problems from IDS in listViewer ' + e)
+            }
+            
             setProblems([])
         }
         setLoadingProblems(false)
@@ -133,7 +136,9 @@ export const ListsViewer = (props) => {
 
     let listsOutput = null
     if (lists) {
-        (process.env.NODE_ENV === 'development') && console.log(lists)
+        if (process.env.NODE_ENV === 'development') {
+            console.log(lists)
+        }
         listsOutput = lists.map(list => {
             return (
                 <tr key={list._id}>

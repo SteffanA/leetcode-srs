@@ -36,7 +36,9 @@ const checkAuthTimeout = (expireDate) => {
 
 // Handle user logout & signal reducer
 const logout = () => {
-    (process.env.NODE_ENV === 'development') && console.log('Logging out')
+    if (process.env.NODE_ENV === 'development') {
+        console.log('Logging out')
+    }
     return {
         type: actionTypes.AUTH_LOGOUT,
     }
@@ -55,7 +57,9 @@ export const checkAuthState = () => {
         // Check if we have a stored token
         const token = localStorage.getItem('token')
         if (!token) {
-            (process.env.NODE_ENV === 'development') && console.log('No token logout')
+            if (process.env.NODE_ENV === 'development') {
+                console.log('No token logout')
+            }
             // Logout if no token; no effect if not logged in
             dispatch(logoutHandler())
         }
@@ -74,7 +78,9 @@ export const checkAuthState = () => {
             }
             else {
                 // Expired
-                (process.env.NODE_ENV === 'development') && console.log('Expired token, logging out.')
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('Expired token, logging out.')
+                }
                 dispatch(logoutHandler())
             }
         }
@@ -115,7 +121,9 @@ export const auth = (email='', password, isRegister, name) => {
                 dispatch(checkAuthTimeout(newDate))
             })
             .catch(err => {
-                (process.env.NODE_ENV === 'development') && console.log('auth error of ', err)
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('auth error of ', err)
+                }
                 dispatch(authFail(err.response.data.errors[0]))
             })
         
