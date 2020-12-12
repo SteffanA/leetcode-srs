@@ -348,21 +348,22 @@ const MainPage = (props) => {
         <Button clicked={openProblemHandler} disabled={false} btnType="Success">Start Problem</Button>
     )
 
+    /* Cols => left/right, rows = up/down*/
     return (
-        <div className={classes.MainPage}>
+        <div id='main' className='grid grid-cols-3 grid-rows-5 bg-blue-100 h-full'>
             {!isAuth && <div>You are not logged in. Log in or register above.</div>}
-            <div className={classes.Selector}>
+            <div id='selector' className='row-start-1 col-start-2 h-8 text-center'>
                 {isAuth && <Selector showLists={true} showProblems={true} />}
             </div>
-            <div className={classes.StartButton}>
+            <div id='start' className='row-start-1 col-start-2 mt-9 relative text-center '>
                 {(!formVisible && isAuth && curProblem) && problemLinkButton}
             </div>
-            <div className={classes.ResultForm}>
+            <div id='form' className='row-start-2 col-start-1 row-span-3 col-span-3 text-center'>
                 {formVisible && form}
                 {(formValid && formVisible) && submitResultsButton}
             </div>
             <br/>
-            <div className={classes.Timer}>
+            <div id='timer' className='row-start-1 col-start-1 row-span-2 col-span-1 text-left'>
                 {timerVisible && timer.current}
                 <br/>
                 {formVisible && timerVisButton} {timerVisible && importTimeToFormButton}
