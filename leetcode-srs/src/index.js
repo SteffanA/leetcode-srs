@@ -28,7 +28,7 @@ const store = createStore(rootReducer, composeEnhancers(
 ReactDOM.render(
     <Provider store={store}>
         <Router>
-            <App />
+            <App className="bg-grey-lighter"/>
         </Router>
     </Provider>
 , document.getElementById('root'));

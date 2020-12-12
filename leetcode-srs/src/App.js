@@ -35,7 +35,7 @@ const App = props => {
   }, [isAuth, onTryAutoSignIn])
 
   return (
-    <div className={classes.App}>
+    <div className={classes.App} className='bg-gray-200 rounded-lg shadow-xl h-screen'>
       <Navbar />
       <Route exact path="/" component={MainPage} />
       <section className="container">
