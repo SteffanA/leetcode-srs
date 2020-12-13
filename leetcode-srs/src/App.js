@@ -35,10 +35,10 @@ const App = props => {
   }, [isAuth, onTryAutoSignIn])
 
   return (
-    <div className={classes.App}>
+    <div className='bg-gray-200 rounded-lg shadow-xl flex flex-col min-h-screen'>
       <Navbar />
       <Route exact path="/" component={MainPage} />
-      <section className="container">
+      <section className="flex-grow">
         <Switch>
           <Route exact path="/auth" component={Auth} />
           <Route exact path="/logout" component={Logout} />

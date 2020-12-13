@@ -141,7 +141,7 @@ export const ListsViewer = (props) => {
         }
         listsOutput = lists.map(list => {
             return (
-                <tr key={list._id}>
+                <tr key={list._id} className='text-center'>
                     <td>{list.name}</td>
                     <td>{list.problems.length}</td>
                     <td>
@@ -170,7 +170,7 @@ export const ListsViewer = (props) => {
             {!loadingLists && (
             <table>
                 <tbody>
-                    <tr>
+                    <tr className='center-text'>
                         <th>List Name</th>
                         <th>Number of Problems</th>
                         <th>View</th>

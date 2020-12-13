@@ -100,7 +100,8 @@ exports.addColorToProblemsBasedOnTON = (user, problems) => {
                 color = 'red'
             }
             else if (tonAsDate < addDaysToDate(now, 7)) {
-                color = 'yellow'
+                // Using a slightly easier to see yellow that isnt as jarring
+                color = 'GoldenRod'
             }
             Object.assign(prob, {'color' : color})
         }
