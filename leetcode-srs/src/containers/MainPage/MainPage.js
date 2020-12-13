@@ -354,7 +354,7 @@ const MainPage = (props) => {
     /* Cols => left/right, rows = up/down*/
     return (
         <div id='main' className='grid grid-cols-3 grid-rows-5 bg-blue-100 h-full flex flex-grow'>
-            {!isAuth && <div>You are not logged in. Log in or register above.</div>}
+            {!isAuth && <div className='center-text'>You are not logged in. Log in or register above to begin studying problems.</div>}
             <div id='selector' className='row-start-1 col-start-2 h-8 text-center'>
                 {isAuth && <Selector showLists={true} showProblems={true} />}
             </div>
@@ -366,7 +366,7 @@ const MainPage = (props) => {
                 {(formValid && formVisible) && submitResultsButton}
             </div>
             <br/>
-            <div id='timer' className='row-start-1 col-start-1 row-span-2 col-span-1 text-left'>
+            <div id='timer' className='row-start-1 col-start-1 row-span-2 col-span-1 text-left z-10 absolute'>
                 {timerVisible && timer.current}
                 <br/>
                 {formVisible && timerVisButton} {timerVisible && importTimeToFormButton}

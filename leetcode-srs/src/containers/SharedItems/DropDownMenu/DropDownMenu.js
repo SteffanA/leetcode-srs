@@ -85,7 +85,9 @@ function DropDownMenu(props) {
                 itemColor = item.color
             }
             return (
-                <button style={{color : itemColor}} key={item._id} onClick={() => setCurItem(item._id)}>
+                <button style={{color : itemColor}} key={item._id} onClick={() => setCurItem(item._id)}
+                className='block text-sm hover:bg-gray-100 hover:text-gray-900 focus:outline-none z-10 focus:bg-gray-100 focus:text-gray-900'
+                >
                     {item.name}
                 </button>
             )}
@@ -94,14 +96,17 @@ function DropDownMenu(props) {
     else if(items) {
         console.debug('Items in DropDownMenu not of type array, investigate')
     }
-
+    //className='bg-opacity-75 bg-white text-center rounded-sm max-h-2 pt-1 pb-4 leading-4 block'>
+    //{className={classes.Menu}}
     return (
-        <div className={classes.DropDownMenu}>
-            <button onClick={menuVisibilityHandler} style={{color : titleColor}}>
+        <div id='dropdown' className='text-center '>
+            <button className= 'inline-flex justify-center w-full rounded-sm border border-gray-300 shadow-sm text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500' onClick={menuVisibilityHandler} style={{color : titleColor}}>
                 <b style={{color: 'black'}}>Select: </b> {curTitle}
             </button>
             {visibility.showMenu ? (
-                <div className={classes.Menu}>
+                <div id = 'drop-down-selections' 
+                className='origin-bottom-right center-text absolute z-20 center-0 mt-2 rounded-md shadow-lg bg-gray-200 '
+                >
                     {selections}
                 </div>
             )
