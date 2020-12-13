@@ -354,7 +354,7 @@ const MainPage = (props) => {
     /* Cols => left/right, rows = up/down*/
     return (
         <div id='main' className='grid grid-cols-3 grid-rows-5 bg-blue-100 h-full flex flex-grow'>
-            {!isAuth && <div className='center-text'>You are not logged in. Log in or register above to begin studying problems.</div>}
+            {!isAuth && <div className='row-start-1 col-start-2 text-center'>You are not logged in. Log in or register above to begin studying problems.</div>}
             <div id='selector' className='row-start-1 col-start-2 h-8 text-center'>
                 {isAuth && <Selector showLists={true} showProblems={true} />}
             </div>

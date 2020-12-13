@@ -32,16 +32,24 @@ const TimerBox = (props) => {
                     setCurState(getTimerState())
                     return (
                         <Fragment>
-                            <div>
-                                <Timer.Hours /> hours<br/>
-                                <Timer.Minutes /> minutes<br/>
-                                <Timer.Seconds /> seconds<br/>
+                            <div className='flex'>
+                                <span className='box-border w-16 border-1 border-black'><Timer.Hours /> hours</span>
+                                <span className='box-border w-20'><Timer.Minutes /> minutes</span>
+                                <span className='box-border w-24'><Timer.Seconds /> seconds</span>
                             </div>
-                            <div>
-                                <button onClick={start}>Start</button>
-                                <button onClick={pause}>Pause</button>
-                                <button onClick={resume}>Resume</button>
-                                <button onClick={reset}>Reset</button>
+                            <div className='flex'>
+                                <button onClick={start}
+                                className='shadow w-16 block border-blue-600 border-2 rounded-full focus:outline-none focus:border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white'
+                                >Start</button>
+                                <button onClick={pause}
+                                className='shadow w-16 block border-blue-600 border-2 rounded-full focus:outline-none focus:border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white'
+                                >Pause</button>
+                                <button onClick={resume}
+                                className='shadow w-20 block border-blue-600 border-2 rounded-full focus:outline-none focus:border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white'
+                                >Resume</button>
+                                <button onClick={reset}
+                                className='shadow w-16 block border-blue-600 border-2 rounded-full focus:outline-none focus:border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white'
+                                >Reset</button>
                             </div>
                         </Fragment>
                     )
