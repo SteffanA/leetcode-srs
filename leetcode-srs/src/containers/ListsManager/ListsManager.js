@@ -332,7 +332,7 @@ const ListsManager = props => {
     }
     const problemTableFields = [
         {
-            'title': 'Time To Next',
+            'title': 'Time of Next Submission',
             'generator' : tonProvider,
         }
     ]

@@ -51,7 +51,7 @@ export const SubmissionTable = (props) => {
 
             // Generate the base attributes and add any extra fields if they exist
             return (
-                <tr key={sub._id}>
+                <tr key={sub._id} className='text-center'>
                     <td>{new Date(sub.submit_date).toDateString()}</td>
                     <td> {resultMapping[sub.result]} </td>
                     <td>{new Date(sub.time_spent * 1000).toISOString().substr(11, 8)}</td>
@@ -80,7 +80,7 @@ export const SubmissionTable = (props) => {
         })
     }
     let titles = (
-        <tr>
+        <tr className='text-center'>
             <th key='date'>Submit Date</th>
             <th key='result'>Result</th>
             <th key='time_spent'>Time Spent (HH:MM:SS)</th>

@@ -44,7 +44,7 @@ export const ProblemTable = (props) => {
 
             // Generate the base attributes and add any extra fields if they exist
             return (
-                <tr key={prob._id}>
+                <tr key={prob._id} className='text-center'>
                     <td> {prob.id} </td>
                     <td><a href={createLink(prob.link)} target="_blank">{prob.name}</a></td>
                     <td><b>{difficultyMapping[prob.difficulty]}</b></td>
@@ -61,16 +61,16 @@ export const ProblemTable = (props) => {
     if (!loading && extraFields) {
         extraTitles = extraFields.map(field => {
             return (
-                <th key={field['title']}>{field['title']}</th>
+                <th key={field['title']} className='text-center'>{field['title']}</th>
             )
         })
     }
     let titles = (
         <tr>
-            <th key='id'>ID</th>
-            <th key='problem'>Problem</th>
-            <th key='difficulty'>Difficulty</th>
-            <th key='problem_text'>Problem Text</th>
+            <th key='id' className='text-center'>ID</th>
+            <th key='problem' className='text-center'>Problem</th>
+            <th key='difficulty' className='text-center'>Difficulty</th>
+            <th key='problem_text' className='text-center'>Problem Text</th>
             {extraTitles}
         </tr>
     )
