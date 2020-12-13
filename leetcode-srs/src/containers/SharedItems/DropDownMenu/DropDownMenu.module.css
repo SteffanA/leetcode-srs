@@ -13,8 +13,8 @@
     line-height: 1em;
     font-size: 1em;
     z-index: 1;
-    float: left;
-    clear: left;
+    float: right;
+    clear: right;
     width: 100px;
 }
 .Background {
