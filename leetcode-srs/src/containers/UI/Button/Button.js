@@ -4,7 +4,7 @@ import classes from './Button.module.css'
 // Reusable button - class is flexible, defined by props joined together
 const button = (props) => ( 
     <button
-        className={[classes.Button, classes[props.btnType]].join(' ')}
+        className={[classes.Button, classes[props.btnType], props.className].join(' ')}
         onClick={props.clicked}
         disabled={props.disabled}
     >

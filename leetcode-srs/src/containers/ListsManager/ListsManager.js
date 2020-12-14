@@ -49,25 +49,6 @@ const ListsManager = props => {
                 valid: false,
                 touched: false,
             },
-            // If new list is public or private
-            isPublic: {
-                elementType: 'select',
-                elementConfig: {
-                    // TODO: This isn't working right
-                    options: [
-                        {
-                            value: 'private',
-                            displayValue: 'Private',
-                        },
-                        {
-                            value: 'public',
-                            displayValue: 'Public',
-                        },
-                    ]
-                },
-                value: 'private', //default
-                valid: true, //no validation required
-            },
         },
         formValid: true, //TODO: Delete this if not used
     })
@@ -128,12 +109,13 @@ const ListsManager = props => {
         // Deconstruct our controls
         const {
             name,
-            isPublic
         } = newListControls
 
         // Grab our values from our controls
         const newListName = name.value
-        const newListPublicity = isPublic.value
+        // Legacy - used when could set public from creator.
+        // May re-add later.
+        const newListPublicity = 'private'
 
         // Send new list to DB
         if (process.env.NODE_ENV === 'development') {
@@ -151,7 +133,6 @@ const ListsManager = props => {
         updatedControls.name.value = ''
         updatedControls.name.touched = false
         updatedControls.name.valid = false
-        updatedControls.isPublic.value = 'private'
         setListState({...listState, updatedControls})
     }
 
@@ -246,6 +227,7 @@ const ListsManager = props => {
     // Open/close problem viewer modal
     const openListEditor = (event) => {
         event.preventDefault()
+        console.log('opening')
         setListEditorOpen(true)
     }
     const closeListEditor = () => {
@@ -384,7 +366,9 @@ const ListsManager = props => {
             {createNewListFormElements}
             <Button 
                 btnType="Success"
-                clicked={null}>
+                clicked={null}
+                className='container mx-auto'
+                >
                     Create New List
                 </Button>
         </form>
@@ -402,7 +386,8 @@ const ListsManager = props => {
     )
 
     const viewListContentsBtn = (
-        <Button btnType="Success" clicked={() => setViewListContents(!viewListContents)}>
+        <Button btnType="Success" clicked={() => setViewListContents(!viewListContents)}
+        className='container mx-auto'>
             {viewListContents ? ('Hide ' + props.curListName + '\'s Problems') :
                                 ('Show ' + props.curListName + '\'s Problems')}
         </Button>
@@ -416,7 +401,7 @@ const ListsManager = props => {
     )
 
     const deleteListBtn = (
-        <Button btnType="Danger" clicked={promptDeleteList}>
+        <Button btnType="Danger" clicked={promptDeleteList} >
             Delete List
         </Button>
     )
@@ -440,24 +425,13 @@ const ListsManager = props => {
 
     // Items that only make sense to show if we have a list selected
     const listEditorItems = (
-        <div>
-            <Button btnType="Success" clicked={openListEditor}>Edit Selected List (add or remove problems)</Button>
-            {listEditorModal}
-            <br/>
-            <div>
-                <h4>
-                    {props.curListName} is: <span style={{color: 'red'}}>{props.curListPublic ? 'Public' : 'Private'}</span>
-                </h4>
+        <div id='listEditorItems' className='grid'>
+            <div id='listProperties' className='row-start-4 col-start-2'>
                 {/* If the current list is private, offer the option to set it public*/}
                 {!props.curListPublic && <Button btnType="Success" clicked={promptListPublic}>Set Selected List Public</Button>}
                 {/* If current list is private, offer ability to rename*/}
                 {!props.curListPublic && <br/> && viewRenameFormBtn}
                 {!props.curListPublic && renameFormState.renameListFormVisible && renameForm}
-                {/* Show the problems currently in the list */}
-                <br/>
-                {viewListContentsBtn}
-                {viewListContents && <ProblemTable problems={props.curProblems} extraFields={problemTableFields} loading={false}/>}
-                <br/>
                 {/* If current list is private, offer ability to delete it. */}
                 {!props.curListPublic && deleteListBtn}
             </div>
@@ -465,10 +439,32 @@ const ListsManager = props => {
     )
 
     return (
-        <div>
-            {newListFormVisible && newListForm}
-            <Selector showLists={true} showProblems={false}/>
-            {showEditingTools && listEditorItems}
+        <div id='listManager' className='container mx-auto'>
+            {listEditorModal}
+            <div className=''>
+                {newListFormVisible && newListForm}
+            </div>
+            <div className='container mx-auto'>
+                <Selector showLists={true} showProblems={false} />
+                <div className='grid grid-rows-1 grid-cols-3'>
+                    <div className='row-start-1 col-start-2'>
+                        <Button btnType="Success" clicked={openListEditor}>Edit Selected List (add or remove problems)</Button>
+                    </div>
+                </div>
+            </div>
+            <div className='container mx-auto'>
+                <h4 className='text-center'>
+                    {props.curListName} is currently: <span style={{color: 'red'}}>{props.curListPublic ? 'Public' : 'Private'}</span>
+                </h4>
+                {showEditingTools && listEditorItems}
+            </div>
+            <div id='listContents' className='grid grid-rows-1 grid-cols-3'>
+                <div className='row-start-1 col-start-2'>
+                    {/* Show the problems currently in the list */}
+                    {showEditingTools && viewListContentsBtn}
+                    {viewListContents && <ProblemTable problems={props.curProblems} extraFields={problemTableFields} loading={false}/>}
+                </div>
+            </div>
         </div>
     )
 }
