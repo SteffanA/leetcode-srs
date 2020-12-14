@@ -161,8 +161,13 @@ const SubmissionHistory = props => {
 
     return (
         <div>
-            <h2>Submission History:</h2>
-            <ProblemTable problems={problems} extraFields={problemTableFields} loading={loadingProblems}/>
+            <h2 className='text-center font-bold text-lg'>Submission History:</h2>
+            <br/>
+            <div className='grid grid-rows-1 grid-cols-7'>
+                <div className='row-start-1 col-start-3 col-span-4'>
+                    <ProblemTable problems={problems} extraFields={problemTableFields} loading={loadingProblems}/>
+                </div>
+            </div>
             {submissionViewerModal}
         </div>
     )
