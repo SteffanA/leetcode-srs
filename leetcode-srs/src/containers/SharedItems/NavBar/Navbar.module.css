@@ -31,13 +31,12 @@
 }
 
 .Title {
-  color: black;
   font-size: x-large;
   font-weight: bold;
   box-sizing: border-box;
-  border-color: black;
+  /* border-color: black;
   border-style: solid;
-  border-width: 2px;
+  border-width: 2px; */
   text-align: center;
   display: block;
   width: 100%;
