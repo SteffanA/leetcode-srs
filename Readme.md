@@ -13,7 +13,7 @@ This is a web application designed to provide Spaced Repetition Studying for Lee
 
 You will be redirected to the main page, where you will be prompted to visit the manage lists page, which you can access from the prompt or by selecting Manage Lists in the navigation bar.
 
-* From here, create a new list, as either public or private (explained below).
+* From here, create a new list, which is private by default (explained below).
 
 Your new list will auto-populate in the drop-down list selector, and new options will appear - the ability to edit your list, change the name, or set public (if created as a private list).
 
