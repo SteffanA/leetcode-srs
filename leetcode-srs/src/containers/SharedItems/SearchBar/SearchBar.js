@@ -9,6 +9,7 @@ export const SearchBar = (props) => {
         defaultText, // default text for the search bar
         handleSubmit, // handler for submission - required params are (event, searchTerm)
         termGetter, // function for the parent to take the search term
+        searchSubject, // string - Problem, List, etc
     } = props
 
 
@@ -68,12 +69,12 @@ export const SearchBar = (props) => {
     }
 
     return (
-        <div>
+        <div id='searchBar'>
             <form className="SearchBar">
-                <label>
-                    Search for a problem:
+                <div>
+                    <h2 className='text-center font-bold text-lg'>Search for a {searchSubject}:</h2>
                     <Input elementType='input' name="name" value={query} changed={handleChange}/>
-                </label>
+                </div>
                 <Input elementType="submit" value="Submit" clicked={handleSubmit}/>
             </form>
         </div>

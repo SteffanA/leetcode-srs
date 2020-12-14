@@ -40,8 +40,11 @@ export const ListsViewer = (props) => {
                 if (res.length === 0) {
                     // No result returned - warn user.
                     alert('No results for ' + term)
+                    // Keep prior results - do not set lists
                 }
-                setLists(res)
+                else {
+                    setLists(res)
+                }
             } catch (error) {
                 alert('Failed to get results for search: ' + error)
                 setLists([])
@@ -71,7 +74,7 @@ export const ListsViewer = (props) => {
             getPublicLists()
         }
         else {
-            handleSubmit(new Event(), searchTerm)
+            handleSubmit(new Event(0), searchTerm)
         }
     }, [])
 
@@ -165,23 +168,25 @@ export const ListsViewer = (props) => {
 
     // For visuals: Table, 3 columns: Name, # of problems, View Problems, Clone
     return (
-        <div>
-            <SearchBar defaultText={INIT_SEARCH_TERM} handleSubmit={handleSubmit} termGetter={updateSearchTerm}/>
-            {!loadingLists && (
-            <table>
-                <tbody>
-                    <tr className='center-text'>
-                        <th>List Name</th>
-                        <th>Number of Problems</th>
-                        <th>View</th>
-                        {/*Only display cloning when logged in*/}
-                        {props.isAuth && (<th>Clone</th>)}
-                    </tr>
-                    {listsOutput}
-                </tbody>
-            </table>
-            )}
-            {loadingLists && <Spinner/>}
+        <div id='publicListViewer'>
+            <SearchBar defaultText={INIT_SEARCH_TERM} handleSubmit={handleSubmit} termGetter={updateSearchTerm} searchSubject={'List'}/>
+            <div id='publicLists' className='grid grid-rows-1 grid-cols-7'>
+                {!loadingLists && (
+                <table className='row-start-1 col-start-2 col-span-5'>
+                    <tbody>
+                        <tr className='center-text'>
+                            <th>List Name</th>
+                            <th>Number of Problems</th>
+                            <th>View</th>
+                            {/*Only display cloning when logged in*/}
+                            {props.isAuth && (<th>Clone</th>)}
+                        </tr>
+                        {listsOutput}
+                    </tbody>
+                </table>
+                )}
+                {loadingLists && <Spinner/>}
+            </div>
             <Modal
                 isOpen={problemsOpen}
                 onAfterOpen={null}

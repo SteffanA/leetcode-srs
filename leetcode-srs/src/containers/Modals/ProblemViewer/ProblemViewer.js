@@ -306,7 +306,7 @@ export const ProblemViewer = (props) => {
 
     return (
         <div>
-            <SearchBar defaultText="Search for a Problem" handleSubmit={handleSubmit} termGetter={updateSearchTerm}/>
+            <SearchBar defaultText="Search for a Problem" handleSubmit={handleSubmit} termGetter={updateSearchTerm} searchSubject='Problem'/>
             <Input elementType="submit" value="Save Changes" clicked={saveChanges}/>
             <ProblemTable problems={curProblemResults} extraFields={extraProblemFields} loading={loadingProblems}/>
             {/*TODO: Add support for these results - will likely need to update the API
