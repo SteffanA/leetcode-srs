@@ -31,8 +31,14 @@ app.use('/api/submissions', require('./routes/api/submissions'))
 const PORT = process.env.SERVER_PORT || 5000
 // Determine if server should be hosted as HTTP or HTTPS
 const SECURE = process.env.HTTPS
-
-if (SECURE) {
+// Determine if we're running tests
+const TEST = process.env.TESTING
+if (TEST) {
+    const TEST_PORT = process.env.TEST_PORT || 61234
+    // Start up a basic HTTP server
+    app.listen(TEST_PORT, () => console.log(`Test server started on port ${TEST_PORT}`))
+}
+else if (SECURE) {
     // TODO: The auto-deploy docker-compose doesn't connect to the HTTPS version
     // of the server. Need to determine if a server issue, or reverse proxy one.
 
@@ -58,3 +64,5 @@ else {
     // app.use(session({cookie: {sameSite: 'lax'},}))
     app.listen(PORT, () => console.log(`Server started on port ${PORT}`))
 }
+
+module.exports = app

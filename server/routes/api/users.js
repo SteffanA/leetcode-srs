@@ -229,7 +229,24 @@ async (req, res) => {
 // @route  DELETE api/users
 // @desc   Delete user
 // @access Private
-
+router.delete('/', [auth], 
+async (req, res) => {
+    try {
+        // Get the User by the passed auth ID
+        const user = await User.findById(req.user.id).select(['-password', '-__v'])
+        // Ensure we could find them
+        if (!user) {
+            return res.status(404).json({errors: [{msg: 'User not found.'}]})
+        }
+        // Delete the user
+        await User.deleteOne({id: req.user.id})
+        // Return the user as JSON
+        return res.json(true)
+    } catch (error) {
+        console.log('Error when deleting user id ' + error.message)
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
+    }
+})
 
 // @route  PUT api/users/changepass
 // @desc   Change a user's password
