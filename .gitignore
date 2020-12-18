@@ -6,3 +6,5 @@ keys/
 Database/
 package-lock.json
 .vscode*
+coverage
+.nyc_output

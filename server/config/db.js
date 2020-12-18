@@ -21,21 +21,45 @@ See: https://github.com/Automattic/mongoose/issues/8180, https://github.com/Auto
 
 May need &tlsInsecure=true option
 */
-const db = `mongodb://${process.env.MONGODB_HOST}:${process.env.MONGODB_PORT}?retryWrites=true&w=majority`
+let db = ''
+// Connect to test database if started with Testing var enabled
+const TEST = process.env.TESTING
+if (TEST) {
+    db = `mongodb://${process.env.TEST_MONGODB_HOST}:${process.env.TEST_MONGODB_PORT}?retryWrites=true&w=majority`
+}
+else {
+    db = `mongodb://${process.env.MONGODB_HOST}:${process.env.MONGODB_PORT}?retryWrites=true&w=majority`
+}
 
 // Connect to our MongoDB instance
 const connectDB = async () => {
     try {
-        await mongoose.connect(db, {
-            // These are options to get rid of depreciation messages
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            useCreateIndex: true,
-            user: `${process.env.MONGODB_USER}`,
-            pass: `${process.env.MONGODB_PASS}`,
-            dbName: `${process.env.DATABASE_NAME}`,
-        })
-        console.log(`MongoDB connected on ${process.env.MONGODB_HOST} via port ${process.env.MONGODB_PORT}...`)
+        // Use test parameters if we're connecting to the test DB
+        if (TEST) {
+            console.log('Connecting to test database...')
+            await mongoose.connect(db, {
+                // These are options to get rid of depreciation messages
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
+                useCreateIndex: true,
+                user: `${process.env.TEST_MONGODB_USER}`,
+                pass: `${process.env.TEST_MONGODB_PASS}`,
+                dbName: `${process.env.DATABASE_NAME}`,
+            })
+            console.log(`MongoDB connected on ${process.env.TEST_MONGODB_HOST} via port ${process.env.TEST_MONGODB_PORT}...`)
+        }
+        else {
+            await mongoose.connect(db, {
+                // These are options to get rid of depreciation messages
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
+                useCreateIndex: true,
+                user: `${process.env.MONGODB_USER}`,
+                pass: `${process.env.MONGODB_PASS}`,
+                dbName: `${process.env.DATABASE_NAME}`,
+            })
+            console.log(`MongoDB connected on ${process.env.MONGODB_HOST} via port ${process.env.MONGODB_PORT}...`)
+        }
     } catch (error) {
         console.log('Failed to connect to the database with error: ')
         console.log(error.message)
