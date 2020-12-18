@@ -129,6 +129,34 @@ One known issue is that the nginx reverse proxy does not currently handle HTTPS 
 
 #
 
+***Testing***
+
+Note: Testing remains a WIP, and currently is only partially implemented for the server.
+
+This project is setup for automated testing and code coverage results via the Mocha and Istanbul projects.  If you have setup your environmental variable file, running the tests is simple and can be done in two ways:
+
+*Automatic running*
+ * At the root of the project, run ./test.sh.
+ > Like the configuration, remember to "chmod +x test.sh" to run the script if on Linux.
+ * Follow the prompt to decide if you just want to run tests, or would like to run tests and gather code coverage data.
+
+*Manual running*
+TODO: Need to determine if copying .env is required.
+ * To manually run the server's tests:
+ * Run "cp .env ./server/tests/.env" to copy the .env file from the root to the test folder (Windows only?)
+ * Change to the ./server/tests directory from the root of the project.
+ * Run "docker-compose up -d mongo" to bring up the temporary test MongoDB.
+ > If you would like, running "docker-compose up -d" will also launch a MongoExpress instance for you to view the information in the database.
+ * CD back one directory to ./server.
+ * Ensure that the .env file at the root of the project has the TESTING variable set to 'true' or any non-falsey value.
+ * To run tests alone, run "npm run test"
+ * To run tests and collect coverage, run "npm run coverage"
+ * CD back to the ./server/tests directory
+ * Run "docker-compose down" to bring down your test database.
+
+If you ran tests, the output will be in the command line.  If you ran coverage, your coverage results will be in ./server/coverage/lcov-report, where you can browse the results via the index.html web page.
+#
+
 **WIP Features**
 
 Making the site less ugly :)
