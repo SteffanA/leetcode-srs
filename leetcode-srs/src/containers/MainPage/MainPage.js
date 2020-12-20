@@ -199,13 +199,47 @@ const MainPage = (props) => {
             setTON(probTON)
             // Update the problem states by and refresh the selector box by doing it
             getProblems(curList)
-            // window.open(process.env.REACT_APP_HOST_URL, "_self")
+            // Refresh the state of the form and re-hide
+            const updatedControls = controls
+            updatedControls.code.touched = false
+            updatedControls.code.value = ''
+            updatedControls.execTime.touched = false
+            updatedControls.execTime.value = ''
+            updatedControls.timeSpent.touched = false
+            updatedControls.timeSpent.valid = false
+            updatedControls.timeSpent.value = ''
+            updatedControls.result.touched = false
+            updatedControls.result.value = true
+            updatedControls.memUsed.touched = false
+            updatedControls.memUsed.value = ''
+            setSubState({...subState, updatedControls, formValid : false})
+            // Repeat for the timer, and set ref
+            setCurState('')
+            setCurTime(0)
+            setStoppedTime(0)
+            timer.current = <TimerBox start={true} updateTime={setCurTime} updateState={setCurState} initialTime={0}/>
+            setelements({...elements, formVisible: false, timerVisible: false})
         } catch (error) {
             console.error('Error submitting:')
             console.error(error)
             alert('Unable to process submission, please try later.')
         }
     }
+
+    // TODO: Use this reducer hook for our form state updates - will provide cleaner
+    //       way of resetting our form
+    // const initialState = {
+
+    // }
+    // const reducer = (state, action) => {
+    //     if (action.type === 'reset') {
+    //         // Reset the form
+    //         return initialState
+    //     }
+    //     // Not currently using reducer for anything but resetting state.
+    //     return state
+    // }
+    // const [state, dispatch] = useReducer(reducer, initialState)
 
     // Handle an input change on a form object
     const inputChangedHandler = (event, controlKey) => {

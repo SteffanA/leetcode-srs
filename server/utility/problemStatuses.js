@@ -96,12 +96,16 @@ exports.addColorToProblemsBasedOnTON = (user, problems) => {
             const ton = status.next_submission
             const tonAsDate = new Date(ton)
             let color = 'green'
-            if (tonAsDate < addDaysToDate(now, 3)) {
+            if (tonAsDate < addDaysToDate(now, 1)) {
                 color = 'red'
+            }
+            else if (tonAsDate < addDaysToDate(now, 4)) {
+                // Using a slightly easier to see yellow that isnt as jarring
+                color = 'GoldenRod'
             }
             else if (tonAsDate < addDaysToDate(now, 7)) {
                 // Using a slightly easier to see yellow that isnt as jarring
-                color = 'GoldenRod'
+                color = 'YellowGreen'
             }
             Object.assign(prob, {'color' : color})
         }
