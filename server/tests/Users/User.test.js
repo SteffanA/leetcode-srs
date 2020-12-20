@@ -136,7 +136,7 @@ describe('User API Tests' , () => {
                 chai.request(app)
                 .post(BASE_URL)
                 .send({
-                    name: 'test2@test.com',
+                    email: 'test2@test.com',
                     pass: 'test12'
                 })
                 .then((err, res) => {

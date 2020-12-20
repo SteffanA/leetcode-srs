@@ -24,7 +24,7 @@
     "nyc": "^15.1.0"
   },
   "scripts": {
-    "test": "mocha ./tests/**/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
+    "test": "env TESTING=true mocha ./tests/**/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
     "_comment": "Note: --exit in the test element is to force the test program to exit after finishing in case we use done()",
     "coverage": "nyc --reporter=lcov --reporter=text-lcov npm test",
     "start": "node server",
