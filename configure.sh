@@ -49,8 +49,13 @@ get_env_input () {
 # BEGIN CONFIGURE SCRIPT
 
 # Install the npm modules for the server and frontend
-(cd ./server/ && npm install)
-(cd ./leetcode-srs/ && npm install)
+read -p "Do you want to install the npm module dependencies? " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    (cd ./server/ && npm install)
+    (cd ./leetcode-srs/ && npm install)
+fi
 
 # Ask if we should configure initialize the .env files
 read -p "Do you want to create the required .env files? " -n 1 -r

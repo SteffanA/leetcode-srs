@@ -1,3 +1,4 @@
+const { body } = require('express-validator');
 const { deleteOne } = require('../../models/User');
 
 const app = require('../../server'),
@@ -148,6 +149,25 @@ describe('User API Tests' , () => {
             })
         })
 
+        describe('Test Users Cannot Register with Pass under 6 chars', () => {
+            it('Returns a 400 response', () => {
+                chai.request(app)
+                .post(BASE_URL)
+                .send({
+                    email: 'test3@test.com',
+                    pass: 'test'
+                })
+                .then((err, res) => {
+                    if (err) done(err)
+                    // Check response for a valid 400
+                    expect(res).to.have.status(400)
+                    // Check that the body throws the right error.
+                    expect(body).to.have.property('errors')
+                    done()
+                })
+            })
+        })
+
         // describe('Test User Can Delete Self', () => {
         //     it('Returns a 200 response', () => {
         //         chai.request(app)
@@ -167,6 +187,69 @@ describe('User API Tests' , () => {
     })
 
     describe('User Information Tests', () => {
+
+        // Get an authentication token before the tests
+        // let authUser = chai.request.agent(app)
+        let token = ''
+
+        describe('Test User Can Get Own Info', () => {
+            before(() => {
+                console.log('Running before...')
+                // Send a request to the auth backend using the 
+                // credentials for an account created
+                // during the POST tests.
+                return new Promise((resolve) => {
+                    chai.request(app)
+                    .post('/api/auth')
+                    .send({
+                        name : 'test',
+                        password: 'test12'
+                    })
+                    .end((err, res) => {
+                        console.log('Got responses')
+                        if (err) {
+                            console.log('error...')
+                            console.log(err)
+                            resolve(err)
+                        }
+                        token = res.body.token
+                        console.log('token is....')
+                        console.log(token)
+                        resolve(res)
+                    })
+                })
+            })
+
+            it('Returns a 200 response with user\'s information', () => {
+                chai.request(app)
+                .get(BASE_URL)
+                .set({'x-auth-token': token})
+                .then((err, res, body) => {
+                    if (err) done(err)
+                    // Check response for a valid 200
+                    expect(res).to.have.status(200)
+                    expect(body).to.include.keys(['name', 'email', 'creationDate', 'lists', 'problem_statuses'])
+                    done()
+                })
+            })
+        })
+
+    })
+
+
+    describe('Protected Routes Require Auth Token', () => {
+        describe('Test User Get Info Requires Auth', () => {
+            it('Returns a 400 response', () => {
+                chai.request(app)
+                .get(BASE_URL)
+                .then((err, res) => {
+                    if (err) done(err)
+                    // Check response 401 - no token in auth
+                    expect(res).to.have.status(401)
+                    done()
+                })
+            })
+        })
     })
 
 })
