@@ -1,5 +1,5 @@
 '''
-Last Run: 12/20/2020
+Last Run: 12/22/2020
 Last Updated: 12/07/2020
 
 This takes the results of the LeetCode api page and transforms it into the data we want
@@ -10,6 +10,7 @@ import json # For converting from/to JSON
 from dotenv import load_dotenv # For getting environmental variables from .env file
 import os # For getting path info of this file and env variables
 import re # For matching for last run/updated
+import argparse # For getting command-line args
 from datetime import date # For getting the current date
 
 class helper:
@@ -73,14 +74,13 @@ class helper:
             'problem_text': 'No text yet.',
         }
         return convert
-        # return json.dumps(convert)
 
     '''
     Parse the results from the LeetCode API, which we either
     gather from a GET request or we can parse a provided file.
     POST the results via our running server instance into our DB.
     '''
-    def parse(self, file_location: str = None):
+    def parse(self, file_location: str = None, test: bool =False):
         lc_url = 'https://leetcode.com/api/problems/algorithms/'
         question_info = None
         if not file_location:
@@ -101,7 +101,11 @@ class helper:
         if question_info:
             # Define our server URL endpoints here:
             base_server_url = os.getenv('SERVER_BASE_URL')
-            server_port = os.getenv('SERVER_PORT')
+            if test:
+                print('Connecting to test server port.')
+                server_port = os.getenv('TEST_SERVER_PORT')
+            else:
+                server_port = os.getenv('SERVER_PORT')
             server_url = base_server_url + ':' + server_port
 
             problem_post_url = server_url + '/api/problems/bulk'
@@ -223,7 +227,27 @@ class helper:
             # Update the last run, but not the last tested date
             self.update_header_dates(True)
 
-# Create our helper and parse
-helper = helper()
-# helper.parse(r'apiresults.json')
-helper.parse()
+if __name__ == '__main__':
+    # Create our helper
+    helper = helper()
+    parser = argparse.ArgumentParser(description='Add problems from LeetCode API.')
+    parser.add_argument('--path', type=str, default= None,
+                        dest='path',
+                        help='Path to API result JSON file.  Optional')
+    parser.add_argument('--test', dest='test', type=bool,
+                        default=False,
+                        help='Determine if connect to test server. True for yes. Optional')
+
+    args = parser.parse_args()
+    test = args.test
+    file_path = args.path
+
+    # Check if a file argument was provided.
+    if (file_path):
+        # We were provided some json problem file. Use this to import problems
+        # Expect it to be a json file, or at least filled with JSON matching the
+        # result of getting the LeetCode API directly
+        helper.parse(file_path, test)
+    else:
+        # Parse directly using the LeetCode API
+        helper.parse(None, test)

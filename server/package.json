@@ -28,6 +28,11 @@
     "test": "env TESTING=true mocha ./tests/**/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
     "_comment": "Note: --exit in the test element is to force the test program to exit after finishing in case we use done()",
     "coverage": "nyc --reporter=lcov --reporter=text-lcov npm test",
+    "authTest": "env TESTING=true mocha ./tests/Auth/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
+    "authCoverage": "nyc --reporter=lcov --reporter=text-lcov npm run authTest",
+    "userTest": "env TESTING=true mocha ./tests/Users/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
+    "userCoverage": "nyc --reporter=lcov --reporter=text-lcov npm run userTest",
+
     "start": "node server",
     "server": "nodemon server",
     "client": "npm start --prefix ..\\leetcode-srs",

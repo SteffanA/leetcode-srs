@@ -9,7 +9,6 @@ const Auth = (req, res, next) => {
 
     // Check if no token exists
     if (!token){
-        console.log('No token in auth')
         return res.status(401).json({msg: 'No token provided. Authorization denied.'})
     }
 
