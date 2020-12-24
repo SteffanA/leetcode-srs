@@ -3,6 +3,10 @@ const app = require('../../server'),
     expect = chai.expect //to solve error when using done(): “ReferenceError: expect is not defined”
 chai.use(chaiHttp);
 
+const {checkForCorrectErrors, checkForValidAddition,
+        checkForValidRemoval, checkSuccessfulLogin,
+        checkValidationResult, checkForCorrectMessage} = require('../sharedTestFunctions.js')
+
 const BASE_URL = '/api/users'
 
 describe('User API Tests' , () => {
@@ -15,7 +19,8 @@ describe('User API Tests' , () => {
     let listID = ''
     // List ID for a private list belonging to 'otherUserToken' user
     let privateListID = ''
-
+    
+    // Tests to ensure we can register a user
     describe('User Register Tests', () => {
         describe('Test User Register Validation Checks', () => {
 
@@ -27,18 +32,7 @@ describe('User API Tests' , () => {
                 })
                 .end((err, res) => {
                     if (err) done(err)
-                    // Check response for a valid 400
-                    expect(res).to.have.status(400)
-                    const body = res.body
-                    const errs = []
-                    const errMsgs = []
-                    body.errors.forEach((error) => {
-                        errs.push(error)
-                        expect(error).to.have.property('msg')
-                        errMsgs.push(error.msg)
-                    })
-                    expect(errMsgs).to.contain('Name is required.')
-                    done()
+                    checkValidationResult(res, done, 'Name is required.')
                 })
             })
 
@@ -50,18 +44,7 @@ describe('User API Tests' , () => {
                 })
                 .end((err, res) => {
                     if (err) done(err)
-                    // Check response for a valid 400
-                    expect(res).to.have.status(400)
-                    const body = res.body
-                    const errs = []
-                    const errMsgs = []
-                    body.errors.forEach((error) => {
-                        errs.push(error)
-                        expect(error).to.have.property('msg')
-                        errMsgs.push(error.msg)
-                    })
-                    expect(errMsgs).to.contain('Please enter a password with at least 6 characters.')
-                    done()
+                    checkValidationResult(res, done, 'Please enter a password with at least 6 characters.')
                 })
             })
 
@@ -74,19 +57,7 @@ describe('User API Tests' , () => {
                 })
                 .end((err, res) => {
                     if (err) done(err)
-                    // Check response for a valid 400
-                    expect(res).to.have.status(400)
-                    const body = res.body
-                    expect(body).to.have.property('errors')
-                    const errs = []
-                    const errMsgs = []
-                    body.errors.forEach((error) => {
-                        errs.push(error)
-                        expect(error).to.have.property('msg')
-                        errMsgs.push(error.msg)
-                    })
-                    expect(errMsgs).to.contain('Name is required.')
-                    done()
+                    checkValidationResult(res, done, 'Name is required.')
                 })
             })
 
@@ -99,19 +70,7 @@ describe('User API Tests' , () => {
                 })
                 .end((err, res) => {
                     if (err) done(err)
-                    // Check response for a valid 400
-                    expect(res).to.have.status(400)
-                    // Check that the body throws the right error.
-                    const body = res.body
-                    const errs = []
-                    const errMsgs = []
-                    body.errors.forEach((error) => {
-                        errs.push(error)
-                        expect(error).to.have.property('msg')
-                        errMsgs.push(error.msg)
-                    })
-                    expect(errMsgs).to.contain('Please enter a password with at least 6 characters.')
-                    done()
+                    checkValidationResult(res, done, 'Please enter a password with at least 6 characters.')
                 })
             })
         })
@@ -127,15 +86,13 @@ describe('User API Tests' , () => {
                 })
                 .end((err, res) => {
                     if (err) done(err)
-                    // Check response for a valid 200
-                    expect(res).to.have.status(200)
+                    // Use a dummy function to pass for 'done' to our register
+                    // test so we retain access to set the otherUserToken
+                    const dummyFunc = () => {}
+                    checkSuccessfulLogin(res, dummyFunc, 'test')
                     const body = res.body
-                    expect(body).to.have.property('username')
-                    expect(body.username).to.equal('test')
-                    expect(body).to.have.property('token')
                     // Set otherUserToken for use later
                     otherUserToken = body.token
-                    expect(body).to.have.property('timeout')
                     done()
                 })
             })
@@ -152,14 +109,7 @@ describe('User API Tests' , () => {
                 })
                 .end((err, res) => {
                     if (err) done(err)
-                    // Check response for a valid 200
-                    expect(res).to.have.status(200)
-                    const body = res.body
-                    expect(body).to.have.property('username')
-                    expect(body.username).to.equal('tester')
-                    expect(body).to.have.property('token')
-                    expect(body).to.have.property('timeout')
-                    done()
+                    checkSuccessfulLogin(res, done, 'tester')
                 })
             })
         })
@@ -174,18 +124,7 @@ describe('User API Tests' , () => {
                 })
                 .end((err, res) => {
                     if (err) done(err)
-                    // Check response for a valid 400
-                    expect(res).to.have.status(400)
-                    const body = res.body
-                    const errs = []
-                    const errMsgs = []
-                    body.errors.forEach((error) => {
-                        errs.push(error)
-                        expect(error).to.have.property('msg')
-                        errMsgs.push(error.msg)
-                    })
-                    expect(errMsgs).to.contain('User already exists for this name')
-                    done()
+                    checkValidationResult(res, done, 'User already exists for this name')
                 })
             })
         })
@@ -201,18 +140,7 @@ describe('User API Tests' , () => {
                 })
                 .end((err, res) => {
                     if (err) done(err)
-                    // Check response for a valid 400
-                    expect(res).to.have.status(400)
-                    const body = res.body
-                    const errs = []
-                    const errMsgs = []
-                    body.errors.forEach((error) => {
-                        errs.push(error)
-                        expect(error).to.have.property('msg')
-                        errMsgs.push(error.msg)
-                    })
-                    expect(errMsgs).to.contain('User already exists for this email')
-                    done()
+                    checkValidationResult(res, done, 'User already exists for this email')
                 })
             })
         })
@@ -229,35 +157,14 @@ describe('User API Tests' , () => {
                 })
                 .end((err, res) => {
                     if (err) done(err)
-                    // Check response for a valid 200
-                    console.log(res.body)
-                    expect(res).to.have.status(200)
-                    const body = res.body
-                    expect(body).to.have.property('username')
-                    expect(body.username).to.equal('test3')
-                    expect(body).to.have.property('token')
-                    expect(body).to.have.property('timeout')
-                    done()
+                    checkSuccessfulLogin(res, done, 'test3')
                 })
             })
         })
-
-        // describe('Test User Can Delete Self', () => {
-        //     it('Returns a 200 response', (done) => {
-        //         chai.request(app)
-        //         .post(BASE_URL)
-        //         .end((err, res) => {
-        //             if (err) done(err)
-        //             // Check response for a valid 200
-        //             expect(res).to.have.status(200)
-        //             done()
-        //         })
-        //     })
-        // })
     })
 
 
-
+    // Tests to check if we can get a User's information
     describe('User Information Tests', () => {
 
         // Get an authentication token before the tests
@@ -279,7 +186,6 @@ describe('User API Tests' , () => {
                     }
                     else {
                         token = res.body.token
-                        console.log('token is: ' + token)
                         resolve(res)
                     }
                 }) //end create user
@@ -304,9 +210,7 @@ describe('User API Tests' , () => {
                     }
                     else {
                         // Retrieve the list ID from the res
-                        console.log('List id being set to...')
                         listID = res.body._id
-                        console.log(listID)
                         resolve(res)
                     }
                 }) // end create list
@@ -344,6 +248,8 @@ describe('User API Tests' , () => {
 
     })
 
+
+    // Tests to do with adding/removing lists from a User
     describe('User List Tests', () => {
         before(() => {
             // Create a list with another user to test private checks work
@@ -363,9 +269,7 @@ describe('User API Tests' , () => {
                     }
                     else {
                         // Retrieve the list ID from the res
-                        console.log('Private list id being set to...')
                         privateListID = res.body._id
-                        console.log(privateListID)
                         resolve(res)
                     }
                 }) // end create list
@@ -378,15 +282,7 @@ describe('User API Tests' , () => {
             .set({'x-auth-token': token})
             .end((err, res) => {
                 if (err) done(err)
-                // Check response for a valid 200
-                expect(res).to.have.status(200)
-                let listIds = []
-                res.body.forEach((list) => {
-                    listIds.push(list._id)
-                })
-                // Check that the added list isn't in the body
-                expect(listIds).to.not.include(listID)
-                done()
+                checkForValidRemoval(res, done, listID)
             })
         })
 
@@ -399,13 +295,7 @@ describe('User API Tests' , () => {
                     console.log('We erred for not exist')
                     done(err)
                 }
-                // Check response for a valid 404
-                expect(res).to.have.status(404)
-                // Check for the correct error message.
-                expect(res.body).to.have.property('errors')
-                expect(res.body.errors[0]).to.have.property('msg')
-                expect(res.body.errors[0].msg).to.include('List not a part of user\'s Lists.')
-                done()
+                checkForCorrectErrors(res, done, 404, 'List not a part of user\'s Lists.')
             })
         })
 
@@ -415,13 +305,7 @@ describe('User API Tests' , () => {
             .set({'x-auth-token': token})
             .end((err, res) => {
                 if (err) done(err)
-                // Check response for a valid 404
-                expect(res).to.have.status(404)
-                // Check for the correct error message
-                expect(res.body).to.have.property('errors')
-                expect(res.body.errors[0]).to.have.property('msg')
-                expect(res.body.errors[0].msg).to.include('List not found.')
-                done()
+                checkForCorrectErrors(res, done, 404, 'List not found.')
             })
         })
 
@@ -431,14 +315,7 @@ describe('User API Tests' , () => {
             .set({'x-auth-token': token})
             .end((err, res) => {
                 if (err) done(err)
-                // Check response for a valid 200
-                expect(res).to.have.status(200)
-                let listIds = []
-                res.body.forEach((list) => {
-                    listIds.push(list._id)
-                })
-                expect(listIds).to.contain(listID)
-                done()
+                checkForValidAddition(res, done, listID)
             })
         })
 
@@ -448,12 +325,7 @@ describe('User API Tests' , () => {
             .set({'x-auth-token': token})
             .end((err, res) => {
                 if (err) done(err)
-                // Check response for a valid 409
-                expect(res).to.have.status(409)
-                expect(res.body).to.have.property('errors')
-                expect(res.body.errors[0]).to.have.property('msg')
-                expect(res.body.errors[0].msg).to.include('List already in User\'s lists.')
-                done()
+                checkForCorrectErrors(res, done, 409, 'List already in User\'s lists.')
             })
         })
 
@@ -463,12 +335,7 @@ describe('User API Tests' , () => {
             .set({'x-auth-token': token})
             .end((err, res) => {
                 if (err) done(err)
-                // Check response for a valid 404
-                expect(res).to.have.status(404)
-                expect(res.body).to.have.property('errors')
-                expect(res.body.errors[0]).to.have.property('msg')
-                expect(res.body.errors[0].msg).to.include('List not found.')
-                done()
+                checkForCorrectErrors(res, done, 404, 'List not found.')
             })
         })
 
@@ -478,94 +345,67 @@ describe('User API Tests' , () => {
             .set({'x-auth-token': token})
             .end((err, res) => {
                 if (err) done(err)
-                // Check response for a valid 404
-                expect(res).to.have.status(404)
-                expect(res.body).to.have.property('errors')
-                expect(res.body.errors[0]).to.have.property('msg')
-                expect(res.body.errors[0].msg).to.include('List not found.')
-                done()
+                checkForCorrectErrors(res, done, 404, 'List not found.')
             })
         })
     })
+
 
     // Tests that assure that we are correctly using our auth middleware for
     // the routes we expect to be auth-protected
     describe('Protected Routes Require Auth Token', () => {
-        describe('Test User Get Info Requires Auth', () => {
-            it('Returns a 401 response and warns of no token', (done) => {
-                chai.request(app)
-                .get(BASE_URL)
-                .end((err, res) => {
-                    if (err) done(err)
-                    // Check response 401 - no token in auth
-                    expect(res).to.have.status(401)
-                    expect(res.body).to.have.property('msg')
-                    expect(res.body.msg).to.include('No token provided. Authorization denied.')
-                    done()
-                })
+        // Helper function to check that we get a 401 rejection with correct message.
+        const check401DueToNoToken = (res, done) => {
+            checkForCorrectMessage(res, done, 401, 'No token provided. Authorization denied.')
+        }
+
+        it('Test User Get Info Requires Auth with 401 res and no token warning', (done) => {
+            chai.request(app)
+            .get(BASE_URL)
+            .end((err, res) => {
+                if (err) done(err)
+                check401DueToNoToken(res, done)
             })
         })
 
-        describe('Test User Get Lists Requires Auth', () => {
-            it('Returns a 401 response and warns of no token', (done) => {
-                chai.request(app)
-                .get(BASE_URL + '/lists')
-                .end((err, res) => {
-                    if (err) done(err)
-                    // Check response 401 - no token in auth
-                    expect(res).to.have.status(401)
-                    expect(res.body).to.have.property('msg')
-                    expect(res.body.msg).to.include('No token provided. Authorization denied.')
-                    done()
-                })
+        it('Test User Get Lists Requires Auth with 401 res and no token warning', (done) => {
+            chai.request(app)
+            .get(BASE_URL + '/lists')
+            .end((err, res) => {
+                if (err) done(err)
+                check401DueToNoToken(res, done)
             })
         })
 
-        describe('Test User Add List Requires Auth', () => {
-            it('Returns a 401 response and warns of no token', (done) => {
-                chai.request(app)
-                .put(BASE_URL + '/add/1234')
-                .end((err, res) => {
-                    if (err) done(err)
-                    // Check response 401 - no token in auth
-                    expect(res).to.have.status(401)
-                    expect(res.body).to.have.property('msg')
-                    expect(res.body.msg).to.include('No token provided. Authorization denied.')
-                    done()
-                })
+        it('Test User Add List Requires Auth with 401 res and no token warning', (done) => {
+            chai.request(app)
+            .put(BASE_URL + '/add/1234')
+            .end((err, res) => {
+                if (err) done(err)
+                check401DueToNoToken(res, done)
             })
         })
 
-        describe('Test User Remove List Requires Auth', () => {
-            it('Returns a 401 response and warns of no token', (done) => {
-                chai.request(app)
-                .put(BASE_URL + '/remove/1234')
-                .end((err, res) => {
-                    if (err) done(err)
-                    // Check response 401 - no token in auth
-                    expect(res).to.have.status(401)
-                    expect(res.body).to.have.property('msg')
-                    expect(res.body.msg).to.include('No token provided. Authorization denied.')
-                    done()
-                })
+        it('Test User Remove List Requires Auth with 401 res and no token warning', (done) => {
+            chai.request(app)
+            .put(BASE_URL + '/remove/1234')
+            .end((err, res) => {
+                if (err) done(err)
+                check401DueToNoToken(res, done)
             })
         })
 
-        describe('Test User Deletion Requires Auth', () => {
-            it('Returns a 401 response and warns of no token', (done) => {
-                chai.request(app)
-                .delete(BASE_URL)
-                .end((err, res) => {
-                    if (err) done(err)
-                    // Check response 401 - no token in auth
-                    expect(res).to.have.status(401)
-                    expect(res.body).to.have.property('msg')
-                    expect(res.body.msg).to.include('No token provided. Authorization denied.')
-                    done()
-                })
+        it('Test Delete User Requires Auth with 401 res and no token warning', (done) => {
+            chai.request(app)
+            .delete(BASE_URL)
+            .end((err, res) => {
+                if (err) done(err)
+                check401DueToNoToken(res, done)
             })
         })
+
     })
+
 
     describe('User Deletion Tests', () => {
             it('Returns a 200 response with True Response', (done) => {

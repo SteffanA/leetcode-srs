@@ -4,6 +4,8 @@ const app = require('../../server'),
     ;
 chai.use(chaiHttp);
 
+const {checkForCorrectErrors, checkValidationResult} = require('../sharedTestFunctions.js')
+
 const BASE_URL = '/api/auth'
 
 describe('Auth API Tests' , () => {
@@ -89,15 +91,9 @@ describe('Auth API Tests' , () => {
     describe('Test Invalid Credentials Are Rejected', () => {
         // Check for the 400 response and invalid credentials message
         const checkInvalid = (res, done) => {
-            // Check response for a valid 200
-            expect(res).to.have.status(400)
-            // Check for the body to contain the expected fields
-            const body = res.body
-            expect(body).to.have.property('errors')
-            expect(body.errors[0]).to.have.property('msg')
-            expect(body.errors[0].msg).to.include('Invalid credentials.')
-            done()
+            checkForCorrectErrors(res, done, 400, 'Invalid credentials.')
         }
+
         it('Does not Allow User to Auth With Name and Invalid Password', (done) => {
             chai.request(app)
             .post(BASE_URL)
@@ -152,21 +148,6 @@ describe('Auth API Tests' , () => {
     })
 
     describe('Test Auth Validation Checks are Successful', () => {
-        // Check the response for the validation result we expect
-        const checkValidationResult = (res, done, msg) => {
-            // Check response for a valid 400
-            expect(res).to.have.status(400)
-            const body = res.body
-            const errs = []
-            const errMsgs = []
-            body.errors.forEach((error) => {
-                errs.push(error)
-                expect(error).to.have.property('msg')
-                errMsgs.push(error.msg)
-            })
-            expect(errMsgs).to.contain(msg)
-            done()
-        }
 
         it('Does not allow User to Auth With No Password', (done) => {
             chai.request(app)

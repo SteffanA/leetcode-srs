@@ -156,7 +156,7 @@ TODO: Need to determine if copying .env is required.
 
 If you ran tests, the output will be in the command line.  If you ran coverage, your coverage results will be in ./server/coverage/lcov-report, where you can browse the results via the index.html web page.
 
-Both tests and coverage can be run for specific subsections - for example, to run only Auth route tests, invoke the test.sh script as "./test.sh authTest", or for coverage invoke the coverage.sh script as "./coverage.sh authCoverage".
+Both tests and coverage can be run for specific subsections - for example, to run only Auth route tests, invoke the test.sh script as "./test.sh authTest", or for coverage invoke the coverage.sh script as "./coverage.sh authCoverage".  Likewise, if running manually, run the test as "npm run authTest" or coverage as "npm run authCoverage".
 
 *Test Status:*
 | Test           | Status       |
@@ -168,6 +168,7 @@ Both tests and coverage can be run for specific subsections - for example, to ru
 | > Problems | 0% |
 | > ProblemStatuses | 0% |
 | > Submissions | 0% |
+| > Middleware | 0% |
 |  React Frontend | TBD |
 #
 
