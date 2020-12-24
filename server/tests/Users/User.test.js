@@ -1,6 +1,3 @@
-const { body } = require('express-validator');
-const { deleteOne } = require('../../models/User');
-
 const app = require('../../server'),
     chai = require('chai'), chaiHttp = require('chai-http'),
     expect = chai.expect //to solve error when using done(): “ReferenceError: expect is not defined”

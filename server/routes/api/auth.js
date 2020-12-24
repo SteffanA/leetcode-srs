@@ -2,7 +2,7 @@ const auth = require('../../middleware/auth')
 const User = require('../../models/User')
 
 const express = require('express')
-const {check, validationResult} = require('express-validator')
+const {check, validationResult, oneOf} = require('express-validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv') // For getting environ vars from .env file
@@ -14,15 +14,26 @@ const router = express.Router()
 // @route  POST api/auth
 // @desc   Authenticate user & retrieve token
 // @access Public
-router.post('/', [
-    // check('name', 'Login name is required').not().isEmpty(),
+router.post('/', [oneOf([
+    // Validation checks to ensure we get data expected.
+    check('name', 'Name or Email must be provided').not().isEmpty(),
+    check('email', 'Name or Email must be provided').not().isEmpty()
+]),
     check('password', 'Password is required').exists()
 ], async(req, res) => {
     // Validate that our checks were successful
     const validationErrors = validationResult(req)
     if (!validationErrors.isEmpty()) {
         // Had some errors, send back bad request w/ the errors
-        return res.status(400).json({errors: validationErrors.array()})
+        // Since we have a oneOf check, sanitize the error output for the frontend
+        let errorArray = []
+        if (validationErrors.array()[0].nestedErrors) {
+            errorArray = validationErrors.array()[0].nestedErrors.map(item => ({'msg': item.msg}))
+        }
+        else {
+            errorArray = validationErrors.array()
+        }
+        return res.status(400).json({ errors: errorArray })
     }
 
     // No validation errors, proceed
