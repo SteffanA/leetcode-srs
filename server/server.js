@@ -34,7 +34,7 @@ const SECURE = process.env.HTTPS
 // Determine if we're running tests
 const TEST = process.env.TESTING
 if (TEST) {
-    const TEST_PORT = process.env.TEST_PORT || 61234
+    const TEST_PORT = process.env.TEST_SERVER_PORT || 61234
     // Start up a basic HTTP server
     app.listen(TEST_PORT, () => console.log(`Test server started on port ${TEST_PORT}`))
 }

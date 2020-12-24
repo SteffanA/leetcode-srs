@@ -13,6 +13,7 @@
     "fs": "0.0.1-security",
     "https": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
+    "mocha": "^8.2.1",
     "mongoose": "^5.10.15",
     "request": "^2.88.2"
   },
@@ -24,9 +25,14 @@
     "nyc": "^15.1.0"
   },
   "scripts": {
-    "test": "mocha ./tests/**/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
+    "test": "env TESTING=true mocha ./tests/**/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
     "_comment": "Note: --exit in the test element is to force the test program to exit after finishing in case we use done()",
     "coverage": "nyc --reporter=lcov --reporter=text-lcov npm test",
+    "authTest": "env TESTING=true mocha ./tests/Auth/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
+    "authCoverage": "nyc --reporter=lcov --reporter=text-lcov npm run authTest",
+    "userTest": "env TESTING=true mocha ./tests/Users/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
+    "userCoverage": "nyc --reporter=lcov --reporter=text-lcov npm run userTest",
+
     "start": "node server",
     "server": "nodemon server",
     "client": "npm start --prefix ..\\leetcode-srs",

@@ -155,9 +155,24 @@ TODO: Need to determine if copying .env is required.
  * Run "docker-compose down" to bring down your test database.
 
 If you ran tests, the output will be in the command line.  If you ran coverage, your coverage results will be in ./server/coverage/lcov-report, where you can browse the results via the index.html web page.
+
+Both tests and coverage can be run for specific subsections - for example, to run only Auth route tests, invoke the test.sh script as "./test.sh authTest", or for coverage invoke the coverage.sh script as "./coverage.sh authCoverage".  Likewise, if running manually, run the test as "npm run authTest" or coverage as "npm run authCoverage".
+
+*Test Status:*
+| Test           | Status       |
+| :------------- | :----------: |
+|  Server Routes | In Progress|
+| > Auth | 92% coverage - remaining is defensive |
+| > Users| 82% coverage - remaining is defensive |
+| > Lists | 0% |
+| > Problems | 0% |
+| > ProblemStatuses | 0% |
+| > Submissions | 0% |
+| > Middleware | 0% |
+|  React Frontend | TBD |
 #
 
-**WIP Features**
+***WIP Features***
 
 Making the site less ugly :)
 
@@ -179,6 +194,6 @@ Automated refreshing of problem information from LeetCode
 
 #
 
-**Feedback**
+***Feedback***
 
 Any feature suggestions, documentation suggestions, or overall feedback is welcomed - feel free to open an issue on this repo.

@@ -13,7 +13,7 @@ const router = express.Router()
 dotenv.config({path: '../.env'}) // So we can read environ vars
 
 
-// @route  GET /api/users/:id
+// @route  GET /api/users/
 // @desc   Retrieve a user's details
 // @access Private
 router.get('/', [auth], 
@@ -65,9 +65,10 @@ async (req, res) => {
 // @access Public
 router.post('/', [oneOf([
     // Validation checks to ensure we get data expected.
-    check('name', 'Name or email is required.').not().isEmpty(),
-    check('email', 'Email or name is required').not().isEmpty()
+    check('email', '').isEmpty(),
+    check('email', 'Email provided must be an actual email').isEmail()
 ]),
+    check('name', 'Name is required.').not().isEmpty(),
     check('password', 'Please enter a password with at least 6 characters.').isLength({min: 6})
 ], async (req, res) => {
     // Check that our... checks are valid
@@ -90,10 +91,12 @@ router.post('/', [oneOf([
 
     try {
         // Check if the user already exists
-        let user = await User.findOne({name: name})
-        if (user) {
-            // Found this user - send bad request
-            return res.status(400).json({errors: [ {msg: 'User already exists for this name'}]})
+        if(name) {
+            let user = await User.findOne({name: name})
+            if (user) {
+                // Found this user - send bad request
+                return res.status(400).json({errors: [ {msg: 'User already exists for this name'}]})
+            }
         }
         // Check that the email isn't already in use.
         if (email) {

@@ -1,14 +1,14 @@
 #!/bin/bash
-# Spins up test database and runs all tests
+# Spins up test database and runs all tests with coverage.
 
-testType='test'
+coverageType='coverage'
 # If optional arg was passed, it determines the subset of tests to run.
 if [ $# -ne 0 ]
 then
     # Grab the first argument as the type of test to run.
-    testType=$1
+    coverageType=$1
 fi 
-printf "Running %ss:\n" "$testType"
+printf "Running tests and %s:\n" "$coverageType"
 (
     # TODO: Is this only needed for windows?
     # Copy the .env file to the same directory as our server docker-compose
@@ -20,12 +20,12 @@ printf "Running %ss:\n" "$testType"
     # TODO: Add this somewhere in the server tests, since server isn't running at this point.
     # Could start a server and then run to fill the DB but this seems slightly clumsy.
     # python3 ./../../utility/lcAPIparser.py --path ./../../utility/testProblems.json --test true
-    # Run our tests
+    # Run our tests/coverage
     cd '..'
-    npm run $testType
+    npm run $coverageType
     # Bring down our test DB
     cd './tests'
     docker-compose down
     # Remove the .env file we copied
-    rm '.env'
+    rm .env
 )
