@@ -130,7 +130,7 @@ router.post('/', [auth, [
         const user = await User.findById(req.user.id)
         const admin_email = process.env.ADMIN_EMAIL
         if (!user || user.email != admin_email) {
-            return res.status(401).json({msg: 'Access denied'})
+            return res.status(401).json({errors: [{msg: 'Access denied'}]})
         }
 
         // Valid admin - create the problem and post it.
@@ -196,7 +196,7 @@ router.post('/bulk', [auth, [
         const user = await User.findById(req.user.id)
         const admin_email = process.env.ADMIN_EMAIL
         if (!user || user.email != admin_email) {
-            return res.status(401).json({msg: 'Access denied'})
+            return res.status(401).json({errors: [{msg: 'Access denied'}]})
         }
 
         const {
@@ -249,7 +249,7 @@ router.post('/bulk', [auth, [
             }
         }
         // Return the results of which problems we could add and which we couldn't
-        return res.json({'NotAdded' : notAdded, 'Added:' : added})
+        return res.json({'NotAdded' : notAdded, 'Added' : added})
     } catch (error) {
         console.error('Error when posting new LC problems ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})

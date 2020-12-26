@@ -10,16 +10,11 @@ const fs = require('fs') // For reading local JSON file
 
 const {checkForCorrectErrors, checkForValidAddition,
         checkForValidRemoval, checkSuccessfulLogin,
-        checkValidationResult, checkForCorrectMessage} = require('../sharedTestFunctions.js')
+        checkValidationResult, checkForCorrectMessage,
+        checkForAddedObject, checkForAddedIDs} = require('../sharedTestFunctions.js')
 
 const BASE_URL = '/api/problems'
 const testProblemsPath = './../utility/testProblems.json'
-
-// 'Converts' the LeetCode API JSON formatted data into the
-// data format we use for adding problems to our database
-const pullProblemDataFromLCjson = (lcJson) => {
-
-}
 
 describe('Problems API Tests' , () => {
 
@@ -320,27 +315,102 @@ describe('Problems API Tests' , () => {
         })
 
         it('Tests Can Add Individual Problem', (done) => {
-            done()
+            const prob = problemJSON[0]
+            chai.request(app)
+            .post(BASE_URL)
+            .set({'x-auth-token': adminToken})
+            .send(
+                prob
+            )
+            .end((err, res) => {
+                if (err) done(err)
+                checkForAddedObject(res, done, prob)
+            })
         })
 
         it('Tests Can Add Bulk Problems', (done) => {
-            done()
+            const probs = problemJSON.slice(1,4)
+            chai.request(app)
+            .post(BASE_URL + '/bulk')
+            .set({'x-auth-token': adminToken})
+            .send({
+                problems: probs
+            })
+            .end((err, res) => {
+                if (err) done(err)
+                // Create array of problem IDs to check for - note we're using LC id, not
+                // the Mongo _id
+                const addedProbIds = []
+                for (let prob of probs) {
+                    addedProbIds.push(prob.id)
+                }
+                checkForAddedIDs(res, done, addedProbIds, 'Added')
+            })
         })
 
         it('Tests Cannot Add Problem That Exists Already', (done) => {
-            done()
+            const prob = problemJSON[0]
+            chai.request(app)
+            .post(BASE_URL)
+            .set({'x-auth-token': adminToken})
+            .send(
+                prob
+            )
+            .end((err, res) => {
+                if (err) done(err)
+                checkForCorrectErrors(res, done, 400, 'Problem already exists')
+            })
         })
 
+        // This test relies on us adding the same problems in the 'Tests Can Add Bulk Problems'
+        // test above - we simply check for the resulting array to be in the 'NotAdded' array
+        // instead
         it('Tests Bulk Addition Does Not Add Problems That Exist Already', (done) => {
-            done()
+            const probs = problemJSON.slice(1,4)
+            chai.request(app)
+            .post(BASE_URL + '/bulk')
+            .set({'x-auth-token': adminToken})
+            .send({
+                problems: probs
+            })
+            .end((err, res) => {
+                if (err) done(err)
+                // Create array of problem IDs to check for - note we're using LC id, not
+                // the Mongo _id
+                const notAddedIds= []
+                for (let prob of probs) {
+                    notAddedIds.push(prob.id)
+                }
+                checkForAddedIDs(res, done, notAddedIds, 'NotAdded')
+            })
         })
 
         it('Tests Non-Admin Cannot Add Problems', (done) => {
-            done()
+            const prob = problemJSON[0]
+            chai.request(app)
+            .post(BASE_URL)
+            .set({'x-auth-token': token})
+            .send(
+                prob
+            )
+            .end((err, res) => {
+                if (err) done(err)
+                checkForCorrectErrors(res, done, 401, 'Access denied')
+            })
         })
 
         it('Tests Non-Admin Cannot Add Bulk Problems', (done) => {
-            done()
+            const probs = problemJSON.slice(4,6)
+            chai.request(app)
+            .post(BASE_URL + '/bulk')
+            .set({'x-auth-token': token})
+            .send({
+                problems: probs
+            })
+            .end((err, res) => {
+                if (err) done(err)
+                checkForCorrectErrors(res, done, 401, 'Access denied')
+            })
         })
     })
 
@@ -351,13 +421,6 @@ describe('Problems API Tests' , () => {
 
         describe('Test Can Update Individual Problems', () => {
             it('Tests Can Update Existing Problem Name', (done) => {
-
-            done()
-            })
-        })
-
-        describe('Test Can Update Bulk Problems', () => {
-            it('Tests Can Update Existing Bulk Problem Names', (done) => {
 
             done()
             })
