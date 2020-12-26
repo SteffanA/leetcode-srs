@@ -113,13 +113,13 @@ router.post('/', [auth, [
     check('id', 'Problem must have valid id.').not().isEmpty(),
     check('name', 'Problem must have a name').not().isEmpty(),
     check('problem_text', 'Problem must have accompanying text').not().isEmpty(),
-    check('link', 'Must include link to problem').not().isEmpty(),
+    check('link', 'Problem must include link to problem').not().isEmpty(),
     check('difficulty', 'Problem must have a difficulty level').isNumeric(),
     check('is_premium', 'Problem must be marked premium or not').isBoolean(),
 ]], async (req, res) => {
     // Check our request contains required fields
     const validationErrors = validationResult(req)
-    if (!validationErrors.isEmpty) {
+    if (!validationErrors.isEmpty()) {
         // Something was missing, send an error
         return res.status(400).json({errors : validationErrors.array()})
     }
@@ -176,16 +176,16 @@ router.post('/', [auth, [
 // @access Admin
 router.post('/bulk', [auth, [
     check('problems', 'Must submit array of problems.').isArray(),
-    check('problems.*.id', 'Problem must have valid id.').not().isEmpty(),
-    check('problems.*.name', 'Problem must have a name').not().isEmpty(),
-    check('problems.*.problem_text', 'Problem must have accompanying text').not().isEmpty(),
-    check('problems.*.link', 'Must include link to problem').not().isEmpty(),
-    check('problems.*.difficulty', 'Problem must have a difficulty level').isNumeric(),
-    check('problems.*.is_premium', 'Problem must be marked premium or not').isBoolean(),
+    check('problems.*.id', 'Problem(s) must have valid id.').not().isEmpty(),
+    check('problems.*.name', 'Problem(s) must have a name').not().isEmpty(),
+    check('problems.*.problem_text', 'Problem(s) must have accompanying text').not().isEmpty(),
+    check('problems.*.link', 'Problems(s) must include link to problem').not().isEmpty(),
+    check('problems.*.difficulty', 'Problem(s) must have a difficulty level').isNumeric(),
+    check('problems.*.is_premium', 'Problem(s) must be marked premium or not').isBoolean(),
 ]], async (req, res) => {
     // Check our request contains required fields
     const validationErrors = validationResult(req)
-    if (!validationErrors.isEmpty) {
+    if (!validationErrors.isEmpty()) {
         // Something was missing, send an error
         return res.status(400).json({errors : validationErrors.array()})
     }
@@ -268,7 +268,7 @@ router.put('/bulk', [
     check('problems.*', 'All problem IDs must be a valid MongoID').isMongoId(),
 ], async (req, res) => {
     const validationErrors = validationResult(req)
-    if (!validationErrors.isEmpty) {
+    if (!validationErrors.isEmpty()) {
         // Something was missing, send an error
         return res.status(400).json({errors : validationErrors.array()})
     }
@@ -298,7 +298,7 @@ router.put('/', [auth, [
 ]], async (req, res) => {
     // Check our request contains required fields
     const validationErrors = validationResult(req)
-    if (!validationErrors.isEmpty) {
+    if (!validationErrors.isEmpty()) {
         // Something was missing, send an error
         return res.status(400).json({errors : validationErrors.array()})
     }

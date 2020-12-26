@@ -32,6 +32,8 @@
     "authCoverage": "nyc --reporter=lcov --reporter=text-lcov npm run authTest",
     "userTest": "env TESTING=true mocha ./tests/Users/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
     "userCoverage": "nyc --reporter=lcov --reporter=text-lcov npm run userTest",
+    "problemTest": "env TESTING=true mocha ./tests/Problems/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
+    "problemCoverage": "nyc --reporter=lcov --reporter=text-lcov npm run problemTest",
 
     "start": "node server",
     "server": "nodemon server",
