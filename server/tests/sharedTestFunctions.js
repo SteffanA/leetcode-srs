@@ -36,6 +36,41 @@ const checkValidationResult = (res, done, msg) => {
     done()
 }
 
+// Checks a URL for multiple types of Validation Check results
+// ReqBodies is an array of Objects that contains reqBody, being the body sent for the request,
+// and err, containing the error message we expect to recieve
+// ReqType is the string representation of the request - ex: PUT, GET
+// Token is optional for tests on APIs that require some kind of auth
+const checkAllValidationResults = (app, reqType, url, reqBodies, token, done) => {
+
+    // Define a dummy func to pass to checkValidationResult
+    // We use this since we don't want to call done() until all requests have
+    // been tested
+    const dummyFunc = () => {}
+    // Validate we're supplying a correct reqBodies
+    expect(reqBodies).to.be.an('array')
+    for (let reqBody of reqBodies) {
+        expect(reqBody).to.have.property('reqBody')
+        // No type validation for reqBody, since can be object, array, etc
+        expect(reqBody).to.have.property('err')
+        expect(reqBody.err).to.be.a('string')
+    }
+    for (let reqBody of reqBodies) {
+        chai.request(app)
+        [`${reqType}`](url)
+        // .put(BASE_URL)
+        .set({'x-auth-token': token})
+        .send(
+            reqBody.reqBody
+        )
+        .end((err, res) => {
+            if (err) done(err)
+            checkValidationResult(res, dummyFunc, reqBody.err)
+        })
+    }
+    done()
+}
+
 // Check for the correct error message in the error array returned
 const checkForCorrectErrors = (res, done, err_code, err_msg) => {
     // Check response for a valid error code
@@ -169,7 +204,8 @@ const checkForAddedIDs = (res, done, addedIds, resArrayName = '') => {
     done()
 }
 
+
 module.exports = {checkForCorrectErrors, checkForValidAddition, checkForValidRemoval, 
     checkSuccessfulLogin, checkValidationResult, checkForCorrectMessage, checkForAddedObject,
-    checkForAddedObjects, checkForAddedIDs
+    checkForAddedObjects, checkForAddedIDs, checkAllValidationResults,
 }

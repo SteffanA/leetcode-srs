@@ -11,7 +11,8 @@ const fs = require('fs') // For reading local JSON file
 const {checkForCorrectErrors, checkForValidAddition,
         checkForValidRemoval, checkSuccessfulLogin,
         checkValidationResult, checkForCorrectMessage,
-        checkForAddedObject, checkForAddedIDs} = require('../sharedTestFunctions.js')
+        checkForAddedObject, checkForAddedIDs,
+        checkAllValidationResults} = require('../sharedTestFunctions.js')
 
 const BASE_URL = '/api/problems'
 const testProblemsPath = './../utility/testProblems.json'
@@ -89,17 +90,18 @@ describe('Problems API Tests' , () => {
         })
     })
 
-    describe('Test Can Add New Problems', () => {
-        // Use this as a baseline invalid test problem for our validation checks.
-        const invalidTestProblemBase = {
-            id: 12345,
-            name: 'InvalidProblem',
-            problem_text : 'This is an invalid Problem.',
-            link: 'invalid-link',
-            difficulty: 1,
-            is_premium: true,
-        }
+    // Use this as a baseline invalid test problem for our validation checks.
+    const invalidTestProblemBase = {
+        id: 12345,
+        name: 'InvalidProblem',
+        problem_text : 'This is an invalid Problem.',
+        link: 'invalid-link',
+        difficulty: 1,
+        is_premium: true,
+    }
 
+    // These tests add from problem index 0 to index 4 of problemJSON to the DB
+    describe('Test Can Add New Problems', () => {
         // Use this as a baseline for testing bulk invalid problem importing
         const invalidProblemsBase = [
             JSON.parse(JSON.stringify(invalidTestProblemBase)),
@@ -416,27 +418,216 @@ describe('Problems API Tests' , () => {
 
     describe('Test Can Edit Existing Problems', () => {
         describe('Test Problem Update Validation Checks', () => {
-
+            it('Tests Problem Update Requires ID', (done) => {
+                let missingIDObject = JSON.parse(JSON.stringify(invalidTestProblemBase))
+                missingIDObject.id = ''
+                chai.request(app)
+                .put(BASE_URL)
+                .set({'x-auth-token': adminToken})
+                .send(
+                    missingIDObject
+                )
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkValidationResult(res, done, 'Problem must have valid id.')
+                })
+            })
         })
 
+        // These tests rely on the prior tests adding problemJSON[0] to the database
+        // They will also alter the database version of the problem vs our local problemJSON
+        // version.
         describe('Test Can Update Individual Problems', () => {
             it('Tests Can Update Existing Problem Name', (done) => {
+                const toBeUpdatedProb = JSON.parse(JSON.stringify(problemJSON[0]))
+                toBeUpdatedProb.name = 'TestName'
+                chai.request(app)
+                .put(BASE_URL)
+                .set({'x-auth-token': adminToken})
+                .send(
+                    toBeUpdatedProb
+                )
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObject(res, done, toBeUpdatedProb)
+                })
+            })
 
-            done()
+            it('Tests Can Update Existing Problem Problem Text', (done) => {
+                const toBeUpdatedProb = JSON.parse(JSON.stringify(problemJSON[0]))
+                toBeUpdatedProb.problem_text = 'Test Problem Text'
+                chai.request(app)
+                .put(BASE_URL)
+                .set({'x-auth-token': adminToken})
+                .send(
+                    toBeUpdatedProb
+                )
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObject(res, done, toBeUpdatedProb)
+                })
+            })
+
+            it('Tests Can Update Existing Problem Link', (done) => {
+                const toBeUpdatedProb = JSON.parse(JSON.stringify(problemJSON[0]))
+                toBeUpdatedProb.link = 'test-problem-link'
+                chai.request(app)
+                .put(BASE_URL)
+                .set({'x-auth-token': adminToken})
+                .send(
+                    toBeUpdatedProb
+                )
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObject(res, done, toBeUpdatedProb)
+                })
+            })
+
+            it('Tests Can Update Existing Problem Test Case', (done) => {
+                const toBeUpdatedProb = JSON.parse(JSON.stringify(problemJSON[0]))
+                toBeUpdatedProb.test_case = 'Test Problem test case'
+                chai.request(app)
+                .put(BASE_URL)
+                .set({'x-auth-token': adminToken})
+                .send(
+                    toBeUpdatedProb
+                )
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObject(res, done, toBeUpdatedProb)
+                })
+            })
+
+            it('Tests Can Update Existing Problem Start Code', (done) => {
+                const toBeUpdatedProb = JSON.parse(JSON.stringify(problemJSON[0]))
+                toBeUpdatedProb.start_code= 'Test Problem starting code block'
+                chai.request(app)
+                .put(BASE_URL)
+                .set({'x-auth-token': adminToken})
+                .send(
+                    toBeUpdatedProb
+                )
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObject(res, done, toBeUpdatedProb)
+                })
+            })
+
+            it('Tests Can Update Existing Problem Difficulty', (done) => {
+                const toBeUpdatedProb = JSON.parse(JSON.stringify(problemJSON[0]))
+                toBeUpdatedProb.difficulty = 5
+                chai.request(app)
+                .put(BASE_URL)
+                .set({'x-auth-token': adminToken})
+                .send(
+                    toBeUpdatedProb
+                )
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObject(res, done, toBeUpdatedProb)
+                })
+            })
+
+            it('Tests Cannot Update Problem That Does Not Yet Exist', (done) => {
+                // Use the problemJSON first problem as a template, then set ID
+                // to some fake number that won't exist
+                const nonExistantProb = JSON.parse(JSON.stringify(problemJSON[0]))
+                nonExistantProb.id = 123456
+                chai.request(app)
+                .put(BASE_URL)
+                .set({'x-auth-token': adminToken})
+                .send(
+                    nonExistantProb
+                )
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 409, 'Problem does not exist.')
+                })
+            })
+        })
+
+        describe('Test Updating Problem Requires Admin', () => {
+            it('Tests Updating an Individual Problem Requires Admin', (done) => {
+                const toBeUpdatedProb = JSON.parse(JSON.stringify(problemJSON[0]))
+                chai.request(app)
+                .put(BASE_URL)
+                .set({'x-auth-token': token})
+                .send(
+                    toBeUpdatedProb
+                )
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 401, 'Access denied')
+                })
             })
         })
     })
 
-    describe('Tests Can Get Problem(s)', () => {
-        describe('Tests Can Get Individual Problem Information', () => {
+    describe('Test Can Get Problem(s)', () => {
+        describe('Test Can Get Individual Problem Information', () => {
+
+            it('Tests Getting Non-Numeric Problem Returns Empty Object', (done) => {
+                chai.request(app)
+                .get(BASE_URL + '/id/ab')
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObject(res, done, {})
+                })
+            })
+
+            // TODO: Test that frontend still works since we edited backend for this...
+            // Looks like it isn't used but do a full boot-up and play around anyway
+            // This test relies on an unedited problemJSON[3] object - if a PUT
+            // update test ends up altering the object, the object we use in this test
+            // must also change
+            it('Tests Getting Problem Returns Correct Problem Object', (done) => {
+                const existingProb = problemJSON[3]
+                const existingProbID = existingProb.id
+                chai.request(app)
+                .get(BASE_URL + '/id/' + existingProbID)
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObject(res, done, existingProb) 
+                })
+            })
+
+            it('Tests Getting Problem With Invalid ID Returns Error', (done) => {
+                chai.request(app)
+                .get(BASE_URL + '/id/1234567')
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'Problem not found.')
+                })
+            })
+        })
+
+        describe('Test Can Get Multiple Problems Information', () => {
+            it('Tests All Get Bulk Problems Validation Checks Are Properly Handled', (done) => {
+                const url = BASE_URL + '/bulk'
+                const badMongoID = '0'
+                const reqs = [
+                    {
+                        reqBody : {},
+                        err: 'Must provide array of problem IDs',
+                    },
+                    {
+                        reqBody : {problems : []},
+                        err: 'Must provide problems to update list with',
+                    },
+                    {
+                        reqBody : {problems: [badMongoID]},
+                        err: 'All problem IDs must be a valid MongoID',
+                    },
+                ]
+                checkAllValidationResults(app, 'put', url, reqs, '', done)
+            })
+        })
+
+        describe('Test Can Get Problems In ID Range', () => {
 
         })
 
-        describe('Tests Can Get Problems In ID Range', () => {
-
-        })
-
-        describe('Tests Can Search For Problem', () => {
+        describe('Test Can Search For Problem', () => {
 
         })
     })

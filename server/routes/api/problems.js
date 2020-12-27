@@ -11,35 +11,45 @@ const router = express.Router()
 dotenv.config({path: '../../.env'}) // for environ variables
 
 // @route  GET /api/problems/
-// @desc   Get all problems
+// @desc   Get all problems, or problems within an ID range
 // @access Public
 router.get('/', async (req, res) => {
     try {
-        start = null
-        end = null
+        let start = null
+        let end = null
         if (req.query.start) {
             start = req.query.start
+        }
+        else {
+            // Default start to 0
+            start = 0
         }
         if (req.query.end) {
             end = req.query.end
         }
+        else {
+            // Get the 'end' via the largest ID in our database
+            end = await Problem.findOne().sort('-id')
+            console.log(end)
+        }
+        const problems = await Problem.find().where('id').gte(start).lte(end)
         // NOTE: We're finding based on id, NOT _id! _id is the DB id, whereas id is the leetcode
         // problem ID!
-        let problems = null
-        // TODO: Figure out if there's a way to pass null into gte/lte w/o causing problems
-        // such that this logic can be condensed to a single query again
-        if (start && end){
-            problems = await Problem.find().where('id').gte(start).lte(end)
-        }
-        else if (start) {
-            problems = await Problem.find().where('id').gte(start)
-        }
-        else if (end) {
-            problems = await Problem.find().where('id').lte(end)
-        }
-        else {
-            problems = await Problem.find()
-        }
+        // let problems = null
+        // // TODO: Figure out if there's a way to pass null into gte/lte w/o causing problems
+        // // such that this logic can be condensed to a single query again
+        // if (start && end){
+        //     problems = await Problem.find().where('id').gte(start).lte(end)
+        // }
+        // else if (start) {
+        //     problems = await Problem.find().where('id').gte(start)
+        // }
+        // else if (end) {
+        //     problems = await Problem.find().where('id').lte(end)
+        // }
+        // else {
+        //     problems = await Problem.find()
+        // }
         
         if (!problems) {
             return res.status(404).json({errors: [{msg: 'No problems found.'}]})
@@ -80,12 +90,12 @@ router.get('/name/:search', async (req, res) => {
     }
 })
 
-// @route  GET /api/problems/:id
+// @route  GET /api/problems/id/:id
 // @desc   Get a problem by id
 // @access Public
 router.get('/id/:id', async (req, res) => {
     try {
-        if (req.params.id === 'undefined') {
+        if (!req.params.id || isNaN(parseInt(req.params.id))) {
             return res.json({})
         }
         // Try to get the problem by ID
@@ -94,10 +104,10 @@ router.get('/id/:id', async (req, res) => {
         // Check that the problem actually exists
         if (!problem) {
             // Doesn't exist, return bad request
-            return res.status(404).json({msg: 'Problem not found.'})
+            return res.status(404).json({errors: [{msg: 'Problem not found.'}]})
         }
 
-        return res.json({problem})
+        return res.json(problem)
     } catch (error) {
         console.error('Get problem by id err: ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
@@ -309,7 +319,7 @@ router.put('/', [auth, [
         const user = await User.findById(req.user.id)
         const admin_email = process.env.ADMIN_EMAIL
         if (!user || user.email != admin_email) {
-            return res.status(401).json({msg: 'Access denied'})
+            return res.status(401).json({errors: [{msg: 'Access denied'}]})
         }
 
         // Valid admin - parse out the updated fields
