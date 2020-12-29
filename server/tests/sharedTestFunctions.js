@@ -39,8 +39,9 @@ const checkValidationResult = (res, done, msg) => {
 // Checks a URL for multiple types of Validation Check results
 // ReqBodies is an array of Objects that contains reqBody, being the body sent for the request,
 // and err, containing the error message we expect to recieve
-// ReqType is the string representation of the request - ex: PUT, GET
+// ReqType is the string representation of the request - ex: put, get, post
 // Token is optional for tests on APIs that require some kind of auth
+// TODO: Refractor Problems, Auth, Users tests to utilize this function
 const checkAllValidationResults = (app, reqType, url, reqBodies, token, done) => {
 
     // Define a dummy func to pass to checkValidationResult
@@ -135,32 +136,40 @@ const checkForAddedObject = (res, done, addedObj) => {
 
 // Checks that each object provided is contained in the response array
 // Assumes each object in the resArray follows the same key-value format
-// TODO: This hasn't been fully tested - no current use
 const checkForAddedObjects = (res, resArrayName, done, addedObjArray) => {
     // Check response for a valid 200
-    console.log(res.body)
     expect(res).to.have.status(200)
     const body = res.body
-    console.log('body')
-    console.log(body)
-    expect(body[`${resArrayName}`]).to.be.an('array')
-    const resArray = body[`${resArrayName}`]
-    console.log('resArray')
-    console.log(resArray)
+    let resArray = []
+    if (resArrayName !== '') {
+        expect(body[`${resArrayName}`]).to.be.an('array')
+        resArray = body[`${resArrayName}`]
+    }
+    else {
+        // No name provided, so assume the body itself is the res array
+        expect(body).to.be.an('array')
+        resArray = body
+    }
     // If we have both an added object array length and a resArray length
     if (resArray.length > 0 && addedObjArray.length > 0) {
+        // Expect each object in the response array to have the same keys
         const resKeys = Object.keys(resArray[0])
+        // Likewise with added objects
         const addedKeys = Object.keys(addedObjArray[0])
         // Check that all of the addedKeys are in resKeys
         expect(resKeys).to.have.lengthOf.at.least(addedKeys.length)
         for (key of addedKeys) {
             expect(resKeys).to.contain(key)
         }
-        const valueArrays = new Array(resKeys.length)
+        const valueArrays = []
+        // Create a new array to fill with values for each key we get in our response
+        for (let i = 0; i < addedKeys.length; i++) {
+            valueArrays.push([])
+        }
         // Add all the key values for each object to its own array
         resArray.forEach((resObj) => {
             let i = 0
-            for (key of resKeys) {
+            for (key of addedKeys) {
                 valueArrays[i].push(resObj[key])
                 i++
             }
@@ -168,8 +177,9 @@ const checkForAddedObjects = (res, resArrayName, done, addedObjArray) => {
         // Look for the added object's key's values in the valueArrays
         addedObjArray.forEach((addedObj) => {
             i = 0
-            for (key of resKeys) {
+            for (key of addedKeys) {
                 expect(valueArrays[i]).to.contain(addedObj[key])
+                i++
             }
         })
     } 

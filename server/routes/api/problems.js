@@ -15,43 +15,21 @@ dotenv.config({path: '../../.env'}) // for environ variables
 // @access Public
 router.get('/', async (req, res) => {
     try {
-        let start = null
-        let end = null
+        // Set defaults for range from 0 to max int
+        let start = 0
+        let end = Number.MAX_SAFE_INTEGER
+        // Adjust range if range was provided
         if (req.query.start) {
             start = req.query.start
-        }
-        else {
-            // Default start to 0
-            start = 0
         }
         if (req.query.end) {
             end = req.query.end
         }
-        else {
-            // Get the 'end' via the largest ID in our database
-            end = await Problem.findOne().sort('-id')
-            console.log(end)
-        }
-        const problems = await Problem.find().where('id').gte(start).lte(end)
         // NOTE: We're finding based on id, NOT _id! _id is the DB id, whereas id is the leetcode
         // problem ID!
-        // let problems = null
-        // // TODO: Figure out if there's a way to pass null into gte/lte w/o causing problems
-        // // such that this logic can be condensed to a single query again
-        // if (start && end){
-        //     problems = await Problem.find().where('id').gte(start).lte(end)
-        // }
-        // else if (start) {
-        //     problems = await Problem.find().where('id').gte(start)
-        // }
-        // else if (end) {
-        //     problems = await Problem.find().where('id').lte(end)
-        // }
-        // else {
-        //     problems = await Problem.find()
-        // }
+        const problems = await Problem.find().where('id').gte(start).lte(end)
         
-        if (!problems) {
+        if (!problems || problems.length === 0) {
             return res.status(404).json({errors: [{msg: 'No problems found.'}]})
         }
 
@@ -73,9 +51,9 @@ router.get('/name/:search', async (req, res) => {
         // TODO: Figure out how/if RegExp objects can be used in mongo searchs
         // re = RegExp('\\b(' + req.params.search + ')\\b', 'i')
         
-        // If we don't pass a search term, don't try to match, just return
-        if (!req.params.search) {
-            return res.json({})
+        // If we don't pass a search term, don't try to match, just return err
+        if (!req.params.search || req.params.search === '') {
+            return res.status(404).json({errors: [{msg: 'No problems found.'}]})
         }
         const problems = await Problem.find({$or:
             [
@@ -83,6 +61,12 @@ router.get('/name/:search', async (req, res) => {
                 {problem_text: {$regex: req.params.search, $options: 'i'}},
             ]}
             ).sort({id: 1})
+
+
+        if (!problems || problems.length === 0) {
+            return res.status(404).json({errors: [{msg: 'No problems found.'}]})
+        }
+
         return res.json({problems})
     } catch (error) {
         console.error('Error when getting problems via search ' + error.message)
@@ -289,9 +273,9 @@ router.put('/bulk', [
         const problems = await Problem.find({'_id' : {$in: object_ids}})
 
         // Check that the problems actually exist
-        if (!problems) {
+        if (!problems || problems.length === 0) {
             // Doesn't exist, return bad request
-            return res.status(404).json({msg: 'Problems not found.'})
+            return res.status(404).json({errors: [ {msg: 'Problems not found.'} ]})
         }
         return res.json({problems})
     } catch (error) {
@@ -353,6 +337,30 @@ router.put('/', [auth, [
         return res.json(updatedProblem)
     } catch (error) {
         console.error('Error when updating LC problem ' + error.message)
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
+    }
+})
+
+
+// @route  DELETE api/problems/:id
+// @desc   Delete problem by LeetCode ID
+// @access Admin
+router.delete('/:id', [auth], 
+async (req, res) => {
+    try {
+        // Get the User by the passed auth ID
+        const user = await User.findById(req.user.id).select(['-password', '-__v'])
+        // Ensure we could find them and that they're admin
+        const admin_email = process.env.ADMIN_EMAIL
+        if (!user || user.email != admin_email) {
+            return res.status(401).json({errors: [{msg: 'Access denied'}]})
+        }
+        // Delete the problem
+        await Problem.deleteOne({id: req.params.id})
+        // Return true as JSON
+        return res.json(true)
+    } catch (error) {
+        console.log('Error when deleting problem by LC id ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })

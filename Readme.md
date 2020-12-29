@@ -165,7 +165,7 @@ Both tests and coverage can be run for specific subsections - for example, to ru
 | > Auth | 92% coverage - remaining is defensive |
 | > Users| 82% coverage - remaining is defensive |
 | > Lists | 0% |
-| > Problems | 0% |
+| > Problems | 86% coverage - remaining is defensive |
 | > ProblemStatuses | 0% |
 | > Submissions | 0% |
 | > Middleware | 0% |

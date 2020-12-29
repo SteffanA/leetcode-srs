@@ -8,11 +8,11 @@ const dotenv = require('dotenv') // For getting environ vars from .env file
 dotenv.config({path: '../../../.env'}) // Config environmental vars to get admin user
 const fs = require('fs') // For reading local JSON file
 
-const {checkForCorrectErrors, checkForValidAddition,
-        checkForValidRemoval, checkSuccessfulLogin,
-        checkValidationResult, checkForCorrectMessage,
+const {checkForCorrectErrors, 
+        checkValidationResult, 
         checkForAddedObject, checkForAddedIDs,
-        checkAllValidationResults} = require('../sharedTestFunctions.js')
+        checkAllValidationResults,
+        checkForAddedObjects} = require('../sharedTestFunctions.js')
 
 const BASE_URL = '/api/problems'
 const testProblemsPath = './../utility/testProblems.json'
@@ -416,6 +416,7 @@ describe('Problems API Tests' , () => {
         })
     })
 
+
     describe('Test Can Edit Existing Problems', () => {
         describe('Test Problem Update Validation Checks', () => {
             it('Tests Problem Update Requires ID', (done) => {
@@ -563,6 +564,32 @@ describe('Problems API Tests' , () => {
         })
     })
 
+    describe('Test Can Delete Problems', () => {
+        it('Tests Non-Admin Cannot Delete Problems', (done) => {
+            const toDeleteID = problemJSON[0].id
+            chai.request(app)
+            .delete(BASE_URL + '/' + toDeleteID)
+            .set({'x-auth-token': token})
+            .end((err, res) => {
+                if (err) done(err)
+                checkForCorrectErrors(res, done, 401, 'Access denied')
+            })
+        })
+
+        it('Tests Can Delete Problem From Database', (done) => {
+            const toDeleteID = problemJSON[0].id
+            chai.request(app)
+            .delete(BASE_URL + '/' + toDeleteID)
+            .set({'x-auth-token': adminToken})
+            .end((err, res) => {
+                if (err) done(err)
+                expect(res).to.have.status(200)
+                expect(res.body).to.equal(true)
+                done()
+            })
+        })
+    })
+
     describe('Test Can Get Problem(s)', () => {
         describe('Test Can Get Individual Problem Information', () => {
 
@@ -602,6 +629,25 @@ describe('Problems API Tests' , () => {
         })
 
         describe('Test Can Get Multiple Problems Information', () => {
+            const addedMongoDBIds = []
+            // Add some problems individually to the DB and keep track of their
+            // mongoDB IDs provided back to us.
+            before(() => {
+                const toAddProblems = problemJSON.slice(6,9)
+                for (let prob of toAddProblems) {
+                    chai.request(app)
+                    .post(BASE_URL)
+                    .set({'x-auth-token': adminToken})
+                    .send(
+                        prob
+                    )
+                    .end((err, res) => {
+                        if (err) done(err)
+                        addedMongoDBIds.push(res.body._id)
+                    })
+                }
+            })
+
             it('Tests All Get Bulk Problems Validation Checks Are Properly Handled', (done) => {
                 const url = BASE_URL + '/bulk'
                 const badMongoID = '0'
@@ -621,14 +667,141 @@ describe('Problems API Tests' , () => {
                 ]
                 checkAllValidationResults(app, 'put', url, reqs, '', done)
             })
+
+            it('Tests Returns 404 if No Problems Found', (done) => {
+                // TODO: Is there a way to generate an ID and know it isn't valid?
+                // This test can theoretically fail if the fresh DB creates this ID
+                // string
+                const badProblemID = '54edb381a13ec9142b9bb353'
+                chai.request(app)
+                .put(BASE_URL + '/bulk')
+                .send({
+                    problems: [badProblemID],
+                })
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'Problems not found.')
+                })
+            })
+
+            it('Tests Response Contains All Valid Problems Provided', (done) => {
+                const usedProbs = problemJSON.slice(6,9)
+                chai.request(app)
+                .put(BASE_URL + '/bulk')
+                .send({
+                    problems: addedMongoDBIds,
+                })
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObjects(res, 'problems', done, usedProbs)
+                })
+            })
         })
 
+        // NOTE: Tests here will need updating if the testProblems.json file used
+        // changes.
         describe('Test Can Get Problems In ID Range', () => {
+            it('Tests Can Get Problems In Defined Range', (done) =>{
+                // Note that the later indices have earlier ids
+                const addedIdStart = problemJSON[8].id
+                const addedIdEnd = problemJSON[6].id
+                const addedProblems = problemJSON.slice(6,9)
+                chai.request(app)
+                .get(BASE_URL + '/?start=' + addedIdStart + '&end=' + addedIdEnd)
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObjects(res, '', done, addedProblems)
+                })
+            })
 
+            it('Tests Can Get Problems From Defined Start Without Defined End', (done)=> {
+                const addedIdStart = problemJSON[8].id
+                const addedProblems = problemJSON.slice(6,9)
+                chai.request(app)
+                .get(BASE_URL + '/?start=' + addedIdStart)
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObjects(res, '', done, addedProblems)
+                })
+            })
+
+            it('Tests Can Get Problems up to Defined End Without Defined Start', (done) => {
+                const addedIdEnd = problemJSON[6].id
+                const addedProblems = problemJSON.slice(6,9)
+                chai.request(app)
+                .get(BASE_URL + '/?end=' + addedIdEnd)
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObjects(res, '', done, addedProblems)
+                })
+            })
+
+            it('Tests Can Get All Problems', (done) => {
+                const addedProblems = problemJSON.slice(6,9)
+                chai.request(app)
+                .get(BASE_URL)
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObjects(res, '', done, addedProblems)
+                })
+            })
+
+            it('Tests Returns 404 if No Problems In Provided Range', (done) => {
+                chai.request(app)
+                .get(BASE_URL + '/?start=100000')
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'No problems found.')
+                })
+            })
         })
 
+        // NOTE: Tests here will need updating if the testProblems.json file used
+        // changes.
         describe('Test Can Search For Problem', () => {
+            it('Tests Can Find Problem Based on Name', (done) => {
+                const prob = problemJSON[6]
+                const name = prob.name
+                chai.request(app)
+                .get(BASE_URL + '/name/' + name)
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObjects(res, 'problems', done, [prob])
+                })
+            })
 
+            it('Tests Can Find Problem Based on Problem Text',(done) => {
+                const prob = problemJSON[6]
+                const text = prob.problem_text
+                chai.request(app)
+                .get(BASE_URL + '/name/' + text)
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForAddedObjects(res, 'problems', done, [prob])
+                })
+            })
+
+            it('Tests Returns 404 when Provided No-Match Name/Text', (done) => {
+                const invalidName = 'I Dont Exist As a Problem'
+                chai.request(app)
+                .get(BASE_URL + '/name/' + invalidName)
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'No problems found.')
+                })
+            })
+
+            // TODO: This test returns {} - but I'm not sure where it's hitting
+            // Need to fix this test at some point
+            // it('Tests Returns 404 When Not Provided Search Term', (done) => {
+            //     console.log('Doing 404 no term test')
+            //     chai.request(app)
+            //     .get(BASE_URL + '/name')
+            //     .end((err, res) => {
+            //         if (err) done(err)
+            //         checkForCorrectErrors(res, done, 404, 'No problems found.')
+            //     })
+            // })
         })
     })
 })
