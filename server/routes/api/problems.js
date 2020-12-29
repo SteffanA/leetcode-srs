@@ -11,12 +11,14 @@ const router = express.Router()
 dotenv.config({path: '../../.env'}) // for environ variables
 
 // @route  GET /api/problems/
-// @desc   Get all problems
+// @desc   Get all problems, or problems within an ID range
 // @access Public
 router.get('/', async (req, res) => {
     try {
-        start = null
-        end = null
+        // Set defaults for range from 0 to max int
+        let start = 0
+        let end = Number.MAX_SAFE_INTEGER
+        // Adjust range if range was provided
         if (req.query.start) {
             start = req.query.start
         }
@@ -25,23 +27,9 @@ router.get('/', async (req, res) => {
         }
         // NOTE: We're finding based on id, NOT _id! _id is the DB id, whereas id is the leetcode
         // problem ID!
-        let problems = null
-        // TODO: Figure out if there's a way to pass null into gte/lte w/o causing problems
-        // such that this logic can be condensed to a single query again
-        if (start && end){
-            problems = await Problem.find().where('id').gte(start).lte(end)
-        }
-        else if (start) {
-            problems = await Problem.find().where('id').gte(start)
-        }
-        else if (end) {
-            problems = await Problem.find().where('id').lte(end)
-        }
-        else {
-            problems = await Problem.find()
-        }
+        const problems = await Problem.find().where('id').gte(start).lte(end)
         
-        if (!problems) {
+        if (!problems || problems.length === 0) {
             return res.status(404).json({errors: [{msg: 'No problems found.'}]})
         }
 
@@ -63,9 +51,9 @@ router.get('/name/:search', async (req, res) => {
         // TODO: Figure out how/if RegExp objects can be used in mongo searchs
         // re = RegExp('\\b(' + req.params.search + ')\\b', 'i')
         
-        // If we don't pass a search term, don't try to match, just return
-        if (!req.params.search) {
-            return res.json({})
+        // If we don't pass a search term, don't try to match, just return err
+        if (!req.params.search || req.params.search === '') {
+            return res.status(404).json({errors: [{msg: 'No problems found.'}]})
         }
         const problems = await Problem.find({$or:
             [
@@ -73,6 +61,12 @@ router.get('/name/:search', async (req, res) => {
                 {problem_text: {$regex: req.params.search, $options: 'i'}},
             ]}
             ).sort({id: 1})
+
+
+        if (!problems || problems.length === 0) {
+            return res.status(404).json({errors: [{msg: 'No problems found.'}]})
+        }
+
         return res.json({problems})
     } catch (error) {
         console.error('Error when getting problems via search ' + error.message)
@@ -80,12 +74,12 @@ router.get('/name/:search', async (req, res) => {
     }
 })
 
-// @route  GET /api/problems/:id
+// @route  GET /api/problems/id/:id
 // @desc   Get a problem by id
 // @access Public
 router.get('/id/:id', async (req, res) => {
     try {
-        if (req.params.id === 'undefined') {
+        if (!req.params.id || isNaN(parseInt(req.params.id))) {
             return res.json({})
         }
         // Try to get the problem by ID
@@ -94,10 +88,10 @@ router.get('/id/:id', async (req, res) => {
         // Check that the problem actually exists
         if (!problem) {
             // Doesn't exist, return bad request
-            return res.status(404).json({msg: 'Problem not found.'})
+            return res.status(404).json({errors: [{msg: 'Problem not found.'}]})
         }
 
-        return res.json({problem})
+        return res.json(problem)
     } catch (error) {
         console.error('Get problem by id err: ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
@@ -113,13 +107,13 @@ router.post('/', [auth, [
     check('id', 'Problem must have valid id.').not().isEmpty(),
     check('name', 'Problem must have a name').not().isEmpty(),
     check('problem_text', 'Problem must have accompanying text').not().isEmpty(),
-    check('link', 'Must include link to problem').not().isEmpty(),
+    check('link', 'Problem must include link to problem').not().isEmpty(),
     check('difficulty', 'Problem must have a difficulty level').isNumeric(),
     check('is_premium', 'Problem must be marked premium or not').isBoolean(),
 ]], async (req, res) => {
     // Check our request contains required fields
     const validationErrors = validationResult(req)
-    if (!validationErrors.isEmpty) {
+    if (!validationErrors.isEmpty()) {
         // Something was missing, send an error
         return res.status(400).json({errors : validationErrors.array()})
     }
@@ -130,7 +124,7 @@ router.post('/', [auth, [
         const user = await User.findById(req.user.id)
         const admin_email = process.env.ADMIN_EMAIL
         if (!user || user.email != admin_email) {
-            return res.status(401).json({msg: 'Access denied'})
+            return res.status(401).json({errors: [{msg: 'Access denied'}]})
         }
 
         // Valid admin - create the problem and post it.
@@ -176,16 +170,16 @@ router.post('/', [auth, [
 // @access Admin
 router.post('/bulk', [auth, [
     check('problems', 'Must submit array of problems.').isArray(),
-    check('problems.*.id', 'Problem must have valid id.').not().isEmpty(),
-    check('problems.*.name', 'Problem must have a name').not().isEmpty(),
-    check('problems.*.problem_text', 'Problem must have accompanying text').not().isEmpty(),
-    check('problems.*.link', 'Must include link to problem').not().isEmpty(),
-    check('problems.*.difficulty', 'Problem must have a difficulty level').isNumeric(),
-    check('problems.*.is_premium', 'Problem must be marked premium or not').isBoolean(),
+    check('problems.*.id', 'Problem(s) must have valid id.').not().isEmpty(),
+    check('problems.*.name', 'Problem(s) must have a name').not().isEmpty(),
+    check('problems.*.problem_text', 'Problem(s) must have accompanying text').not().isEmpty(),
+    check('problems.*.link', 'Problems(s) must include link to problem').not().isEmpty(),
+    check('problems.*.difficulty', 'Problem(s) must have a difficulty level').isNumeric(),
+    check('problems.*.is_premium', 'Problem(s) must be marked premium or not').isBoolean(),
 ]], async (req, res) => {
     // Check our request contains required fields
     const validationErrors = validationResult(req)
-    if (!validationErrors.isEmpty) {
+    if (!validationErrors.isEmpty()) {
         // Something was missing, send an error
         return res.status(400).json({errors : validationErrors.array()})
     }
@@ -196,7 +190,7 @@ router.post('/bulk', [auth, [
         const user = await User.findById(req.user.id)
         const admin_email = process.env.ADMIN_EMAIL
         if (!user || user.email != admin_email) {
-            return res.status(401).json({msg: 'Access denied'})
+            return res.status(401).json({errors: [{msg: 'Access denied'}]})
         }
 
         const {
@@ -249,7 +243,7 @@ router.post('/bulk', [auth, [
             }
         }
         // Return the results of which problems we could add and which we couldn't
-        return res.json({'NotAdded' : notAdded, 'Added:' : added})
+        return res.json({'NotAdded' : notAdded, 'Added' : added})
     } catch (error) {
         console.error('Error when posting new LC problems ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
@@ -268,7 +262,7 @@ router.put('/bulk', [
     check('problems.*', 'All problem IDs must be a valid MongoID').isMongoId(),
 ], async (req, res) => {
     const validationErrors = validationResult(req)
-    if (!validationErrors.isEmpty) {
+    if (!validationErrors.isEmpty()) {
         // Something was missing, send an error
         return res.status(400).json({errors : validationErrors.array()})
     }
@@ -279,9 +273,9 @@ router.put('/bulk', [
         const problems = await Problem.find({'_id' : {$in: object_ids}})
 
         // Check that the problems actually exist
-        if (!problems) {
+        if (!problems || problems.length === 0) {
             // Doesn't exist, return bad request
-            return res.status(404).json({msg: 'Problems not found.'})
+            return res.status(404).json({errors: [ {msg: 'Problems not found.'} ]})
         }
         return res.json({problems})
     } catch (error) {
@@ -298,7 +292,7 @@ router.put('/', [auth, [
 ]], async (req, res) => {
     // Check our request contains required fields
     const validationErrors = validationResult(req)
-    if (!validationErrors.isEmpty) {
+    if (!validationErrors.isEmpty()) {
         // Something was missing, send an error
         return res.status(400).json({errors : validationErrors.array()})
     }
@@ -309,7 +303,7 @@ router.put('/', [auth, [
         const user = await User.findById(req.user.id)
         const admin_email = process.env.ADMIN_EMAIL
         if (!user || user.email != admin_email) {
-            return res.status(401).json({msg: 'Access denied'})
+            return res.status(401).json({errors: [{msg: 'Access denied'}]})
         }
 
         // Valid admin - parse out the updated fields
@@ -343,6 +337,30 @@ router.put('/', [auth, [
         return res.json(updatedProblem)
     } catch (error) {
         console.error('Error when updating LC problem ' + error.message)
+        return res.status(500).json({errors: [ {msg: 'Server error.'}]})
+    }
+})
+
+
+// @route  DELETE api/problems/:id
+// @desc   Delete problem by LeetCode ID
+// @access Admin
+router.delete('/:id', [auth], 
+async (req, res) => {
+    try {
+        // Get the User by the passed auth ID
+        const user = await User.findById(req.user.id).select(['-password', '-__v'])
+        // Ensure we could find them and that they're admin
+        const admin_email = process.env.ADMIN_EMAIL
+        if (!user || user.email != admin_email) {
+            return res.status(401).json({errors: [{msg: 'Access denied'}]})
+        }
+        // Delete the problem
+        await Problem.deleteOne({id: req.params.id})
+        // Return true as JSON
+        return res.json(true)
+    } catch (error) {
+        console.log('Error when deleting problem by LC id ' + error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})
     }
 })

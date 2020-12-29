@@ -2,8 +2,9 @@
 Contains a variety of functions that can be used to test responses
 */
 
-chai = require('chai'), chaiHttp = require('chai-http'),
-expect = chai.expect //to solve error when using done(): “ReferenceError: expect is not defined”
+const chai = require('chai')
+const {expect} = require('chai')
+const chaiHttp = require('chai-http')
 chai.use(chaiHttp);
 
 // Checks for a successful user register response
@@ -32,6 +33,42 @@ const checkValidationResult = (res, done, msg) => {
         errMsgs.push(error.msg)
     })
     expect(errMsgs).to.contain(msg)
+    done()
+}
+
+// Checks a URL for multiple types of Validation Check results
+// ReqBodies is an array of Objects that contains reqBody, being the body sent for the request,
+// and err, containing the error message we expect to recieve
+// ReqType is the string representation of the request - ex: put, get, post
+// Token is optional for tests on APIs that require some kind of auth
+// TODO: Refractor Problems, Auth, Users tests to utilize this function
+const checkAllValidationResults = (app, reqType, url, reqBodies, token, done) => {
+
+    // Define a dummy func to pass to checkValidationResult
+    // We use this since we don't want to call done() until all requests have
+    // been tested
+    const dummyFunc = () => {}
+    // Validate we're supplying a correct reqBodies
+    expect(reqBodies).to.be.an('array')
+    for (let reqBody of reqBodies) {
+        expect(reqBody).to.have.property('reqBody')
+        // No type validation for reqBody, since can be object, array, etc
+        expect(reqBody).to.have.property('err')
+        expect(reqBody.err).to.be.a('string')
+    }
+    for (let reqBody of reqBodies) {
+        chai.request(app)
+        [`${reqType}`](url)
+        // .put(BASE_URL)
+        .set({'x-auth-token': token})
+        .send(
+            reqBody.reqBody
+        )
+        .end((err, res) => {
+            if (err) done(err)
+            checkValidationResult(res, dummyFunc, reqBody.err)
+        })
+    }
     done()
 }
 
@@ -80,5 +117,105 @@ const checkForValidAddition = (res, done, addedId) => {
     done()
 }
 
+// Checks the response contains the provided object
+// Intended for use against a single response object, not an array of response objects
+const checkForAddedObject = (res, done, addedObj) => {
+    // Check response for a valid 200
+    expect(res).to.have.status(200)
+    const body = res.body
+    expect(body).to.be.an('object')
+    // Check that each key in the response corresponds to the provided object
+    const obj_keys = Object.keys(addedObj)
+    body_vals = Object.values(body)
+    obj_keys.forEach((key) => {
+        object_val = addedObj[key]
+        expect(body_vals).to.include(object_val)
+    })
+    done()
+}
+
+// Checks that each object provided is contained in the response array
+// Assumes each object in the resArray follows the same key-value format
+const checkForAddedObjects = (res, resArrayName, done, addedObjArray) => {
+    // Check response for a valid 200
+    expect(res).to.have.status(200)
+    const body = res.body
+    let resArray = []
+    if (resArrayName !== '') {
+        expect(body[`${resArrayName}`]).to.be.an('array')
+        resArray = body[`${resArrayName}`]
+    }
+    else {
+        // No name provided, so assume the body itself is the res array
+        expect(body).to.be.an('array')
+        resArray = body
+    }
+    // If we have both an added object array length and a resArray length
+    if (resArray.length > 0 && addedObjArray.length > 0) {
+        // Expect each object in the response array to have the same keys
+        const resKeys = Object.keys(resArray[0])
+        // Likewise with added objects
+        const addedKeys = Object.keys(addedObjArray[0])
+        // Check that all of the addedKeys are in resKeys
+        expect(resKeys).to.have.lengthOf.at.least(addedKeys.length)
+        for (key of addedKeys) {
+            expect(resKeys).to.contain(key)
+        }
+        const valueArrays = []
+        // Create a new array to fill with values for each key we get in our response
+        for (let i = 0; i < addedKeys.length; i++) {
+            valueArrays.push([])
+        }
+        // Add all the key values for each object to its own array
+        resArray.forEach((resObj) => {
+            let i = 0
+            for (key of addedKeys) {
+                valueArrays[i].push(resObj[key])
+                i++
+            }
+        })
+        // Look for the added object's key's values in the valueArrays
+        addedObjArray.forEach((addedObj) => {
+            i = 0
+            for (key of addedKeys) {
+                expect(valueArrays[i]).to.contain(addedObj[key])
+                i++
+            }
+        })
+    } 
+    // If the above statement isn't true, addedObjArray should have no values
+    else {
+        expect(addedObjArray).to.have.length(0)
+    }
+    done()
+}
+
+// Check that the response contains all the IDs added, assuming IDs are passed
+// back in Array as a part of the body
+const checkForAddedIDs = (res, done, addedIds, resArrayName = '') => {
+    // Check response for a valid 200
+    expect(res).to.have.status(200)
+    const body = res.body
+    let resArray = []
+    // If passed name, resArray is a member of the body
+    if (resArrayName.length > 0) {
+        expect(body[`${resArrayName}`]).to.be.an('array')
+        resArray = body[`${resArrayName}`]
+    }
+    // Otherwise resArray is the body itself
+    else {
+        expect(body).to.be.an('array')
+        resArray = body
+    }
+    // Check that each added ID is in our response
+    for (let addedId of addedIds) {
+        expect(resArray).to.include(addedId)
+    }
+    done()
+}
+
+
 module.exports = {checkForCorrectErrors, checkForValidAddition, checkForValidRemoval, 
-    checkSuccessfulLogin, checkValidationResult, checkForCorrectMessage}
+    checkSuccessfulLogin, checkValidationResult, checkForCorrectMessage, checkForAddedObject,
+    checkForAddedObjects, checkForAddedIDs, checkAllValidationResults,
+}

@@ -243,7 +243,7 @@ async (req, res) => {
         }
         // Delete the user
         await User.deleteOne({id: req.user.id})
-        // Return the user as JSON
+        // Return true as JSON
         return res.json(true)
     } catch (error) {
         console.log('Error when deleting user id ' + error.message)
