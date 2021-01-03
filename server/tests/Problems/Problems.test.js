@@ -10,9 +10,9 @@ const fs = require('fs') // For reading local JSON file
 const {checkForCorrectErrors, createTestUser,
         checkValidationResult, convertLeetCodeResToOurObjects,
         checkForAddedObject, checkForAddedIDs,
-        checkAllValidationResults,
-        checkForAddedObjects,
-        createOrGetTokenForAdminUser} = require('../sharedTestFunctions.js')
+        checkAllValidationResults, createOrGetTokenForAdminUser,
+        checkForAddedObjects, getFakeMongoDBid,
+        } = require('../sharedTestFunctions.js')
 
 const BASE_URL = '/api/problems'
 // Note that the test is run at the root of the server module,
@@ -641,10 +641,7 @@ describe('Problems API Tests' , () => {
             })
 
             it('Tests Returns 404 if No Problems Found', (done) => {
-                // TODO: Is there a way to generate an ID and know it isn't valid?
-                // This test can theoretically fail if the fresh DB creates this ID
-                // string
-                const badProblemID = '54edb381a13ec9142b9bb353'
+                const badProblemID = getFakeMongoDBid()
                 chai.request(app)
                 .put(BASE_URL + '/bulk')
                 .send({

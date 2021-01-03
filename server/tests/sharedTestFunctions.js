@@ -194,6 +194,25 @@ const checkForAddedObjects = (res, resArrayName, done, addedObjArray) => {
     done()
 }
 
+// Looks for a 200 response but empty array
+const checkForEmptyArray = (res, resArrayName, done) => {
+    // Check response for a valid 200
+    expect(res).to.have.status(200)
+    const body = res.body
+    let resArray = []
+    if (resArrayName !== '') {
+        expect(body[`${resArrayName}`]).to.be.an('array')
+        resArray = body[`${resArrayName}`]
+    }
+    else {
+        // No name provided, so assume the body itself is the res array
+        expect(body).to.be.an('array')
+        resArray = body
+    }
+    expect(resArray).to.have.length(0)
+    done()
+}
+
 // Check that the response contains all the IDs added, assuming IDs are passed
 // back in Array as a part of the body
 const checkForAddedIDs = (res, done, addedIds, resArrayName = '') => {
@@ -319,10 +338,17 @@ const convertLeetCodeResToOurObjects = (lcResAsJson) => {
     return problemJSON
 }
 
+// Returns a MongoDB ID that doesn't exist
+// Tests can theoretically fail if the DB generates this string somehow
+// NOTE: After looking at how IDs are generated, they are supposed to be
+// unique across all MongoDB documents ever made - so this should be okay
+const getFakeMongoDBid = () => {
+    return '54edb381a13ec9142b9bb353'
+}
 
 module.exports = {checkForCorrectErrors, checkForValidAddition, checkForValidRemoval, 
     checkSuccessfulLogin, checkValidationResult, checkForCorrectMessage, checkForAddedObject,
     checkForAddedObjects, checkForAddedIDs, checkAllValidationResults, checkRouteIsPrivate,
     checkRoutesArePrivate, createTestUser, convertLeetCodeResToOurObjects, createOrGetTokenForAdminUser,
-
+    getFakeMongoDBid, checkForEmptyArray,
 }
