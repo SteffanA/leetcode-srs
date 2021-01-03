@@ -208,7 +208,7 @@ router.post('/', [auth, [
 
         const numberOfLists = user.lists.length
         if (numberOfLists >= 100) {
-            console.log('User already has ' + numberOfLists + ' lists.')
+            console.log('User ' + user.name + ' already has ' + numberOfLists + ' lists.')
             // Prevent a user from owning more than 100 lists
             return res.status(401).json({errors: [{msg: 'You cannot have more than 100 lists.'}]})
         }

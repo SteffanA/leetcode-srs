@@ -7,6 +7,10 @@ const {expect} = require('chai')
 const chaiHttp = require('chai-http')
 chai.use(chaiHttp);
 
+const dotenv = require('dotenv')
+dotenv.config({path: '../../../.env'}) // Config environmental vars to get admin user
+
+
 // Checks for a successful user register response
 const checkSuccessfulLogin = (res, done, user) => {
     // Check response for a valid 200
@@ -214,8 +218,111 @@ const checkForAddedIDs = (res, done, addedIds, resArrayName = '') => {
     done()
 }
 
+// Checks that a particular route requires authorization
+// Token is defaulted to blank, but can be set to non-admin token
+// to check admin-protected routes
+const checkRouteIsPrivate = (done, route, routeType, token = '') => {
+    chai.request(app)
+    [`${routeType}`](route)
+    .set({'x-auth-token': token})
+    .end((err, res) => {
+        if (err) done(err)
+        check401DueToNoToken(res, done)
+    })
+}
+
+// Checks that all the given routes are private.
+// Routes is a 1:1 map of string routes to string route type
+// Ex: {'/api/problems' : 'get'}
+// Token is defaulted to blank, but can be set to non-admin token
+// to test admin-protected routes
+const checkRoutesArePrivate = (res, done, routes, token = '') => {
+    for (let route of routes) {
+        checkRouteIsPrivate(res, done, route, token)
+    }
+}
+
+// Create a test user in our database with given credentials
+const createTestUser = (app, name, email, pass) => {
+    return new Promise((resolve) => {
+        chai.request(app)
+        .post('/api/users')
+        .send({
+            name : name,
+            email: email,
+            password: pass,
+        })
+        .end((err, res) => {
+            if (err) reject(err)
+            // Check response for a valid 200
+            expect(res).to.have.status(200)
+            const body = res.body
+            expect(body).to.have.property('token')
+            resolve(res)
+        })
+    })
+}
+
+// Attempts to either create or login the admin user
+// to access the admin token
+const createOrGetTokenForAdminUser = (app) => {
+    // Gather the admin credentials
+    const adminUser = process.env.ADMIN_NAME
+    const adminEmail = process.env.ADMIN_EMAIL
+    const adminPass = process.env.ADMIN_PASS
+    return new Promise((resolve) => {
+        chai.request(app)
+        .post('/api/auth')
+        .send({
+            name : adminUser,
+            email: adminEmail,
+            password: adminPass,
+        })
+        .end((err, res) => {
+            if (err) reject(err)
+            // Check response for a valid 200
+            if (res.status === 200) {
+                // Successfully logged in
+                const body = res.body
+                expect(body).to.have.property('token')
+                resolve(res)
+            }
+            else {
+                // Define a create function so we can do async stuff
+                const create = async () => {
+                    r = await createTestUser(app, adminUser, adminEmail, adminPass)
+                    return r
+                }
+                // Couldn't login, try to register
+                res = create()
+                resolve(res)
+            }
+        })
+    })
+}
+
+// Convert the raw JSON from LeetCode's API to an array of the objects we expect
+// in our Problem POST routines
+const convertLeetCodeResToOurObjects = (lcResAsJson) => {
+    let problemJSON = []
+    const stats = lcResAsJson.stat_status_pairs
+    stats.forEach((stat) => {
+        problem = {}
+        problem.id = stat.stat.question_id
+        problem.name = stat.stat.question__title
+        problem.problem_text = 'No text yet'
+        problem.link = stat.stat.question__title_slug
+        problem.difficulty = stat.difficulty.level
+        problem.is_premium = stat.paid_only
+        problemJSON.push(problem)
+    })
+    return problemJSON
+}
+
 
 module.exports = {checkForCorrectErrors, checkForValidAddition, checkForValidRemoval, 
     checkSuccessfulLogin, checkValidationResult, checkForCorrectMessage, checkForAddedObject,
-    checkForAddedObjects, checkForAddedIDs, checkAllValidationResults,
+    checkForAddedObjects, checkForAddedIDs, checkAllValidationResults, checkRouteIsPrivate,
+    checkRoutesArePrivate, createTestUser, convertLeetCodeResToOurObjects, createOrGetTokenForAdminUser,
+
 }
