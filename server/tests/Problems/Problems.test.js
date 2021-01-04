@@ -1,4 +1,3 @@
-
 const app = require('../../server'),
     chai = require('chai'), chaiHttp = require('chai-http'),
     expect = chai.expect //to solve error when using done(): “ReferenceError: expect is not defined”
@@ -8,67 +7,50 @@ const dotenv = require('dotenv') // For getting environ vars from .env file
 dotenv.config({path: '../../../.env'}) // Config environmental vars to get admin user
 const fs = require('fs') // For reading local JSON file
 
-const {checkForCorrectErrors, 
-        checkValidationResult, 
-        checkForAddedObject, checkForAddedIDs,
-        checkAllValidationResults,
-        checkForAddedObjects} = require('../sharedTestFunctions.js')
+const {checkForCorrectErrors, createTestUser,
+        checkValidationResult, convertLeetCodeResToOurObjects,
+        checkForReturnedObject, checkForAddedIDs,
+        checkAllValidationResults, createOrGetTokenForAdminUser,
+        checkForReturnedObjects, getFakeMongoDBid,
+        } = require('../sharedTestFunctions.js')
 
 const BASE_URL = '/api/problems'
-const testProblemsPath = './../utility/testProblems.json'
+// Note that the test is run at the root of the server module,
+// and thus the path is defined as if we are at the root of the server folder
+const testProblemsPath = './tests/Problems/testProblems.json'
 
 describe('Problems API Tests' , () => {
 
-    const testUser = 'problemTester'
-    const testEmail = 'problemTester@test.com'
-    const testPass = 'test12'
     let token = ''
+    let adminToken = ''
+
     // Create a user account we can test our problems routes with
-    before(() => {
-        return new Promise((resolve) => {
-            chai.request(app)
-            .post('/api/users')
-            .send({
-                name : testUser,
-                email: testEmail,
-                password: testPass,
-            })
-            .end((err, res) => {
-                if (err) reject(err)
-                // Check response for a valid 200
-                expect(res).to.have.status(200)
-                const body = res.body
-                expect(body).to.have.property('token')
-                token = body.token
-                resolve(res)
-            })
-        })
+    before(async () => {
+        const testUser = 'problemTester'
+        const testEmail = 'problemTester@test.com'
+        const testPass = 'test12'
+        try {
+            const res = await createTestUser(app, testUser, testEmail, testPass)
+            const body = res.body
+            token = body.token
+        } catch (error) {
+            console.log('Hit error creating test user for Problems.')
+            console.log(error)
+            expect(false).to.equal(true)
+        }
     })
 
-    const adminUser = process.env.ADMIN_NAME
-    const adminEmail = process.env.ADMIN_EMAIL
-    const adminPass = process.env.ADMIN_PASS
-    let adminToken = ''
     // Create an admin account we can test adding problems with
-    before(() => {
-        return new Promise((resolve) => {
-            chai.request(app)
-            .post('/api/users')
-            .send({
-                name : adminUser,
-                email: adminEmail,
-                password: adminPass,
-            })
-            .end((err, res) => {
-                if (err) reject(err)
-                // Check response for a valid 200
-                expect(res).to.have.status(200)
-                const body = res.body
-                expect(body).to.have.property('token')
-                adminToken = body.token
-                resolve(res)
-            })
-        })
+    before(async () => {
+        try {
+            const res = await createOrGetTokenForAdminUser(app)
+            const body = res.body
+            adminToken = body.token
+        } catch (error) {
+            console.log('Hit error creating test admin user for Problems.')
+            console.log(error)
+            expect(false).to.equal(true)
+        }
     })
 
     // Array that stores our problems we utilize in our tests
@@ -77,17 +59,7 @@ describe('Problems API Tests' , () => {
     before(() => {
         const rawData = fs.readFileSync(testProblemsPath)
         const asJson = JSON.parse(rawData)
-        const stats = asJson.stat_status_pairs
-        stats.forEach((stat) => {
-            problem = {}
-            problem.id = stat.stat.question_id
-            problem.name = stat.stat.question__title
-            problem.problem_text = 'No text yet'
-            problem.link = stat.stat.question__title_slug
-            problem.difficulty = stat.difficulty.level
-            problem.is_premium = stat.paid_only
-            problemJSON.push(problem)
-        })
+        problemJSON.push(...convertLeetCodeResToOurObjects(asJson))
     })
 
     // Use this as a baseline invalid test problem for our validation checks.
@@ -326,7 +298,7 @@ describe('Problems API Tests' , () => {
             )
             .end((err, res) => {
                 if (err) done(err)
-                checkForAddedObject(res, done, prob)
+                checkForReturnedObject(res, done, prob)
             })
         })
 
@@ -450,7 +422,7 @@ describe('Problems API Tests' , () => {
                 )
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, toBeUpdatedProb)
+                    checkForReturnedObject(res, done, toBeUpdatedProb)
                 })
             })
 
@@ -465,7 +437,7 @@ describe('Problems API Tests' , () => {
                 )
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, toBeUpdatedProb)
+                    checkForReturnedObject(res, done, toBeUpdatedProb)
                 })
             })
 
@@ -480,7 +452,7 @@ describe('Problems API Tests' , () => {
                 )
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, toBeUpdatedProb)
+                    checkForReturnedObject(res, done, toBeUpdatedProb)
                 })
             })
 
@@ -495,7 +467,7 @@ describe('Problems API Tests' , () => {
                 )
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, toBeUpdatedProb)
+                    checkForReturnedObject(res, done, toBeUpdatedProb)
                 })
             })
 
@@ -510,7 +482,7 @@ describe('Problems API Tests' , () => {
                 )
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, toBeUpdatedProb)
+                    checkForReturnedObject(res, done, toBeUpdatedProb)
                 })
             })
 
@@ -525,7 +497,7 @@ describe('Problems API Tests' , () => {
                 )
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, toBeUpdatedProb)
+                    checkForReturnedObject(res, done, toBeUpdatedProb)
                 })
             })
 
@@ -598,7 +570,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL + '/id/ab')
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, {})
+                    checkForReturnedObject(res, done, {})
                 })
             })
 
@@ -614,7 +586,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL + '/id/' + existingProbID)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, existingProb) 
+                    checkForReturnedObject(res, done, existingProb) 
                 })
             })
 
@@ -669,10 +641,7 @@ describe('Problems API Tests' , () => {
             })
 
             it('Tests Returns 404 if No Problems Found', (done) => {
-                // TODO: Is there a way to generate an ID and know it isn't valid?
-                // This test can theoretically fail if the fresh DB creates this ID
-                // string
-                const badProblemID = '54edb381a13ec9142b9bb353'
+                const badProblemID = getFakeMongoDBid()
                 chai.request(app)
                 .put(BASE_URL + '/bulk')
                 .send({
@@ -693,7 +662,7 @@ describe('Problems API Tests' , () => {
                 })
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, 'problems', done, usedProbs)
+                    checkForReturnedObjects(res, 'problems', done, usedProbs)
                 })
             })
         })
@@ -710,7 +679,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL + '/?start=' + addedIdStart + '&end=' + addedIdEnd)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, '', done, addedProblems)
+                    checkForReturnedObjects(res, '', done, addedProblems)
                 })
             })
 
@@ -721,7 +690,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL + '/?start=' + addedIdStart)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, '', done, addedProblems)
+                    checkForReturnedObjects(res, '', done, addedProblems)
                 })
             })
 
@@ -732,7 +701,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL + '/?end=' + addedIdEnd)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, '', done, addedProblems)
+                    checkForReturnedObjects(res, '', done, addedProblems)
                 })
             })
 
@@ -742,7 +711,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, '', done, addedProblems)
+                    checkForReturnedObjects(res, '', done, addedProblems)
                 })
             })
 
@@ -766,7 +735,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL + '/name/' + name)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, 'problems', done, [prob])
+                    checkForReturnedObjects(res, 'problems', done, [prob])
                 })
             })
 
@@ -777,7 +746,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL + '/name/' + text)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, 'problems', done, [prob])
+                    checkForReturnedObjects(res, 'problems', done, [prob])
                 })
             })
 

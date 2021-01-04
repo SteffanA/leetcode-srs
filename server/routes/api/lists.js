@@ -17,7 +17,7 @@ const router = express.Router()
 router.get('/', async (req, res) => {
     try {
         const lists =  await List.find({public: true})
-        if (!lists) {
+        if (!lists || lists.length === 0) {
             return res.status(404).json({errors: [{msg: 'No lists found.'}]})
         }
         return res.json(lists)
@@ -34,7 +34,7 @@ router.get('/own', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id)
         const lists = await List.find({creator: user._id})
-        if (!lists) {
+        if (!lists || lists.length === 0) {
             return res.status(404).json({errors: [{msg: 'You do not own any lists.'}]})
         }
         return res.json(lists)
@@ -45,7 +45,7 @@ router.get('/own', auth, async (req, res) => {
 })
 
 
-// @route  GET api/lists/:id
+// @route  GET api/lists/public/id/:id
 // @desc   Get a public list by ID
 // @access Public
 router.get('/public/id/:id', async (req, res) => {
@@ -72,7 +72,7 @@ router.get('/public/id/:id', async (req, res) => {
 router.get('/public/search/:term', async (req, res) => {
     try {
         // If no term is passed, just return an empty array
-        if (!req.params.term) {
+        if (!req.params.term || req.params.term === '') {
             return res.json([])
         }
         const lists = await List.find({$and:
@@ -88,7 +88,7 @@ router.get('/public/search/:term', async (req, res) => {
     }
 })
 
-// @route  GET api/lists/:id
+// @route  GET api/lists/private/:id
 // @desc   Get a public list, or private list user owns
 // @access Private 
 router.get('/private/:id', auth, async (req, res) => {
@@ -208,7 +208,7 @@ router.post('/', [auth, [
 
         const numberOfLists = user.lists.length
         if (numberOfLists >= 100) {
-            console.log('User already has ' + numberOfLists + ' lists.')
+            console.log('User ' + user.name + ' already has ' + numberOfLists + ' lists.')
             // Prevent a user from owning more than 100 lists
             return res.status(401).json({errors: [{msg: 'You cannot have more than 100 lists.'}]})
         }
