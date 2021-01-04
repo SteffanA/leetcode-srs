@@ -9,9 +9,9 @@ const fs = require('fs'); // For reading local JSON file
 
 const {checkForCorrectErrors, createTestUser,
         checkValidationResult, convertLeetCodeResToOurObjects,
-        checkForAddedObject, checkForAddedIDs,
+        checkForReturnedObject, checkForAddedIDs,
         checkAllValidationResults, createOrGetTokenForAdminUser,
-        checkForAddedObjects, checkForEmptyArray,
+        checkForReturnedObjects, checkForEmptyArray,
         getFakeMongoDBid} = require('../sharedTestFunctions.js')
 
 const BASE_URL = '/api/lists'
@@ -124,7 +124,7 @@ describe('Lists API Tests' , () => {
                 .send(list)
                 .end((err, res) => {
                     if (err) reject(err)
-                    checkForAddedObject(res, dummyFunc, list)
+                    checkForReturnedObject(res, dummyFunc, list)
                     resolve(res)
                 })
             })
@@ -207,7 +207,7 @@ describe('Lists API Tests' , () => {
             .end((err, res) => {
                 if (err) done(err)
                 const dummyFunc = () => {}
-                checkForAddedObject(res, dummyFunc, addedPublicList)
+                checkForReturnedObject(res, dummyFunc, addedPublicList)
                 publicListId = res.body._id
                 done()
             })
@@ -221,7 +221,7 @@ describe('Lists API Tests' , () => {
             .end((err, res) => {
                 if (err) done(err)
                 const dummyFunc = () => {}
-                checkForAddedObject(res, dummyFunc, addedOwnPrivateList)
+                checkForReturnedObject(res, dummyFunc, addedOwnPrivateList)
                 privateOwnListId = res.body._id
                 done()
             })
@@ -234,7 +234,7 @@ describe('Lists API Tests' , () => {
             .get(BASE_URL)
             .end((err, res) => {
                 if (err) done(err)
-                checkForAddedObjects(res, '', done, [addedPublicList])
+                checkForReturnedObjects(res, '', done, [addedPublicList])
             })
         })
 
@@ -243,7 +243,7 @@ describe('Lists API Tests' , () => {
             .get(BASE_URL + '/public/id/' + publicListId)
             .end((err, res) => {
                 if (err) done(err)
-                checkForAddedObject(res, done, addedPublicList)
+                checkForReturnedObject(res, done, addedPublicList)
             })
         })
 
@@ -272,7 +272,7 @@ describe('Lists API Tests' , () => {
             .set({'x-auth-token': token})
             .end((err, res) => {
                 if (err) done(err)
-                checkForAddedObjects(res, '', done, [addedPublicList])
+                checkForReturnedObjects(res, '', done, [addedPublicList])
             })
         })
 
@@ -282,7 +282,7 @@ describe('Lists API Tests' , () => {
             .set({'x-auth-token': token})
             .end((err, res) => {
                 if (err) done(err)
-                checkForAddedObject(res, done, addedOwnPrivateList)
+                checkForReturnedObject(res, done, addedOwnPrivateList)
             })
         })
 
@@ -314,7 +314,7 @@ describe('Lists API Tests' , () => {
                 .get(BASE_URL + '/public/search/' + term)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, '', done, [addedPublicList])
+                    checkForReturnedObjects(res, '', done, [addedPublicList])
                 })
             })
 

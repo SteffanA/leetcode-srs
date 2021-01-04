@@ -123,7 +123,7 @@ const checkForValidAddition = (res, done, addedId) => {
 
 // Checks the response contains the provided object
 // Intended for use against a single response object, not an array of response objects
-const checkForAddedObject = (res, done, addedObj) => {
+const checkForReturnedObject = (res, done, addedObj) => {
     // Check response for a valid 200
     expect(res).to.have.status(200)
     const body = res.body
@@ -140,7 +140,7 @@ const checkForAddedObject = (res, done, addedObj) => {
 
 // Checks that each object provided is contained in the response array
 // Assumes each object in the resArray follows the same key-value format
-const checkForAddedObjects = (res, resArrayName, done, addedObjArray) => {
+const checkForReturnedObjects = (res, resArrayName, done, addedObjArray) => {
     // Check response for a valid 200
     expect(res).to.have.status(200)
     const body = res.body
@@ -347,8 +347,8 @@ const getFakeMongoDBid = () => {
 }
 
 module.exports = {checkForCorrectErrors, checkForValidAddition, checkForValidRemoval, 
-    checkSuccessfulLogin, checkValidationResult, checkForCorrectMessage, checkForAddedObject,
-    checkForAddedObjects, checkForAddedIDs, checkAllValidationResults, checkRouteIsPrivate,
+    checkSuccessfulLogin, checkValidationResult, checkForCorrectMessage, checkForReturnedObject,
+    checkForReturnedObjects, checkForAddedIDs, checkAllValidationResults, checkRouteIsPrivate,
     checkRoutesArePrivate, createTestUser, convertLeetCodeResToOurObjects, createOrGetTokenForAdminUser,
     getFakeMongoDBid, checkForEmptyArray,
 }

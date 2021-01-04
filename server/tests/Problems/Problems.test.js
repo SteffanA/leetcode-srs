@@ -9,9 +9,9 @@ const fs = require('fs') // For reading local JSON file
 
 const {checkForCorrectErrors, createTestUser,
         checkValidationResult, convertLeetCodeResToOurObjects,
-        checkForAddedObject, checkForAddedIDs,
+        checkForReturnedObject, checkForAddedIDs,
         checkAllValidationResults, createOrGetTokenForAdminUser,
-        checkForAddedObjects, getFakeMongoDBid,
+        checkForReturnedObjects, getFakeMongoDBid,
         } = require('../sharedTestFunctions.js')
 
 const BASE_URL = '/api/problems'
@@ -298,7 +298,7 @@ describe('Problems API Tests' , () => {
             )
             .end((err, res) => {
                 if (err) done(err)
-                checkForAddedObject(res, done, prob)
+                checkForReturnedObject(res, done, prob)
             })
         })
 
@@ -422,7 +422,7 @@ describe('Problems API Tests' , () => {
                 )
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, toBeUpdatedProb)
+                    checkForReturnedObject(res, done, toBeUpdatedProb)
                 })
             })
 
@@ -437,7 +437,7 @@ describe('Problems API Tests' , () => {
                 )
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, toBeUpdatedProb)
+                    checkForReturnedObject(res, done, toBeUpdatedProb)
                 })
             })
 
@@ -452,7 +452,7 @@ describe('Problems API Tests' , () => {
                 )
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, toBeUpdatedProb)
+                    checkForReturnedObject(res, done, toBeUpdatedProb)
                 })
             })
 
@@ -467,7 +467,7 @@ describe('Problems API Tests' , () => {
                 )
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, toBeUpdatedProb)
+                    checkForReturnedObject(res, done, toBeUpdatedProb)
                 })
             })
 
@@ -482,7 +482,7 @@ describe('Problems API Tests' , () => {
                 )
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, toBeUpdatedProb)
+                    checkForReturnedObject(res, done, toBeUpdatedProb)
                 })
             })
 
@@ -497,7 +497,7 @@ describe('Problems API Tests' , () => {
                 )
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, toBeUpdatedProb)
+                    checkForReturnedObject(res, done, toBeUpdatedProb)
                 })
             })
 
@@ -570,7 +570,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL + '/id/ab')
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, {})
+                    checkForReturnedObject(res, done, {})
                 })
             })
 
@@ -586,7 +586,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL + '/id/' + existingProbID)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObject(res, done, existingProb) 
+                    checkForReturnedObject(res, done, existingProb) 
                 })
             })
 
@@ -662,7 +662,7 @@ describe('Problems API Tests' , () => {
                 })
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, 'problems', done, usedProbs)
+                    checkForReturnedObjects(res, 'problems', done, usedProbs)
                 })
             })
         })
@@ -679,7 +679,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL + '/?start=' + addedIdStart + '&end=' + addedIdEnd)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, '', done, addedProblems)
+                    checkForReturnedObjects(res, '', done, addedProblems)
                 })
             })
 
@@ -690,7 +690,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL + '/?start=' + addedIdStart)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, '', done, addedProblems)
+                    checkForReturnedObjects(res, '', done, addedProblems)
                 })
             })
 
@@ -701,7 +701,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL + '/?end=' + addedIdEnd)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, '', done, addedProblems)
+                    checkForReturnedObjects(res, '', done, addedProblems)
                 })
             })
 
@@ -711,7 +711,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, '', done, addedProblems)
+                    checkForReturnedObjects(res, '', done, addedProblems)
                 })
             })
 
@@ -735,7 +735,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL + '/name/' + name)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, 'problems', done, [prob])
+                    checkForReturnedObjects(res, 'problems', done, [prob])
                 })
             })
 
@@ -746,7 +746,7 @@ describe('Problems API Tests' , () => {
                 .get(BASE_URL + '/name/' + text)
                 .end((err, res) => {
                     if (err) done(err)
-                    checkForAddedObjects(res, 'problems', done, [prob])
+                    checkForReturnedObjects(res, 'problems', done, [prob])
                 })
             })
 

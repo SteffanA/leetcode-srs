@@ -1,4 +1,3 @@
-const auth = require('../../middleware/auth')
 const User = require('../../models/User')
 
 const express = require('express')
