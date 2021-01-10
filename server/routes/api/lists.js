@@ -186,7 +186,8 @@ async (req, res) => {
 // @access Private
 router.post('/', [auth, [
     check('name', 'Lists must be named.').not().isEmpty(),
-    check('public', 'Public must be set true or false').isBoolean(),
+    check('public', 'Lists must be set true or false').isBoolean(),
+    check('public', 'Public must be set as a bool').isBoolean(),
 ]], async (req, res) => {
     const validationErrors = validationResult(req)
     if (!validationErrors.isEmpty()) {
@@ -200,8 +201,9 @@ router.post('/', [auth, [
         // Likewise for problems contained within
         const {
             name,
-            public
         } = req.body
+        // Handle 'public' seperately to work around a bug in nyc (coverage tool)
+        const pub = req.body['public']
 
         // Get the current user to make them the creator
         const user = await User.findById(req.user.id)
@@ -215,7 +217,7 @@ router.post('/', [auth, [
 
         const newList = new List({
             name,
-            public,
+            public : pub,
             creator: user,
         })
 
@@ -275,9 +277,9 @@ async (req, res) => {
     }
 })
 
-// @route  PUT api/lists/:id
-// @desc   Update an existing list's non-Problem attributes
-// @access Private
+// // @route  PUT api/lists/:id
+// // @desc   Update an existing list's non-Problem attributes
+// // @access Private
 router.put('/:id', [auth],
 async (req, res) => {
     try {
@@ -302,12 +304,13 @@ async (req, res) => {
 
         const {
             name,
-            public
         } = req.body
+        // Handle 'public' seperately to work around a bug in nyc (coverage tool)
+        const pub = req.body['public']
 
         // Update the list
         if (name) {list.name = name}
-        if (public) {list.public = public}
+        if (pub) {list.public = pub}
 
         // Save the updated list
         const updatedList = await list.save()

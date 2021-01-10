@@ -250,7 +250,7 @@ const checkRouteIsPrivate = (done, route, routeType, token = '') => {
     })
 }
 
-// Checks that all the given routes are private.
+// Checks that all the given routes are private (require auth)
 // Routes is a 1:1 map of string routes to string route type
 // Ex: {'/api/problems' : 'get'}
 // Token is defaulted to blank, but can be set to non-admin token

@@ -192,8 +192,12 @@ describe('Lists API Tests' , () => {
                     err: 'Lists must be named.'
                 },
                 {
+                    reqBody: {name: 'testName'},
+                    err: 'Lists must be set true or false'
+                },
+                {
                     reqBody: {name: 'testName', public: 23},
-                    err: 'Public must be set true or false'
+                    err: 'Public must be set as a bool'
                 },
             ]
             checkAllValidationResults(app, 'post', BASE_URL, reqs, token, done)
