@@ -12,7 +12,9 @@ const {checkForCorrectErrors, createTestUser,
         checkForReturnedObject, checkForAddedIDs,
         checkAllValidationResults, createOrGetTokenForAdminUser,
         checkForReturnedObjects, checkForEmptyArray,
-        getFakeMongoDBid} = require('../sharedTestFunctions.js')
+        getFakeMongoDBid, checkForNewIdValueInResponseObject,
+        checkForValidAddition,
+        checkIdNotContainedInResArray} = require('../sharedTestFunctions.js')
 
 const BASE_URL = '/api/lists'
 // Note that the test is run at the root of the server module,
@@ -336,27 +338,149 @@ describe('Lists API Tests' , () => {
 
     describe('Test Can Edit Lists', () => {
         describe('Test Can Add Problems To List', () => {
+            it('Tests Can Add a Problem To List', (done) => {
+                const problemToAdd = testProblems[0]
+                const getUrl = '/api/problems/id/' + problemToAdd
+                const reqUrl = BASE_URL + '/add/' + publicListId + '/' + problemToAdd
+                checkForNewIdValueInResponseObject(app, done, token, getUrl, 'put', reqUrl, 'problems')
+            })
 
+            it('Tests Cannot Add Problem To List User Does Not Own', (done) => {
+                const problemToAdd = testProblems[1]
+                chai.request(app)
+                .put(BASE_URL + '/add/' + publicListId + '/' + problemToAdd)
+                .set({'x-auth-token': adminToken})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 401, 'Cannot add to a list you did not create.')
+                })
+            })
+
+            it('Tests Cannot Add Problem To List That Does Not Exist', (done) => {
+                const problemToAdd = testProblems[0]
+                const badListId = getFakeMongoDBid()
+                chai.request(app)
+                .put(BASE_URL + '/add/' + badListId + '/' + problemToAdd)
+                .set({'x-auth-token': token})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'List not found.')
+                })
+            })
+
+            it('Tests Cannot Add Problem That Does Not Exist To List', (done) => {
+                const problemToAdd = -120
+                chai.request(app)
+                .put(BASE_URL + '/add/' + publicListId + '/' + problemToAdd)
+                .set({'x-auth-token': token})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'Problem not found.')
+                })
+            })
+
+            it('Tests Cannot Add Problem When List ID Provided Is Not MongoID', (done) => {
+                const problemToAdd = testProblems[0]
+                chai.request(app)
+                .put(BASE_URL + '/add/' + 12 + '/' + problemToAdd)
+                .set({'x-auth-token': token})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'List not found.')
+                })
+            })
+
+            it('Tests Cannot Add Problem When Problem Already In List', (done) => {
+                const problemToAdd = testProblems[0]
+                chai.request(app)
+                .put(BASE_URL + '/add/' + publicListId + '/' + problemToAdd)
+                .set({'x-auth-token': token})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 409, 'Problem already a part of this list.')
+                })
+            })
         })
 
-        describe('Test Can Remove Problems To List', () => {
+        describe('Test Can Remove Problems From List', () => {
+            it('Tests Can Remove a Problem From List', (done) => {
+                const problemToRemove = testProblems[0]
+                const getUrl = '/api/problems/id/' + problemToRemove 
+                const reqUrl = BASE_URL + '/remove/' + publicListId + '/' + problemToRemove
+                checkIdNotContainedInResArray(app, done, token, getUrl, 'put', reqUrl, 'problems')
+            })
 
-        })
+            it('Tests Cannot Remove Problem From List User Does Not Own', (done) => {
+                const problemToRemove = testProblems[0]
+                chai.request(app)
+                .put(BASE_URL + '/remove/' + publicListId + '/' + problemToRemove)
+                .set({'x-auth-token': adminToken})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 401, 'Cannot delete from a list you did not create.')
+                })
+            })
 
-        describe('Test Can Remove Problems To List', () => {
+            it('Tests Cannot Remove Problem From List That Does Not Exist', (done) => {
+                const badListId = getFakeMongoDBid()
+                const problemToRemove = testProblems[0]
+                chai.request(app)
+                .put(BASE_URL + '/remove/' + badListId + '/' + problemToRemove)
+                .set({'x-auth-token': token})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'List not found.')
+                })
+            })
 
+            it('Tests Cannot Add Problem That Does Not Exist To List', (done) => {
+                const problemToRemove = -120
+                chai.request(app)
+                .put(BASE_URL + '/remove/' + publicListId + '/' + problemToRemove)
+                .set({'x-auth-token': token})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'Problem not found.')
+                })
+            })
+
+            it('Tests Cannot Remove Problem When List ID Provided Is Not MongoID', (done) => {
+                const problemToRemove = testProblems[0]
+                chai.request(app)
+                .put(BASE_URL + '/remove/' + 12 + '/' + problemToRemove)
+                .set({'x-auth-token': token})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'List not found.')
+                })
+            })
+
+            it('Tests Cannot Remove Problem When Problem Not In List', (done) => {
+                const problemToRemove = testProblems[0]
+                chai.request(app)
+                .put(BASE_URL + '/remove/' + publicListId + '/' + problemToRemove)
+                .set({'x-auth-token': token})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'Problem not part of this list.')
+                })
+            })
         })
 
         describe('Test Can Bulk Edit List', () => {
 
         })
 
-        describe('Test Can Update List Attributes', () => {
+        describe('Test Can Update List Non-Problem Attributes', () => {
 
         })
     })
 
     describe('Test Can Get Problems In List', () => {
+        // Insert problems into our test list
+        before(() => {
+
+        })
         it('Tests Can Get All Problems In a List', (done) => {
             done()
         })

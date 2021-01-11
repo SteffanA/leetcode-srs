@@ -237,6 +237,94 @@ const checkForAddedIDs = (res, done, addedIds, resArrayName = '') => {
     done()
 }
 
+// Perform a GET request for an object to use as a baseline, then perform the request
+// via the provided reqType and reqURL (ex: 'put' and '/api/lists/add/123'), and check
+// the response array for an additional object or value compared to the baseline.
+// Used for problem addition checks mainly, as we use a LeetCode ids for the request but get
+// a MongoDB id in the response
+// NOTE: Get functionality only tested against List routes for now, and expects a single response object
+const checkForNewIdValueInResponseObject = (app, done, token, getURL, reqType, reqURL, resArrayName = '') => {
+    let responseId = ''
+    chai.request(app)
+    .get(getURL)
+    .set({'x-auth-token': token})
+    .end((err, res) => {
+        if (err) done(err)
+        // Check we got a response and store the mongo ID
+        expect(res).to.have.status(200)
+        const body = res.body
+        expect(body).to.have.property('_id')
+        responseId = body._id
+    })
+
+    // Perform the request that should return a response containing the
+    // responseId
+    chai.request(app)
+    [`${reqType}`](reqURL)
+    .set({'x-auth-token': token})
+    .end((err, res) => {
+        if (err) done(err)
+        expect(res).to.have.status(200)
+        let resArray = res.body
+        if (resArrayName !== '') {
+            resArray = res.body[`${resArrayName}`]
+        }
+        // Now check for the responseID in the res array
+        const ids = []
+        for (let res of resArray) {
+            expect(res).to.have.property('_id')
+            ids.push(res._id)
+        }
+        expect(ids).to.include(responseId)
+        done()
+    })
+}
+
+// Perform a GET request for an object to use as a baseline, then perform the request
+// via the provided reqType and reqURL (ex: 'put' and '/api/lists/remove/123'), and check
+// the response array for the lack of the GET requested object.
+// Used for problem addition checks mainly, as we use a LeetCode ids for the request but get
+// a MongoDB id in the response
+// NOTE: Get functionality only tested against List routes for now, and expects a single response object
+const checkIdNotContainedInResArray = (app, done, token, getURL, reqType, reqURL, resArrayName = '') => {
+    let responseId = ''
+    chai.request(app)
+    .get(getURL)
+    .set({'x-auth-token': token})
+    .end((err, res) => {
+        if (err) done(err)
+        // Check we got a response and store the mongo ID
+        expect(res).to.have.status(200)
+        const body = res.body
+        expect(body).to.have.property('_id')
+        responseId = body._id
+    })
+
+    // Perform the request that should return a response not containing the
+    // responseId
+    chai.request(app)
+    [`${reqType}`](reqURL)
+    .set({'x-auth-token': token})
+    .end((err, res) => {
+        if (err) done(err)
+        // Expect a valid response and check that removed ID doesn't exist
+        expect(res).to.have.status(200)
+        let resArray = res.body
+        if (resArrayName !== '') {
+            resArray = res.body[`${resArrayName}`]
+        }
+        // Now check for the responseID in the res array
+        const ids = []
+        for (let res of resArray) {
+            expect(res).to.have.property('_id')
+            ids.push(res._id)
+        }
+        expect(ids).to.not.include(responseId)
+        done()
+    })
+
+}
+
 // Checks that a particular route requires authorization
 // Token is defaulted to blank, but can be set to non-admin token
 // to check admin-protected routes
@@ -350,5 +438,6 @@ module.exports = {checkForCorrectErrors, checkForValidAddition, checkForValidRem
     checkSuccessfulLogin, checkValidationResult, checkForCorrectMessage, checkForReturnedObject,
     checkForReturnedObjects, checkForAddedIDs, checkAllValidationResults, checkRouteIsPrivate,
     checkRoutesArePrivate, createTestUser, convertLeetCodeResToOurObjects, createOrGetTokenForAdminUser,
-    getFakeMongoDBid, checkForEmptyArray,
+    getFakeMongoDBid, checkForEmptyArray, checkForNewIdValueInResponseObject, checkIdNotContainedInResArray,
+
 }
