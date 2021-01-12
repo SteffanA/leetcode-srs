@@ -13,8 +13,9 @@ const {checkForCorrectErrors, createTestUser,
         checkAllValidationResults, createOrGetTokenForAdminUser,
         checkForReturnedObjects, checkForEmptyArray,
         getFakeMongoDBid, checkForNewIdValueInResponseObject,
-        checkForValidAddition,
-        checkIdNotContainedInResArray} = require('../sharedTestFunctions.js')
+        checkForValidAddition, checkIDsDoNotExistAsPartOfResObjects,
+        checkIdNotContainedInResArray,
+        checkForAddedIDsAsPartOfResObjects} = require('../sharedTestFunctions.js')
 
 const BASE_URL = '/api/lists'
 // Note that the test is run at the root of the server module,
@@ -468,6 +469,215 @@ describe('Lists API Tests' , () => {
         })
 
         describe('Test Can Bulk Edit List', () => {
+            // This function uses the MongoDB ID, unlike other list add/remove functions
+            // that use the LeetCode ID.  Gather a few IDs to use for this batch of tests
+            const testProblemMongoIds = []
+            before(() => {
+                // When we get our problems in the before for this test suite,
+                // they are added such that the highest LC id is in the first element
+                const highestProblemId = testProblems[0]
+                chai.request(app)
+                .get('/api/problems?start=&end=' + highestProblemId)
+                .end((err, res) => {
+                    if (err) done(err)
+                    expect(res).to.have.status(200)
+                    const body = res.body
+                    expect(body).to.be.an('array')
+                    for (let prob of body) {
+                        expect(prob).to.have.property('_id')
+                        testProblemMongoIds.push(prob._id)
+                    }
+                })
+            })
+            it('Tests Bulk List Edit Validation Checks Work Correctly', (done) => {
+                const problemId = testProblemMongoIds[0]
+                const reqs = [
+                    {
+                        reqBody: {},
+                        err: 'Must provide problems to update list with'
+                    },
+                    {
+                        reqBody: {problems: ''},
+                        err: 'Must provide array of problem IDs'
+                    },
+                    {
+                        reqBody: {problems: [{'smth' : problemId}]},
+                        err: 'All problems must have an ID'
+                    },
+                    {
+                        reqBody: {problems: [{ 'id' : -120}]},
+                        err: 'All problem IDs must be a valid MongoID'
+                    },
+                    {
+                        reqBody: {problems: [{ 'id' : problemId}]},
+                        err: 'All problems must declare if we\'re adding or removing.'
+                    },
+                    {
+                        reqBody: {problems: [{'id': problemId, 'add' : []}]},
+                        err: 'All problems must provide bool for adding.'
+                    },
+                ]
+                const url = BASE_URL + '/bulk/' + publicListId
+                checkAllValidationResults(app, 'put', url, reqs, token, done)
+            })
+
+            it('Tests Can Bulk Add Problems to List', (done) => {
+                chai.request(app)
+                .put(BASE_URL + '/bulk/' + publicListId)
+                .set({'x-auth-token': token})
+                .send({problems: [
+                    {'id': testProblemMongoIds[0], 'add' : true},
+                    {'id': testProblemMongoIds[1], 'add' : true},
+                    {'id': testProblemMongoIds[2], 'add' : true},
+                    {'id': testProblemMongoIds[3], 'add' : true},
+                ]})
+                .end((err, res) => {
+                    if (err) done(err)
+                    // Alter the body a bit to fit our verify function, once
+                    // we have verified that the body comes in the form we expect
+                    let body = res.body
+                    expect(body).to.have.property('list')
+                    expect(body.list).to.have.property('problems')
+                    body.problems = body.list.problems
+                    checkForAddedIDsAsPartOfResObjects(res, done, testProblemMongoIds.slice(0,4), 'problems')
+                })
+            })
+
+            // Note this test removes 2 items from the list, whereas prior test added 4
+            // This is so we can test simultaneous add and removal in the next test
+            it('Tests Can Bulk Remove Problems From List', (done) => {
+
+                chai.request(app)
+                .put(BASE_URL + '/bulk/' + publicListId)
+                .set({'x-auth-token': token})
+                .send({problems: [
+                    {'id': testProblemMongoIds[0], 'add' : false},
+                    {'id': testProblemMongoIds[1], 'add' : false},
+                ]})
+                .end((err, res) => {
+                    if (err) done(err)
+                    // Alter the body a bit to fit our verify function, once
+                    // we have verified that the body comes in the form we expect
+                    let body = res.body
+                    expect(body).to.have.property('list')
+                    expect(body.list).to.have.property('problems')
+                    body.problems = body.list.problems
+                    checkIDsDoNotExistAsPartOfResObjects(res, done, testProblemMongoIds.slice(0,2), 'problems')
+                })
+            })
+            
+            it('Tests Can Bulk Add and Remove Problems from List Simultaneously', (done) => {
+                chai.request(app)
+                .put(BASE_URL + '/bulk/' + publicListId)
+                .set({'x-auth-token': token})
+                .send({problems: [
+                    {'id': testProblemMongoIds[0], 'add' : true},
+                    {'id': testProblemMongoIds[1], 'add' : true},
+                    {'id': testProblemMongoIds[2], 'add' : false},
+                    {'id': testProblemMongoIds[3], 'add' : false},
+                ]})
+                .end((err, res) => {
+                    if (err) done(err)
+                    // Alter the body a bit to fit our verify function, once
+                    // we have verified that the body comes in the form we expect
+                    let body = res.body
+                    expect(body).to.have.property('list')
+                    expect(body.list).to.have.property('problems')
+                    body.problems = body.list.problems
+                    // define dummy function to pass to first test helper so we can test both
+                    // addition and removal
+                    const dummyFunc = () => {}
+                    checkForAddedIDsAsPartOfResObjects(res, dummyFunc, testProblemMongoIds.slice(0,2), 'problems')
+                    checkIDsDoNotExistAsPartOfResObjects(res, done, testProblemMongoIds.slice(2,4), 'problems')
+                })
+            })
+            
+            it('Tests Cannot Bulk Edit List That Does Not Exist', (done) => {
+                const problemId = testProblemMongoIds[0]
+                const badListId = getFakeMongoDBid()
+                chai.request(app)
+                .put(BASE_URL + '/bulk/' + badListId)
+                .set({'x-auth-token': token})
+                .send({problems: [{'id': problemId, 'add' : true}]})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'List not found.')
+                })
+            })
+
+            it('Tests Cannot Bulk Edit List When Given Non MongoID', (done) => {
+                const problemId = testProblemMongoIds[0]
+                chai.request(app)
+                .put(BASE_URL + '/bulk/' + 120)
+                .set({'x-auth-token': token})
+                .send({problems: [{'id': problemId, 'add' : true}]})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'List not found.')
+                })
+            })
+
+            it('Tests Cannot Bulk Edit List That User Does Not Own', (done) => {
+                const problemId = testProblemMongoIds[0]
+                chai.request(app)
+                .put(BASE_URL + '/bulk/' + publicListId)
+                .set({'x-auth-token': adminToken})
+                .send({problems: [{'id': problemId, 'add' : true}]})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 401, 'Cannot update a list you did not create.')
+                })
+            })
+
+            it('Tests Cannot Bulk Update with Problem That Does Not Exist', (done) => {
+                const badProblemId = getFakeMongoDBid()
+                chai.request(app)
+                .put(BASE_URL + '/bulk/' + publicListId)
+                .set({'x-auth-token': token})
+                .send({problems: [{'id': badProblemId, 'add' : true}]})
+                .end((err, res) => {
+                    if (err) done(err)
+                    expect(res).to.have.status(200)
+                    const body = res.body
+                    expect(body).to.have.property('errors')
+                    expect(body.errors).to.contain('Could not find problem with ID ' + badProblemId)
+                    done()
+                })
+            })
+
+            it('Tests Cannot Bulk Update Add Problem That Is Already In List', (done) => {
+                chai.request(app)
+                .put(BASE_URL + '/bulk/' + publicListId)
+                .set({'x-auth-token': token})
+                .send({problems: [
+                    {'id': testProblemMongoIds[0], 'add' : true},
+                ]})
+                .end((err, res) => {
+                    if (err) done(err)
+                    expect(res).to.have.status(200)
+                    const body = res.body
+                    expect(body).to.have.property('errors')
+                    expect(body.errors).to.contain('Problem already part of list: ID ' + testProblemMongoIds[0])
+                    done()
+                })
+            })
+
+            it('Tests Cannot Bulk Update Remove Problem That Is Not In List', (done) => {
+                chai.request(app)
+                .put(BASE_URL + '/bulk/' + publicListId)
+                .set({'x-auth-token': token})
+                .send({problems: [
+                    {'id': testProblemMongoIds[2], 'add' : false},
+                ]})
+                .end((err, res) => {
+                    if (err) done(err)
+                    expect(res).to.have.status(200)
+                    const body = res.body
+                    expect(body).to.have.property('errors')
+                    expect(body.errors).to.contain('Problem not part of list: ID ' + testProblemMongoIds[2])
+                    done()
+                })
+            })
 
         })
 

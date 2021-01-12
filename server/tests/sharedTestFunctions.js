@@ -45,6 +45,13 @@ const checkValidationResult = (res, done, msg) => {
 // and err, containing the error message we expect to recieve
 // ReqType is the string representation of the request - ex: put, get, post
 // Token is optional for tests on APIs that require some kind of auth
+
+// Example reqBodies below:
+// reqs = [
+//     {
+//         reqBody: {name: '', public: false},
+//         err: 'Lists must be named.'
+//     },
 // TODO: Refractor Problems, Auth, Users tests to utilize this function
 const checkAllValidationResults = (app, reqType, url, reqBodies, token, done) => {
 
@@ -233,6 +240,64 @@ const checkForAddedIDs = (res, done, addedIds, resArrayName = '') => {
     // Check that each added ID is in our response
     for (let addedId of addedIds) {
         expect(resArray).to.include(addedId)
+    }
+    done()
+}
+
+// Check that the response contains all the IDs added, assuming IDs are passed
+// back in Array of objects with an _id field as a part of the body
+const checkForAddedIDsAsPartOfResObjects = (res, done, addedIds, resArrayName = '') => {
+    // Check response for a valid 200
+    expect(res).to.have.status(200)
+    const body = res.body
+    let resArray = []
+    // If passed name, resArray is a member of the body
+    if (resArrayName.length > 0) {
+        expect(body[`${resArrayName}`]).to.be.an('array')
+        resArray = body[`${resArrayName}`]
+    }
+    // Otherwise resArray is the body itself
+    else {
+        expect(body).to.be.an('array')
+        resArray = body
+    }
+    const returnedIds = []
+    for (let item of resArray) {
+        expect(item).to.have.property('_id')
+        returnedIds.push(item._id)
+    }
+    // Check that each added ID is in our response
+    for (let addedId of addedIds) {
+        expect(returnedIds).to.include(addedId)
+    }
+    done()
+}
+
+// Check that the response contains does not contain all the passed IDs , assuming IDs
+// are passed back in Array of objects with an _id field as a part of the body
+const checkIDsDoNotExistAsPartOfResObjects = (res, done, shouldntExistIds, resArrayName = '') => {
+    // Check response for a valid 200
+    expect(res).to.have.status(200)
+    const body = res.body
+    let resArray = []
+    // If passed name, resArray is a member of the body
+    if (resArrayName.length > 0) {
+        expect(body[`${resArrayName}`]).to.be.an('array')
+        resArray = body[`${resArrayName}`]
+    }
+    // Otherwise resArray is the body itself
+    else {
+        expect(body).to.be.an('array')
+        resArray = body
+    }
+    const returnedIds = []
+    for (let item of resArray) {
+        expect(item).to.have.property('_id')
+        returnedIds.push(item._id)
+    }
+    // Check that each added ID is in our response
+    for (let dne of shouldntExistIds) {
+        expect(returnedIds).to.not.include(dne)
     }
     done()
 }
@@ -439,5 +504,5 @@ module.exports = {checkForCorrectErrors, checkForValidAddition, checkForValidRem
     checkForReturnedObjects, checkForAddedIDs, checkAllValidationResults, checkRouteIsPrivate,
     checkRoutesArePrivate, createTestUser, convertLeetCodeResToOurObjects, createOrGetTokenForAdminUser,
     getFakeMongoDBid, checkForEmptyArray, checkForNewIdValueInResponseObject, checkIdNotContainedInResArray,
-
+    checkForAddedIDsAsPartOfResObjects, checkIDsDoNotExistAsPartOfResObjects,
 }

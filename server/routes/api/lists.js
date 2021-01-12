@@ -425,9 +425,9 @@ router.put('/bulk/:list_id', [auth, [
 ]],
 async (req, res) => {
     const validationErrors = validationResult(req)
-    if (!validationErrors.isEmpty) {
-        // Something was missing, send an error
-        return res.status(400).json({errors : validationErrors.array()})
+    if (!validationErrors.isEmpty()) {
+        // Failed a validation check, return our errors.
+        return res.status(400).json({errors: validationErrors.array()})
     }
     try {
         // Get the list
