@@ -82,13 +82,13 @@ describe('Lists API Tests' , () => {
         })
     })
 
-    // Create a throwaway user to create 100 lists on
-    let throwawayToken = ''
+    // Create a user to create 100 lists on
+    let privateListUser = ''
     before(async () => {
         try {
             const res = await createTestUser(app, 'throwaway', '', 'test12')
             const body = res.body
-            throwawayToken = body.token
+            privateListUser = body.token
         } catch (error) {
             console.log('Hit error creating test user for Lists.')
             console.log(error)
@@ -123,7 +123,7 @@ describe('Lists API Tests' , () => {
                 const list = {name: 'list', public: false}
                 chai.request(app)
                 .post(BASE_URL)
-                .set({'x-auth-token': throwawayToken})
+                .set({'x-auth-token': privateListUser})
                 .send(list)
                 .end((err, res) => {
                     if (err) reject(err)
@@ -153,7 +153,7 @@ describe('Lists API Tests' , () => {
                 const list = {name: 'list', public: false}
                 chai.request(app)
                 .post(BASE_URL)
-                .set({'x-auth-token' : throwawayToken})
+                .set({'x-auth-token' : privateListUser})
                 .send(list)
                 .end((err, res) => {
                     if (err) done(err)
@@ -296,7 +296,7 @@ describe('Lists API Tests' , () => {
         it('Tests Non-Owner Cannot Get Private List Directly', (done) => {
             chai.request(app)
             .get(BASE_URL + '/private/' + privateOwnListId)
-            .set({'x-auth-token': throwawayToken})
+            .set({'x-auth-token': privateListUser})
             .end((err, res) => {
                 if (err) done(err)
                 checkForCorrectErrors(res, done, 404, 'List not found.')
@@ -682,7 +682,77 @@ describe('Lists API Tests' , () => {
         })
 
         describe('Test Can Update List Non-Problem Attributes', () => {
+            it('Tests Can Update List Name', (done) => {
+                const newName = 'switchedName'
+                chai.request(app)
+                .put(BASE_URL + '/' + privateListId)
+                .set({'x-auth-token': privateListUser})
+                .send({name : newName})
+                .end((err, res) => {
+                    if (err) done(err)
+                    expect(res).to.have.status(200)
+                    const body = res.body
+                    expect(body).to.have.property('name')
+                    expect(body.name).to.be.equal(newName)
+                    done()
+                })
+            })
 
+            it('Tests Can Update List Public Status', (done) => {
+                chai.request(app)
+                .put(BASE_URL + '/' + privateListId)
+                .set({'x-auth-token': privateListUser})
+                .send({public: true})
+                .end((err, res) => {
+                    if (err) done(err)
+                    expect(res).to.have.status(200)
+                    const body = res.body
+                    expect(body).to.have.property('public')
+                    expect(body.public).to.be.equal(true)
+                    done()
+                })
+            })
+
+            it('Tests Cannot Update List Attributes for List That Does Not Exist', (done) => {
+                const badId = getFakeMongoDBid()
+                chai.request(app)
+                .put(BASE_URL + '/' + badId)
+                .set({'x-auth-token': token})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'List not found.')
+                })
+            })
+
+            it('Tests Cannot Update List Attributes for When Provided Non-MongoDB ID', (done) => {
+                chai.request(app)
+                .put(BASE_URL + '/' + 1)
+                .set({'x-auth-token': token})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 404, 'List not found.')
+                })
+            })
+
+            it('Tests Cannot Update List Attributes for List Not Owned', (done) => {
+                chai.request(app)
+                .put(BASE_URL + '/' + publicListId)
+                .set({'x-auth-token': adminToken})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 401, 'Cannot update a list you did not create.')
+                })
+            })
+
+            it('Tests Cannot Update List Attributes for Public List', (done) => {
+                chai.request(app)
+                .put(BASE_URL + '/' + publicListId)
+                .set({'x-auth-token': token})
+                .end((err, res) => {
+                    if (err) done(err)
+                    checkForCorrectErrors(res, done, 403, 'Cannot update a public list\'s non-problem attributes.')
+                })
+            })
         })
     })
 

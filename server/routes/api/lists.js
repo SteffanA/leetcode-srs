@@ -10,6 +10,9 @@ const {sortStatusByNextSubmission} = require('../../utility/utility')
 const {addColorToProblemsBasedOnTON} = require('../../utility/problemStatuses')
 
 const router = express.Router()
+// TODO: Consider refractoring some of the non-middleware checks
+// into functions - this should reduce duplicate code and make for
+// less overall test cases
 
 // @route  GET api/lists
 // @desc   Get all public Lists
@@ -299,7 +302,7 @@ async (req, res) => {
         }
         // Ensure list isn't public - cannot rename a public list, or take private
         if (list.public) {
-            return res.status(403).json({errors: [{msg: 'Cannot update a public list.'}]})
+            return res.status(403).json({errors: [{msg: 'Cannot update a public list\'s non-problem attributes.'}]})
         }
 
         const {
