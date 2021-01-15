@@ -15,7 +15,8 @@ const {checkForCorrectErrors, createTestUser,
         getFakeMongoDBid, checkForNewIdValueInResponseObject,
         checkForValidAddition, checkIDsDoNotExistAsPartOfResObjects,
         checkIdNotContainedInResArray,
-        checkForAddedIDsAsPartOfResObjects} = require('../sharedTestFunctions.js')
+        checkForAddedIDsAsPartOfResObjects,
+        checkRoutesArePrivate} = require('../sharedTestFunctions.js')
 
 const BASE_URL = '/api/lists'
 // Note that the test is run at the root of the server module,
@@ -776,10 +777,131 @@ describe('Lists API Tests' , () => {
 
 
     describe('Test Can Delete List', () => {
+        // Create a list under token user to delete later
+        let deleteId = ''
+        before(() => {
+            const deleteList = {name: 'deleteMe', public: false}
+            chai.request(app)
+            .post(BASE_URL)
+            .set({'x-auth-token' : token})
+            .send(deleteList)
+            .end((err, res) => {
+                expect(res).to.have.status(200)
+                const body = res.body
+                expect(body).to.have.property('_id')
+                deleteId = body._id
+            })
+        })
 
+        it('Tests Cannot Delete Public List', (done) => {
+            chai.request(app)
+            .delete(BASE_URL + '/' + publicListId)
+            .set({'x-auth-token' : token})
+            .end((err, res) => {
+                if (err) done(err)
+                checkForCorrectErrors(res, done, 403, 'Cannot delete a public list.')
+            })
+        })
+
+        it('Tests Cannot Delete List When Provided Non MongoDB ID', (done) => {
+            chai.request(app)
+            .delete(BASE_URL + '/' + 1)
+            .set({'x-auth-token' : token})
+            .end((err, res) => {
+                if (err) done(err)
+                checkForCorrectErrors(res, done, 404, 'List not found.')
+            })
+        })
+
+        it('Tests Cannot Delete List That Does Not Exist', (done) => {
+            const badId = getFakeMongoDBid()
+            chai.request(app)
+            .delete(BASE_URL + '/' + badId)
+            .set({'x-auth-token' : token})
+            .end((err, res) => {
+                if (err) done(err)
+                checkForCorrectErrors(res, done, 404, 'List not found.')
+            })
+        })
+
+        it('Tests Cannot Delete List That Does Not Belong to User', async () => {
+            // Helper function to create a list to use before test executes
+            const createList = () => {
+                return new Promise((resolve, reject) => {
+                    chai.request(app)
+                    .post(BASE_URL)
+                    .set({'x-auth-token' : token})
+                    .send({name: 'delete', public: false})
+                    .end((err, res) => {
+                        if (err) reject(err)
+                        // Check the test list posted successfully and store the _id
+                        expect(res).to.have.status(200)
+                        const body = res.body
+                        expect(body).to.have.property('_id')
+                        resolve(body._id)
+                    })
+                })
+            }
+
+            // First create a new private list to use for this test
+            const newListId = await createList()
+            // Now try to delete it under a different token
+            return new Promise((resolve, reject) => {
+                chai.request(app)
+                .delete(BASE_URL + '/' + newListId)
+                .set({'x-auth-token' : adminToken})
+                .end((err, res) => {
+                    if (err) reject(err)
+                    checkForCorrectErrors(res, resolve, 401, 'Cannot delete a list you did not create.')
+                })
+            })
+        })
+
+
+        it('Tests Can Delete List', async () => {
+            // Helper function to ensure we delete first then check lists
+            const deleteList = () => {
+                return new Promise((resolve, reject) => {
+                    chai.request(app)
+                    .delete(BASE_URL + '/' + deleteId)
+                    .set({'x-auth-token' : token})
+                    .end((err, res) => {
+                        if (err) reject(err)
+                        expect(res).to.have.status(200)
+                        const body = res.body
+                        expect(body).to.have.property('msg')
+                        expect(body.msg).to.equal('List removed')
+                        resolve(body.msg)
+                    })
+                })
+            }
+            // Check we can delete the list
+            await deleteList()
+            // Check the user's lists do not contain the list ID
+            return new Promise((resolve, reject) => {
+                chai.request(app)
+                .get(BASE_URL + '/own/')
+                .set({'x-auth-token': token})
+                .end((err, res) => {
+                    if (err) reject(err)
+                    checkIDsDoNotExistAsPartOfResObjects(res, resolve, [deleteId])
+                })
+            })
+        })
     })
 
-    describe('Test Private List Routes Are Private', () => {
-
+    it('Tests Private List Routes Are Private', (done) => {
+        const routes = {}
+        routes[ BASE_URL+'/own'] = 'get'
+        routes[ (BASE_URL + '/private/12') ] = 'get'
+        routes[ (BASE_URL + '/12/problems/') ] = 'get'
+        routes[ BASE_URL ] = 'post'
+        routes[ (BASE_URL + '/copy/12') ] = 'post'
+        routes[ (BASE_URL + '/12') ] = 'put'
+        routes[(BASE_URL + '/add/12/12') ] = 'put'
+        routes[ (BASE_URL + '/remove/12/12') ] = 'put'
+        routes[ (BASE_URL + '/bulk/12') ] = 'put'
+        routes[ (BASE_URL + '/12') ] = 'delete'
+        checkRoutesArePrivate(done, app, routes)
     })
 })

@@ -393,25 +393,30 @@ const checkIdNotContainedInResArray = (app, done, token, getURL, reqType, reqURL
 // Checks that a particular route requires authorization
 // Token is defaulted to blank, but can be set to non-admin token
 // to check admin-protected routes
-const checkRouteIsPrivate = (done, route, routeType, token = '') => {
+const checkRouteIsPrivate = (done, app, route, routeType, token = '') => {
     chai.request(app)
     [`${routeType}`](route)
     .set({'x-auth-token': token})
     .end((err, res) => {
         if (err) done(err)
-        check401DueToNoToken(res, done)
+        checkForCorrectMessage(res, done, 401, 'No token provided. Authorization denied.')
     })
 }
 
 // Checks that all the given routes are private (require auth)
-// Routes is a 1:1 map of string routes to string route type
+// Routes is an object of 1:1 mappings of string routes to string route type
 // Ex: {'/api/problems' : 'get'}
-// Token is defaulted to blank, but can be set to non-admin token
+// Token is defaulted to blank, but can be set to non-admin token in order
 // to test admin-protected routes
-const checkRoutesArePrivate = (res, done, routes, token = '') => {
-    for (let route of routes) {
-        checkRouteIsPrivate(res, done, route, token)
+const checkRoutesArePrivate = (done, app, routes, token = '') => {
+    // Create dummy function to pass instead of done to subroutine
+    const dummyFunc = () => {}
+    for (let route of Object.keys(routes)) {
+        // This only works because each Object in the array has 1 key only
+        const rType = routes[route]
+        checkRouteIsPrivate(dummyFunc, app, route, rType, token)
     }
+    done()
 }
 
 // Create a test user in our database with given credentials

@@ -528,7 +528,7 @@ async (req, res) => {
         }
         
         // Check that this list belongs to the user
-        if (user._id.toString() != list.creator.toString()) {
+        if (user._id.toString() !== list.creator.toString()) {
             return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
         }
         // Check that this list is not public
