@@ -7,9 +7,9 @@ const {expect} = require('chai')
 const chaiHttp = require('chai-http')
 chai.use(chaiHttp);
 
-const dotenv = require('dotenv')
-dotenv.config({path: '../../../.env'}) // Config environmental vars to get admin user
-
+// Create dummy function to pass instead of done to subroutine for cases
+// where we execute the same check multiple times before returning
+const dummyFunc = () => {}
 
 // Checks for a successful user register response
 const checkSuccessfulLogin = (res, done, user) => {
@@ -45,13 +45,16 @@ const checkValidationResult = (res, done, msg) => {
 // and err, containing the error message we expect to recieve
 // ReqType is the string representation of the request - ex: put, get, post
 // Token is optional for tests on APIs that require some kind of auth
+
+// Example reqBodies below:
+// reqs = [
+//     {
+//         reqBody: {name: '', public: false},
+//         err: 'Lists must be named.'
+//     },
 // TODO: Refractor Problems, Auth, Users tests to utilize this function
 const checkAllValidationResults = (app, reqType, url, reqBodies, token, done) => {
 
-    // Define a dummy func to pass to checkValidationResult
-    // We use this since we don't want to call done() until all requests have
-    // been tested
-    const dummyFunc = () => {}
     // Validate we're supplying a correct reqBodies
     expect(reqBodies).to.be.an('array')
     for (let reqBody of reqBodies) {
@@ -237,118 +240,211 @@ const checkForAddedIDs = (res, done, addedIds, resArrayName = '') => {
     done()
 }
 
+// Check that the response contains all the IDs added, assuming IDs are passed
+// back in Array of objects with an _id field as a part of the body
+const checkForAddedIDsAsPartOfResObjects = (res, done, addedIds, resArrayName = '') => {
+    // Check response for a valid 200
+    expect(res).to.have.status(200)
+    const body = res.body
+    let resArray = []
+    // If passed name, resArray is a member of the body
+    if (resArrayName.length > 0) {
+        expect(body[`${resArrayName}`]).to.be.an('array')
+        resArray = body[`${resArrayName}`]
+    }
+    // Otherwise resArray is the body itself
+    else {
+        expect(body).to.be.an('array')
+        resArray = body
+    }
+    const returnedIds = []
+    for (let item of resArray) {
+        expect(item).to.have.property('_id')
+        returnedIds.push(item._id)
+    }
+    // Check that each added ID is in our response
+    for (let addedId of addedIds) {
+        expect(returnedIds).to.include(addedId)
+    }
+    done()
+}
+
+// Check that the response contains does not contain all the passed IDs , assuming IDs
+// are passed back in Array of objects with an _id field as a part of the body
+const checkIDsDoNotExistAsPartOfResObjects = (res, done, shouldntExistIds, resArrayName = '') => {
+    // Check response for a valid 200
+    expect(res).to.have.status(200)
+    const body = res.body
+    let resArray = []
+    // If passed name, resArray is a member of the body
+    if (resArrayName.length > 0) {
+        expect(body[`${resArrayName}`]).to.be.an('array')
+        resArray = body[`${resArrayName}`]
+    }
+    // Otherwise resArray is the body itself
+    else {
+        expect(body).to.be.an('array')
+        resArray = body
+    }
+    const returnedIds = []
+    for (let item of resArray) {
+        expect(item).to.have.property('_id')
+        returnedIds.push(item._id)
+    }
+    // Check that each added ID is in our response
+    for (let dne of shouldntExistIds) {
+        expect(returnedIds).to.not.include(dne)
+    }
+    done()
+}
+
+// Perform a GET request for an object to use as a baseline, then perform the request
+// via the provided reqType and reqURL (ex: 'put' and '/api/lists/add/123'), and check
+// the response array for an additional object or value compared to the baseline.
+// Used for problem addition checks mainly, as we use a LeetCode ids for the request but get
+// a MongoDB id in the response
+// NOTE: Get functionality only tested against List routes for now, and expects a single response object
+const checkForNewIdValueInResponseObject = (app, done, token, getURL, reqType, reqURL, resArrayName = '') => {
+    let responseId = ''
+    chai.request(app)
+    .get(getURL)
+    .set({'x-auth-token': token})
+    .end((err, res) => {
+        if (err) done(err)
+        // Check we got a response and store the mongo ID
+        expect(res).to.have.status(200)
+        const body = res.body
+        expect(body).to.have.property('_id')
+        responseId = body._id
+    })
+
+    // Perform the request that should return a response containing the
+    // responseId
+    chai.request(app)
+    [`${reqType}`](reqURL)
+    .set({'x-auth-token': token})
+    .end((err, res) => {
+        if (err) done(err)
+        expect(res).to.have.status(200)
+        let resArray = res.body
+        if (resArrayName !== '') {
+            resArray = res.body[`${resArrayName}`]
+        }
+        // Now check for the responseID in the res array
+        const ids = []
+        for (let res of resArray) {
+            expect(res).to.have.property('_id')
+            ids.push(res._id)
+        }
+        expect(ids).to.include(responseId)
+        done()
+    })
+}
+
+// Perform a GET request for an object to use as a baseline, then perform the request
+// via the provided reqType and reqURL (ex: 'put' and '/api/lists/remove/123'), and check
+// the response array for the lack of the GET requested object.
+// Used for problem addition checks mainly, as we use a LeetCode ids for the request but get
+// a MongoDB id in the response
+// NOTE: Get functionality only tested against List routes for now, and expects a single response object
+const checkIdNotContainedInResArray = (app, done, token, getURL, reqType, reqURL, resArrayName = '') => {
+    let responseId = ''
+    chai.request(app)
+    .get(getURL)
+    .set({'x-auth-token': token})
+    .end((err, res) => {
+        if (err) done(err)
+        // Check we got a response and store the mongo ID
+        expect(res).to.have.status(200)
+        const body = res.body
+        expect(body).to.have.property('_id')
+        responseId = body._id
+    })
+
+    // Perform the request that should return a response not containing the
+    // responseId
+    chai.request(app)
+    [`${reqType}`](reqURL)
+    .set({'x-auth-token': token})
+    .end((err, res) => {
+        if (err) done(err)
+        // Expect a valid response and check that removed ID doesn't exist
+        expect(res).to.have.status(200)
+        let resArray = res.body
+        if (resArrayName !== '') {
+            resArray = res.body[`${resArrayName}`]
+        }
+        // Now check for the responseID in the res array
+        const ids = []
+        for (let res of resArray) {
+            expect(res).to.have.property('_id')
+            ids.push(res._id)
+        }
+        expect(ids).to.not.include(responseId)
+        done()
+    })
+
+}
+
 // Checks that a particular route requires authorization
 // Token is defaulted to blank, but can be set to non-admin token
 // to check admin-protected routes
-const checkRouteIsPrivate = (done, route, routeType, token = '') => {
+const checkRouteIsPrivate = (done, app, route, routeType, token = '') => {
     chai.request(app)
     [`${routeType}`](route)
     .set({'x-auth-token': token})
     .end((err, res) => {
         if (err) done(err)
-        check401DueToNoToken(res, done)
+        checkForCorrectMessage(res, done, 401, 'No token provided. Authorization denied.')
     })
 }
 
-// Checks that all the given routes are private.
-// Routes is a 1:1 map of string routes to string route type
+// Checks that all the given routes are private (require auth)
+// Routes is an object of 1:1 mappings of string routes to string route type
 // Ex: {'/api/problems' : 'get'}
-// Token is defaulted to blank, but can be set to non-admin token
+// Token is defaulted to blank, but can be set to non-admin token in order
 // to test admin-protected routes
-const checkRoutesArePrivate = (res, done, routes, token = '') => {
-    for (let route of routes) {
-        checkRouteIsPrivate(res, done, route, token)
+const checkRoutesArePrivate = (done, app, routes, token = '') => {
+    for (let route of Object.keys(routes)) {
+        // This only works because each Object in the array has 1 key only
+        const rType = routes[route]
+        checkRouteIsPrivate(dummyFunc, app, route, rType, token)
     }
+    done()
 }
 
-// Create a test user in our database with given credentials
-const createTestUser = (app, name, email, pass) => {
-    return new Promise((resolve) => {
-        chai.request(app)
-        .post('/api/users')
-        .send({
-            name : name,
-            email: email,
-            password: pass,
-        })
-        .end((err, res) => {
-            if (err) reject(err)
-            // Check response for a valid 200
-            expect(res).to.have.status(200)
-            const body = res.body
-            expect(body).to.have.property('token')
-            resolve(res)
-        })
+// Check if two Lists are the same in every way except for ID
+const checkIfListsAreSame = (done, orig, copy) => {
+    for (let prop of Object.keys(orig)) {
+        // Skip these keys - ignore id and public, and handle problems after
+        if (prop === '_id' || prop === 'problems' || prop === 'public') {
+            continue
+        }
+        expect(orig.prop).to.be.equal(copy.prop)
+    }
+    const copyProbs = copy.problems.map((prob) => {
+        expect(prob).to.have.property('_id')
+        return prob._id
+    })
+    for (let prob of orig.problems) {
+        expect(prob).to.have.property('_id')
+        expect(copyProbs).to.include(prob._id)
+    }
+    done()
+}
+
+// Basic wait/sleep function
+const sleep = (ms) => {
+    return new Promise((resolve, reject) => {
+        setTimeout(resolve, ms)
     })
 }
 
-// Attempts to either create or login the admin user
-// to access the admin token
-const createOrGetTokenForAdminUser = (app) => {
-    // Gather the admin credentials
-    const adminUser = process.env.ADMIN_NAME
-    const adminEmail = process.env.ADMIN_EMAIL
-    const adminPass = process.env.ADMIN_PASS
-    return new Promise((resolve) => {
-        chai.request(app)
-        .post('/api/auth')
-        .send({
-            name : adminUser,
-            email: adminEmail,
-            password: adminPass,
-        })
-        .end((err, res) => {
-            if (err) reject(err)
-            // Check response for a valid 200
-            if (res.status === 200) {
-                // Successfully logged in
-                const body = res.body
-                expect(body).to.have.property('token')
-                resolve(res)
-            }
-            else {
-                // Define a create function so we can do async stuff
-                const create = async () => {
-                    r = await createTestUser(app, adminUser, adminEmail, adminPass)
-                    return r
-                }
-                // Couldn't login, try to register
-                res = create()
-                resolve(res)
-            }
-        })
-    })
-}
-
-// Convert the raw JSON from LeetCode's API to an array of the objects we expect
-// in our Problem POST routines
-const convertLeetCodeResToOurObjects = (lcResAsJson) => {
-    let problemJSON = []
-    const stats = lcResAsJson.stat_status_pairs
-    stats.forEach((stat) => {
-        problem = {}
-        problem.id = stat.stat.question_id
-        problem.name = stat.stat.question__title
-        problem.problem_text = 'No text yet'
-        problem.link = stat.stat.question__title_slug
-        problem.difficulty = stat.difficulty.level
-        problem.is_premium = stat.paid_only
-        problemJSON.push(problem)
-    })
-    return problemJSON
-}
-
-// Returns a MongoDB ID that doesn't exist
-// Tests can theoretically fail if the DB generates this string somehow
-// NOTE: After looking at how IDs are generated, they are supposed to be
-// unique across all MongoDB documents ever made - so this should be okay
-const getFakeMongoDBid = () => {
-    return '54edb381a13ec9142b9bb353'
-}
 
 module.exports = {checkForCorrectErrors, checkForValidAddition, checkForValidRemoval, 
     checkSuccessfulLogin, checkValidationResult, checkForCorrectMessage, checkForReturnedObject,
     checkForReturnedObjects, checkForAddedIDs, checkAllValidationResults, checkRouteIsPrivate,
-    checkRoutesArePrivate, createTestUser, convertLeetCodeResToOurObjects, createOrGetTokenForAdminUser,
-    getFakeMongoDBid, checkForEmptyArray,
+    checkRoutesArePrivate,  checkForEmptyArray, checkForNewIdValueInResponseObject, 
+    checkIdNotContainedInResArray,checkForAddedIDsAsPartOfResObjects, checkIDsDoNotExistAsPartOfResObjects,
+    sleep, checkIfListsAreSame, 
 }

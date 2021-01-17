@@ -9,19 +9,19 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
-    "express-validator": "^6.6.1",
+    "express-validator": "^6.9.2",
     "fs": "0.0.1-security",
     "https": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
     "mocha": "^8.2.1",
-    "mongoose": "^5.10.15",
+    "mongoose": "^5.11.11",
     "request": "^2.88.2"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
     "concurrently": "^5.3.0",
-    "nodemon": "^2.0.6",
+    "nodemon": "^2.0.7",
     "nyc": "^15.1.0"
   },
   "scripts": {
@@ -36,7 +36,6 @@
     "problemCoverage": "nyc --reporter=lcov --reporter=text-lcov npm run problemTest",
     "listTest": "env TESTING=true mocha ./tests/Lists/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
     "listCoverage": "nyc --reporter=lcov --reporter=text-lcov npm run listTest",
-
     "start": "node server",
     "server": "nodemon server",
     "client": "npm start --prefix ..\\leetcode-srs",

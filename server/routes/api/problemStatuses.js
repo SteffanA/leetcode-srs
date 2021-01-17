@@ -29,6 +29,7 @@ router.get('/', auth, async (req, res) => {
 
 // @route  GET api/problem_status/:problem_id
 // @desc   Get a problem status for a specific problem
+// @note   problem_id passed should be a leetcode ID
 // @access Private
 router.get('/:problem_id', auth, async (req, res) => {
     try {
@@ -98,6 +99,7 @@ router.put('/next_times', [auth, [
 
 // @route  PUT api/problem_status/:problem_id
 // @desc   Create or update a problem status for a problem
+// @note   problem_id passed should be a leetcode ID
 // @access Private
 router.put('/:problem_id', [auth,[
     check('result', 'Result for this attempt required.').isBoolean(),
@@ -112,6 +114,7 @@ router.put('/:problem_id', [auth,[
         }
 
         // Make sure problem actually exists
+        // Note here we use LeetCode ID!
         const problem = await Problem.findOne({id: req.params.problem_id})
         if (!problem) {
             // Problem doesn't exist

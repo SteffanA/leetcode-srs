@@ -10,6 +10,9 @@ const {sortStatusByNextSubmission} = require('../../utility/utility')
 const {addColorToProblemsBasedOnTON} = require('../../utility/problemStatuses')
 
 const router = express.Router()
+// TODO: Consider refractoring some of the non-middleware checks
+// into functions - this should reduce duplicate code and make for
+// less overall test cases
 
 // @route  GET api/lists
 // @desc   Get all public Lists
@@ -147,6 +150,8 @@ async (req, res) => {
         // As of now, any truthy means sort requested
         const user = await User.findById(req.user.id)
         if (req.params.sort)  {
+            // Defensive block, shouldn't hit else case unless func turned
+            // public vs private
             if (user) {
                 const statuses = user.problem_statuses
                 // Make a lookup map for the problem->status index
@@ -171,6 +176,7 @@ async (req, res) => {
         if (user) {
             problems = addColorToProblemsBasedOnTON(user, problems)
         }
+        // More defensive code
         else {
             console.log('No user associated, not color-coding.')
         }
@@ -186,7 +192,8 @@ async (req, res) => {
 // @access Private
 router.post('/', [auth, [
     check('name', 'Lists must be named.').not().isEmpty(),
-    check('public', 'Public must be set true or false').isBoolean(),
+    check('public', 'Lists must be set true or false').isBoolean(),
+    check('public', 'Public must be set as a bool').isBoolean(),
 ]], async (req, res) => {
     const validationErrors = validationResult(req)
     if (!validationErrors.isEmpty()) {
@@ -200,8 +207,9 @@ router.post('/', [auth, [
         // Likewise for problems contained within
         const {
             name,
-            public
         } = req.body
+        // Handle 'public' seperately to work around a bug in nyc (coverage tool)
+        const pub = req.body['public']
 
         // Get the current user to make them the creator
         const user = await User.findById(req.user.id)
@@ -215,7 +223,7 @@ router.post('/', [auth, [
 
         const newList = new List({
             name,
-            public,
+            public : pub,
             creator: user,
         })
 
@@ -275,9 +283,9 @@ async (req, res) => {
     }
 })
 
-// @route  PUT api/lists/:id
-// @desc   Update an existing list's non-Problem attributes
-// @access Private
+// // @route  PUT api/lists/:id
+// // @desc   Update an existing list's non-Problem attributes
+// // @access Private
 router.put('/:id', [auth],
 async (req, res) => {
     try {
@@ -297,17 +305,18 @@ async (req, res) => {
         }
         // Ensure list isn't public - cannot rename a public list, or take private
         if (list.public) {
-            return res.status(403).json({errors: [{msg: 'Cannot update a public list.'}]})
+            return res.status(403).json({errors: [{msg: 'Cannot update a public list\'s non-problem attributes.'}]})
         }
 
         const {
             name,
-            public
         } = req.body
+        // Handle 'public' seperately to work around a bug in nyc (coverage tool)
+        const pub = req.body['public']
 
         // Update the list
         if (name) {list.name = name}
-        if (public) {list.public = public}
+        if (pub) {list.public = pub}
 
         // Save the updated list
         const updatedList = await list.save()
@@ -422,9 +431,9 @@ router.put('/bulk/:list_id', [auth, [
 ]],
 async (req, res) => {
     const validationErrors = validationResult(req)
-    if (!validationErrors.isEmpty) {
-        // Something was missing, send an error
-        return res.status(400).json({errors : validationErrors.array()})
+    if (!validationErrors.isEmpty()) {
+        // Failed a validation check, return our errors.
+        return res.status(400).json({errors: validationErrors.array()})
     }
     try {
         // Get the list
@@ -522,7 +531,7 @@ async (req, res) => {
         }
         
         // Check that this list belongs to the user
-        if (user._id.toString() != list.creator.toString()) {
+        if (user._id.toString() !== list.creator.toString()) {
             return res.status(401).json({errors: [{msg: 'Cannot delete a list you did not create.'}]})
         }
         // Check that this list is not public

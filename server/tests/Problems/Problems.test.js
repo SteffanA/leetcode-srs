@@ -7,12 +7,17 @@ const dotenv = require('dotenv') // For getting environ vars from .env file
 dotenv.config({path: '../../../.env'}) // Config environmental vars to get admin user
 const fs = require('fs') // For reading local JSON file
 
-const {checkForCorrectErrors, createTestUser,
-        checkValidationResult, convertLeetCodeResToOurObjects,
+const {checkForCorrectErrors, checkValidationResult,
         checkForReturnedObject, checkForAddedIDs,
-        checkAllValidationResults, createOrGetTokenForAdminUser,
-        checkForReturnedObjects, getFakeMongoDBid,
+        checkAllValidationResults, checkForReturnedObjects,
         } = require('../sharedTestFunctions.js')
+
+
+const {createTestUser, convertLeetCodeResToOurObjects,
+        createOrGetTokenForAdminUser, 
+    } = require('../sharedCreationFunctions.js')
+
+const {getFakeMongoDBid} = require('../sharedGetters.js')
 
 const BASE_URL = '/api/problems'
 // Note that the test is run at the root of the server module,
