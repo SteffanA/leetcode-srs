@@ -7,21 +7,33 @@ const dotenv = require('dotenv') // For getting environ vars from .env file
 dotenv.config({path: '../../../.env'}) // Config environmental vars to get admin user
 const fs = require('fs'); // For reading local JSON file
 
-const {checkForCorrectErrors, createTestUser,
-        checkValidationResult, convertLeetCodeResToOurObjects,
+const {checkForCorrectErrors, sleep,
+        checkValidationResult,
         checkForReturnedObject, checkForAddedIDs,
-        checkAllValidationResults, createOrGetTokenForAdminUser,
+        checkAllValidationResults,
         checkForReturnedObjects, checkForEmptyArray,
-        getFakeMongoDBid, checkForNewIdValueInResponseObject,
+        checkForNewIdValueInResponseObject,
         checkForValidAddition, checkIDsDoNotExistAsPartOfResObjects,
         checkIdNotContainedInResArray,
         checkForAddedIDsAsPartOfResObjects,
-        checkRoutesArePrivate} = require('../sharedTestFunctions.js')
+        checkRoutesArePrivate,
+        checkIfListsAreSame} = require('../sharedTestFunctions.js')
+
+const {createTestUser, convertLeetCodeResToOurObjects,
+        createOrGetTokenForAdminUser, addSuccessfulProblemStatus,
+        addProblemsToList, createList,
+    } = require('../sharedCreationFunctions.js')
+
+const {getFakeMongoDBid, getPrivateList, getPublicList, getUsersLists,
+} = require('../sharedGetters.js')
 
 const BASE_URL = '/api/lists'
 // Note that the test is run at the root of the server module,
 // and thus the path is defined as if we are at the root of the server folder
 const TEST_PROBLEMS_PATH = './tests/Lists/listTestProblems.json'
+
+// Dummy function to pass in replacement of done when running multiple test helpers
+const dummyFunc = () => {}
 
 describe('Lists API Tests' , () => {
     // Create a user to create lists for
@@ -83,13 +95,38 @@ describe('Lists API Tests' , () => {
         })
     })
 
+    // Some functions uses the MongoDB ID, unlike other list add/remove functions
+    // that use the LeetCode ID.  Gather a few IDs to use for said tests
+    // NOTE: This requires problems to have been added first!
+    const testProblemMongoIds = []
+    before(() => {
+        // When we get our problems in the before for this test suite,
+        // they are added such that the highest LC id is in the first element
+        const highestProblemId = testProblems[0]
+        chai.request(app)
+        .get('/api/problems?start=&end=' + highestProblemId)
+        .end((err, res) => {
+            if (err) done(err)
+            expect(res).to.have.status(200)
+            const body = res.body
+            expect(body).to.be.an('array')
+            for (let prob of body) {
+                expect(prob).to.have.property('_id')
+                // Insert at front instead of append to keep relative
+                // order of elements the same between testProblems and
+                // testProblemMongoIds
+                testProblemMongoIds.unshift(prob._id)
+            }
+        })
+    })
+
     // Create a user to create 100 lists on
-    let privateListUser = ''
+    let privateListUserToken = ''
     before(async () => {
         try {
             const res = await createTestUser(app, 'throwaway', '', 'test12')
             const body = res.body
-            privateListUser = body.token
+            privateListUserToken = body.token
         } catch (error) {
             console.log('Hit error creating test user for Lists.')
             console.log(error)
@@ -124,7 +161,7 @@ describe('Lists API Tests' , () => {
                 const list = {name: 'list', public: false}
                 chai.request(app)
                 .post(BASE_URL)
-                .set({'x-auth-token': privateListUser})
+                .set({'x-auth-token': privateListUserToken})
                 .send(list)
                 .end((err, res) => {
                     if (err) reject(err)
@@ -154,7 +191,7 @@ describe('Lists API Tests' , () => {
                 const list = {name: 'list', public: false}
                 chai.request(app)
                 .post(BASE_URL)
-                .set({'x-auth-token' : privateListUser})
+                .set({'x-auth-token' : privateListUserToken})
                 .send(list)
                 .end((err, res) => {
                     if (err) done(err)
@@ -297,7 +334,7 @@ describe('Lists API Tests' , () => {
         it('Tests Non-Owner Cannot Get Private List Directly', (done) => {
             chai.request(app)
             .get(BASE_URL + '/private/' + privateOwnListId)
-            .set({'x-auth-token': privateListUser})
+            .set({'x-auth-token': privateListUserToken})
             .end((err, res) => {
                 if (err) done(err)
                 checkForCorrectErrors(res, done, 404, 'List not found.')
@@ -470,26 +507,6 @@ describe('Lists API Tests' , () => {
         })
 
         describe('Test Can Bulk Edit List', () => {
-            // This function uses the MongoDB ID, unlike other list add/remove functions
-            // that use the LeetCode ID.  Gather a few IDs to use for this batch of tests
-            const testProblemMongoIds = []
-            before(() => {
-                // When we get our problems in the before for this test suite,
-                // they are added such that the highest LC id is in the first element
-                const highestProblemId = testProblems[0]
-                chai.request(app)
-                .get('/api/problems?start=&end=' + highestProblemId)
-                .end((err, res) => {
-                    if (err) done(err)
-                    expect(res).to.have.status(200)
-                    const body = res.body
-                    expect(body).to.be.an('array')
-                    for (let prob of body) {
-                        expect(prob).to.have.property('_id')
-                        testProblemMongoIds.push(prob._id)
-                    }
-                })
-            })
             it('Tests Bulk List Edit Validation Checks Work Correctly', (done) => {
                 const problemId = testProblemMongoIds[0]
                 const reqs = [
@@ -687,7 +704,7 @@ describe('Lists API Tests' , () => {
                 const newName = 'switchedName'
                 chai.request(app)
                 .put(BASE_URL + '/' + privateListId)
-                .set({'x-auth-token': privateListUser})
+                .set({'x-auth-token': privateListUserToken})
                 .send({name : newName})
                 .end((err, res) => {
                     if (err) done(err)
@@ -702,7 +719,7 @@ describe('Lists API Tests' , () => {
             it('Tests Can Update List Public Status', (done) => {
                 chai.request(app)
                 .put(BASE_URL + '/' + privateListId)
-                .set({'x-auth-token': privateListUser})
+                .set({'x-auth-token': privateListUserToken})
                 .send({public: true})
                 .end((err, res) => {
                     if (err) done(err)
@@ -759,38 +776,199 @@ describe('Lists API Tests' , () => {
 
     describe('Test Can Get Problems In List', () => {
         // Insert problems into our test list
-        before(() => {
-
+        let getProbListId = ''
+        before(async () => {
+            // Create a list
+            res = await createList(app, token, {name : 'getProbs', public: false})
+            getProbListId = res._id
+            await addProblemsToList(app, token, getProbListId, testProblemMongoIds.slice(0,4))
         })
+
+        it('Tests Cannot Get All Problems For Private List Not Owned By User', (done) => {
+            chai.request(app)
+            .get(BASE_URL + '/' + getProbListId + '/problems/true')
+            .set({'x-auth-token': adminToken})
+            .end((err, res) => {
+                if (err) done(err)
+                checkForCorrectErrors(res, done, 401, 'Access to List denied.')
+            })
+        })
+
+        it('Tests Cannot Get All Problems for List that Does Not Exist', (done) => {
+            const badMongoId = getFakeMongoDBid()
+            chai.request(app)
+            .get(BASE_URL + '/' + badMongoId + '/problems/true')
+            .set({'x-auth-token': token})
+            .end((err, res) => {
+                if (err) done(err)
+                checkForCorrectErrors(res, done, 404, 'List not found.')
+            })
+        })
+
+        it('Tests Cannot Get All Problems When List ID Provided Is Not MongoID', (done) => {
+            const badListId = 12
+            chai.request(app)
+            .get(BASE_URL + '/' + badListId + '/problems/true')
+            .set({'x-auth-token': token})
+            .end((err, res) => {
+                if (err) done(err)
+                checkForCorrectErrors(res, done, 404, 'List not found.')
+            })
+        })
+
         it('Tests Can Get All Problems In a List', (done) => {
-            done()
+            chai.request(app)
+            .get(BASE_URL + '/' + getProbListId +'/problems/')
+            .set({'x-auth-token' : token})
+            .end((err, res) => {
+                if (err) done(err)
+                // Ensure we get all problems that are part of the list back
+                checkForAddedIDsAsPartOfResObjects(res, done, testProblemMongoIds.slice(0,4))
+            })
         })
 
-        it('Tests Can Get All Problems In a List Sorted By Time To Next Sub', (done) => {
-            done()
+        it('Tests Can Get All Problems In a List Sorted By Time To Next Sub', async () => {
+            // Helper function to get problems sorted & check results
+            // Using a helper since we call this multiple times
+            const checkIfSortedTTN = (expectedOrder) => {
+                return new Promise((resolve, reject) => {
+                    chai.request(app)
+                    .get(BASE_URL + '/' + getProbListId + '/problems/true')
+                    .set({'x-auth-token' : token})
+                    .end((err, res) => {
+                        if (err) reject(err)
+                        expect(res).to.have.status(200)
+                        const body = res.body
+                        expect(body).to.be.an('array')
+                        // Check ordering via IDs
+                        for (let [index, probId] of expectedOrder.entries()) {
+                            expect(body[index]).to.have.property('_id')
+                            expect(body[index]._id).to.be.equal(probId)
+                        }
+                        resolve()
+                    })
+                })
+            }
+            // Adjust the problems we used so we have ordered
+            // TTN such that [0] is soonest and [3] is latest
+            for (let i = 0; i < 4; i++) {
+                const probToUpdate = testProblems[i]
+                await addSuccessfulProblemStatus(app, token, probToUpdate)
+                // Sleep for a bit to avoid a same status time
+                await sleep(5)
+            }
+
+            // Get problems, ensure order of ids matches 0-3
+            await checkIfSortedTTN(testProblemMongoIds.slice(0,4))
+            // Set [0] problem status TTN to be latest
+            await addSuccessfulProblemStatus(app, token, testProblems[0])
+            // Verify change
+            const updatedExpectedOrder = testProblemMongoIds.slice(1,4)
+            updatedExpectedOrder.push(testProblemMongoIds[0])
+            await checkIfSortedTTN(updatedExpectedOrder)
         })
+
     })
 
     describe('Test Can Copy Lists', () => {
+        let privateListToCopyId = ''
+        const copyList = {name : 'copyList', public: false}
+        before( async () => {
+            const list = await createList(app, token, copyList)
+            privateListToCopyId = list._id
+            await addProblemsToList(app, token, privateListToCopyId, testProblemMongoIds.slice(0,4))
+            await addProblemsToList(app, token, publicListId, testProblemMongoIds.slice(0,4))
+        })
 
+        it('Tests Cannot Copy List For Private List Not Owned By User', (done) => {
+            chai.request(app)
+            .post(BASE_URL + '/copy/' + privateListToCopyId)
+            .set({'x-auth-token': adminToken})
+            .end((err, res) => {
+                if (err) done(err)
+                checkForCorrectErrors(res, done, 404, 'List not found.')
+            })
+        })
+
+        it('Tests Cannot Copy List that Does Not Exist', (done) => {
+            const badMongoId = getFakeMongoDBid()
+            chai.request(app)
+            .post(BASE_URL + '/copy/' + badMongoId)
+            .set({'x-auth-token': token})
+            .end((err, res) => {
+                if (err) done(err)
+                checkForCorrectErrors(res, done, 404, 'List not found.')
+            })
+        })
+
+        it('Tests Cannot Copy List When List ID Provided Is Not MongoID', (done) => {
+            const badListId = 12
+            chai.request(app)
+            .post(BASE_URL + '/copy/' + badListId)
+            .set({'x-auth-token': token})
+            .end((err, res) => {
+                if (err) done(err)
+                checkForCorrectErrors(res, done, 404, 'List not found.')
+            })
+        })
+
+        // helper function for the following two tests
+        // Check if the User's lists contains the new list ID
+        const checkIfIncludedInUsersLists = async (app, done, token, copyId) => {
+            const userLists = await getUsersLists(app, token)
+            expect(userLists).to.include(copyId)
+            done()
+        }
+
+        it('Tests Can Copy Private List Owned By User', async () => {
+            // Test list added to user's lists, all properties the same
+            const copiedList = await getPrivateList(app, privateListToCopyId, token)
+            // Remove the ID and public from the returned obj
+            delete copiedList._id
+            delete copiedList.public
+            return new Promise((resolve, reject) => {
+                chai.request(app)
+                .post(BASE_URL + '/copy/' + privateListToCopyId)
+                .set({'x-auth-token': token})
+                .end((err, res) => {
+                    if (err) reject(err)
+                    expect(res).to.have.status(200)
+                    // Check the lists are the same
+                    checkIfListsAreSame(resolve, copiedList, res.body)
+                    // Check if the User's lists contains the new list ID
+                    checkIfIncludedInUsersLists(app, resolve, token, res.body._id)
+                })
+            })
+        })
+
+        it('Tests Can Copy Public List', async () => {
+            const copiedList = await getPublicList(app, publicListId)
+            // Remove ID and Public from the returned list
+            delete copiedList._id
+            delete copiedList.public
+            return new Promise((resolve, reject) => {
+                chai.request(app)
+                .post(BASE_URL + '/copy/' + publicListId)
+                .set({'x-auth-token': token})
+                .end((err, res) => {
+                    if (err) reject(err)
+                    expect(res).to.have.status(200)
+                    checkIfListsAreSame(resolve, copiedList, res.body)
+                    // Check if the User's lists contains the new list ID
+                    checkIfIncludedInUsersLists(app, resolve, token, res.body._id)
+                })
+            })
+        })
     })
 
 
     describe('Test Can Delete List', () => {
         // Create a list under token user to delete later
         let deleteId = ''
-        before(() => {
+        before( async () => {
             const deleteList = {name: 'deleteMe', public: false}
-            chai.request(app)
-            .post(BASE_URL)
-            .set({'x-auth-token' : token})
-            .send(deleteList)
-            .end((err, res) => {
-                expect(res).to.have.status(200)
-                const body = res.body
-                expect(body).to.have.property('_id')
-                deleteId = body._id
-            })
+            const list = await createList(app, token, deleteList)
+            deleteId = list._id
         })
 
         it('Tests Cannot Delete Public List', (done) => {
@@ -825,26 +1003,9 @@ describe('Lists API Tests' , () => {
         })
 
         it('Tests Cannot Delete List That Does Not Belong to User', async () => {
-            // Helper function to create a list to use before test executes
-            const createList = () => {
-                return new Promise((resolve, reject) => {
-                    chai.request(app)
-                    .post(BASE_URL)
-                    .set({'x-auth-token' : token})
-                    .send({name: 'delete', public: false})
-                    .end((err, res) => {
-                        if (err) reject(err)
-                        // Check the test list posted successfully and store the _id
-                        expect(res).to.have.status(200)
-                        const body = res.body
-                        expect(body).to.have.property('_id')
-                        resolve(body._id)
-                    })
-                })
-            }
-
             // First create a new private list to use for this test
-            const newListId = await createList()
+            const newList = await createList(app, token, {name: 'delete', public: false})
+            const newListId = newList._id
             // Now try to delete it under a different token
             return new Promise((resolve, reject) => {
                 chai.request(app)

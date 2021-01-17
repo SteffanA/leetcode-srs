@@ -7,9 +7,9 @@ const {expect} = require('chai')
 const chaiHttp = require('chai-http')
 chai.use(chaiHttp);
 
-const dotenv = require('dotenv')
-dotenv.config({path: '../../../.env'}) // Config environmental vars to get admin user
-
+// Create dummy function to pass instead of done to subroutine for cases
+// where we execute the same check multiple times before returning
+const dummyFunc = () => {}
 
 // Checks for a successful user register response
 const checkSuccessfulLogin = (res, done, user) => {
@@ -55,10 +55,6 @@ const checkValidationResult = (res, done, msg) => {
 // TODO: Refractor Problems, Auth, Users tests to utilize this function
 const checkAllValidationResults = (app, reqType, url, reqBodies, token, done) => {
 
-    // Define a dummy func to pass to checkValidationResult
-    // We use this since we don't want to call done() until all requests have
-    // been tested
-    const dummyFunc = () => {}
     // Validate we're supplying a correct reqBodies
     expect(reqBodies).to.be.an('array')
     for (let reqBody of reqBodies) {
@@ -409,8 +405,6 @@ const checkRouteIsPrivate = (done, app, route, routeType, token = '') => {
 // Token is defaulted to blank, but can be set to non-admin token in order
 // to test admin-protected routes
 const checkRoutesArePrivate = (done, app, routes, token = '') => {
-    // Create dummy function to pass instead of done to subroutine
-    const dummyFunc = () => {}
     for (let route of Object.keys(routes)) {
         // This only works because each Object in the array has 1 key only
         const rType = routes[route]
@@ -419,95 +413,38 @@ const checkRoutesArePrivate = (done, app, routes, token = '') => {
     done()
 }
 
-// Create a test user in our database with given credentials
-const createTestUser = (app, name, email, pass) => {
-    return new Promise((resolve) => {
-        chai.request(app)
-        .post('/api/users')
-        .send({
-            name : name,
-            email: email,
-            password: pass,
-        })
-        .end((err, res) => {
-            if (err) reject(err)
-            // Check response for a valid 200
-            expect(res).to.have.status(200)
-            const body = res.body
-            expect(body).to.have.property('token')
-            resolve(res)
-        })
+// Check if two Lists are the same in every way except for ID
+const checkIfListsAreSame = (done, orig, copy) => {
+    for (let prop of Object.keys(orig)) {
+        // Skip these keys - ignore id and public, and handle problems after
+        if (prop === '_id' || prop === 'problems' || prop === 'public') {
+            continue
+        }
+        expect(orig.prop).to.be.equal(copy.prop)
+    }
+    const copyProbs = copy.problems.map((prob) => {
+        expect(prob).to.have.property('_id')
+        return prob._id
+    })
+    for (let prob of orig.problems) {
+        expect(prob).to.have.property('_id')
+        expect(copyProbs).to.include(prob._id)
+    }
+    done()
+}
+
+// Basic wait/sleep function
+const sleep = (ms) => {
+    return new Promise((resolve, reject) => {
+        setTimeout(resolve, ms)
     })
 }
 
-// Attempts to either create or login the admin user
-// to access the admin token
-const createOrGetTokenForAdminUser = (app) => {
-    // Gather the admin credentials
-    const adminUser = process.env.ADMIN_NAME
-    const adminEmail = process.env.ADMIN_EMAIL
-    const adminPass = process.env.ADMIN_PASS
-    return new Promise((resolve) => {
-        chai.request(app)
-        .post('/api/auth')
-        .send({
-            name : adminUser,
-            email: adminEmail,
-            password: adminPass,
-        })
-        .end((err, res) => {
-            if (err) reject(err)
-            // Check response for a valid 200
-            if (res.status === 200) {
-                // Successfully logged in
-                const body = res.body
-                expect(body).to.have.property('token')
-                resolve(res)
-            }
-            else {
-                // Define a create function so we can do async stuff
-                const create = async () => {
-                    r = await createTestUser(app, adminUser, adminEmail, adminPass)
-                    return r
-                }
-                // Couldn't login, try to register
-                res = create()
-                resolve(res)
-            }
-        })
-    })
-}
-
-// Convert the raw JSON from LeetCode's API to an array of the objects we expect
-// in our Problem POST routines
-const convertLeetCodeResToOurObjects = (lcResAsJson) => {
-    let problemJSON = []
-    const stats = lcResAsJson.stat_status_pairs
-    stats.forEach((stat) => {
-        problem = {}
-        problem.id = stat.stat.question_id
-        problem.name = stat.stat.question__title
-        problem.problem_text = 'No text yet'
-        problem.link = stat.stat.question__title_slug
-        problem.difficulty = stat.difficulty.level
-        problem.is_premium = stat.paid_only
-        problemJSON.push(problem)
-    })
-    return problemJSON
-}
-
-// Returns a MongoDB ID that doesn't exist
-// Tests can theoretically fail if the DB generates this string somehow
-// NOTE: After looking at how IDs are generated, they are supposed to be
-// unique across all MongoDB documents ever made - so this should be okay
-const getFakeMongoDBid = () => {
-    return '54edb381a13ec9142b9bb353'
-}
 
 module.exports = {checkForCorrectErrors, checkForValidAddition, checkForValidRemoval, 
     checkSuccessfulLogin, checkValidationResult, checkForCorrectMessage, checkForReturnedObject,
     checkForReturnedObjects, checkForAddedIDs, checkAllValidationResults, checkRouteIsPrivate,
-    checkRoutesArePrivate, createTestUser, convertLeetCodeResToOurObjects, createOrGetTokenForAdminUser,
-    getFakeMongoDBid, checkForEmptyArray, checkForNewIdValueInResponseObject, checkIdNotContainedInResArray,
-    checkForAddedIDsAsPartOfResObjects, checkIDsDoNotExistAsPartOfResObjects,
+    checkRoutesArePrivate,  checkForEmptyArray, checkForNewIdValueInResponseObject, 
+    checkIdNotContainedInResArray,checkForAddedIDsAsPartOfResObjects, checkIDsDoNotExistAsPartOfResObjects,
+    sleep, checkIfListsAreSame, 
 }

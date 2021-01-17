@@ -161,13 +161,13 @@ Both tests and coverage can be run for specific subsections - for example, to ru
 *Test Status:*
 | Test           | Status       |
 | :------------- | :----------: |
-|  Server Routes | In Progress|
-| > Auth | 92% coverage - remaining is defensive |
-| > Users| 82% coverage - remaining is defensive |
-| > Lists | 0% |
-| > Problems | 86% coverage - remaining is defensive |
-| > ProblemStatuses | 0% |
-| > Submissions | 0% |
+|  Server Tests | In Progress|
+| > Auth Routes | 92% coverage - remaining is defensive |
+| > Users Routes | 82% coverage - remaining is defensive |
+| > Lists Routes | 87% coverage - remaining is defensive |
+| > Problems Routes | 86% coverage - remaining is defensive |
+| > ProblemStatuses Routes | 0% |
+| > Submissions Routes | 0% |
 | > Middleware | 0% |
 |  React Frontend | TBD |
 #

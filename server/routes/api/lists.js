@@ -150,6 +150,8 @@ async (req, res) => {
         // As of now, any truthy means sort requested
         const user = await User.findById(req.user.id)
         if (req.params.sort)  {
+            // Defensive block, shouldn't hit else case unless func turned
+            // public vs private
             if (user) {
                 const statuses = user.problem_statuses
                 // Make a lookup map for the problem->status index
@@ -174,6 +176,7 @@ async (req, res) => {
         if (user) {
             problems = addColorToProblemsBasedOnTON(user, problems)
         }
+        // More defensive code
         else {
             console.log('No user associated, not color-coding.')
         }
