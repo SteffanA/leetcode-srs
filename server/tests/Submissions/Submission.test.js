@@ -7,7 +7,7 @@ const fs = require('fs'); // For reading local JSON file
 
 const {checkForCorrectErrors, checkAllValidationResults, 
         checkSubmissionReturnedContainsProperties,
-        dummyFunc,
+        dummyFunc, checkRoutesArePrivate, 
     } = require('../sharedTestFunctions.js')
 
 const {createTestUser, convertLeetCodeResToOurObjects,
@@ -299,5 +299,13 @@ describe('Problem Status API Tests', () => {
                 })
             })
         })
+    })
+
+    it('Tests Private Routes Require Authorization', (done) => {
+        const routes = {}
+        routes[ BASE_URL + '/12'] = 'get'
+        routes[ (BASE_URL + '/lc/12') ] = 'get'
+        routes[ (BASE_URL + '/12') ] = 'post'
+        checkRoutesArePrivate(done, app, routes)
     })
 })

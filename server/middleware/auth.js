@@ -9,7 +9,7 @@ const Auth = (req, res, next) => {
 
     // Check if no token exists
     if (!token){
-        return res.status(401).json({msg: 'No token provided. Authorization denied.'})
+        return res.status(401).json({errors: [ {msg: 'No token provided. Authorization denied.'}]})
     }
 
     // Token exist, verify it.
@@ -23,7 +23,7 @@ const Auth = (req, res, next) => {
         next() // Move onto the next middleware function
     } catch (error) {
         console.log('Bad token')
-        return res.status(401).json({msg: 'Invalid token. Authorization denied.'})
+        return res.status(401).json({errors: [ {msg: 'Invalid token. Authorization denied.'}]})
     }
 }
 
