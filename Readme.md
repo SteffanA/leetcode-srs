@@ -131,7 +131,7 @@ One known issue is that the nginx reverse proxy does not currently handle HTTPS 
 
 ***Testing***
 
-Note: Testing remains a WIP, and currently is only partially implemented for the server.
+Note: Testing remains a WIP, and currently is only implemented for the server.
 
 This project is setup for automated testing and code coverage results via the Mocha and NYC (Istanbul) projects.  If you have setup your environmental variable file, running the tests is simple and can be done in two ways:
 
@@ -161,14 +161,14 @@ Both tests and coverage can be run for specific subsections - for example, to ru
 *Test Status:*
 | Test           | Status       |
 | :------------- | :----------: |
-|  Server Tests | In Progress|
+|  Server Tests | 87.2% coverage |
 | > Auth Routes | 92% coverage - remaining is defensive |
 | > Users Routes | 82% coverage - remaining is defensive |
 | > Lists Routes | 87% coverage - remaining is defensive |
 | > Problems Routes | 86% coverage - remaining is defensive |
 | > ProblemStatuses Routes | 89% - remaining is defensive |
 | > Submissions Routes | 91% - remaining is defensive |
-| > Middleware | 0% |
+| > Middleware | 100% |
 |  React Frontend | TBD |
 
 *Postman Tests*

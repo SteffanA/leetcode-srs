@@ -5,7 +5,7 @@ chai.use(chaiHttp);
 
 const {checkForCorrectErrors, checkForValidAddition,
         checkForValidRemoval, checkSuccessfulLogin,
-        checkValidationResult, checkForCorrectMessage} = require('../sharedTestFunctions.js')
+        checkValidationResult, checkRoutesArePrivate} = require('../sharedTestFunctions.js')
 
 const BASE_URL = '/api/users'
 
@@ -354,57 +354,15 @@ describe('User API Tests' , () => {
 
     // Tests that assure that we are correctly using our auth middleware for
     // the routes we expect to be auth-protected
-    describe('Protected Routes Require Auth Token', () => {
-        // Helper function to check that we get a 401 rejection with correct message.
-        const check401DueToNoToken = (res, done) => {
-            checkForCorrectMessage(res, done, 401, 'No token provided. Authorization denied.')
-        }
+    it('Tests Private Routes Require Authorization', (done) => {
 
-        it('Test User Get Info Requires Auth with 401 res and no token warning', (done) => {
-            chai.request(app)
-            .get(BASE_URL)
-            .end((err, res) => {
-                if (err) done(err)
-                check401DueToNoToken(res, done)
-            })
-        })
-
-        it('Test User Get Lists Requires Auth with 401 res and no token warning', (done) => {
-            chai.request(app)
-            .get(BASE_URL + '/lists')
-            .end((err, res) => {
-                if (err) done(err)
-                check401DueToNoToken(res, done)
-            })
-        })
-
-        it('Test User Add List Requires Auth with 401 res and no token warning', (done) => {
-            chai.request(app)
-            .put(BASE_URL + '/add/1234')
-            .end((err, res) => {
-                if (err) done(err)
-                check401DueToNoToken(res, done)
-            })
-        })
-
-        it('Test User Remove List Requires Auth with 401 res and no token warning', (done) => {
-            chai.request(app)
-            .put(BASE_URL + '/remove/1234')
-            .end((err, res) => {
-                if (err) done(err)
-                check401DueToNoToken(res, done)
-            })
-        })
-
-        it('Test Delete User Requires Auth with 401 res and no token warning', (done) => {
-            chai.request(app)
-            .delete(BASE_URL)
-            .end((err, res) => {
-                if (err) done(err)
-                check401DueToNoToken(res, done)
-            })
-        })
-
+        const routes = {}
+        routes[ BASE_URL] = 'get'
+        routes[ (BASE_URL + '/lists') ] = 'get'
+        routes[ (BASE_URL + '/add/12') ] = 'put'
+        routes[ (BASE_URL + '/remove/12') ] = 'put'
+        routes[ BASE_URL ] = 'delete'
+        checkRoutesArePrivate(done, app, routes)
     })
 
 

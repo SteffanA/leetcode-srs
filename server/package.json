@@ -28,6 +28,8 @@
     "_comment": "Note: --exit in the test element is to force the test program to exit after finishing in case we use done()",
     "test": "env TESTING=true mocha ./tests/**/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
     "coverage": "nyc --reporter=lcov --reporter=text-lcov npm test",
+    "middlewareTest": "env TESTING=true mocha ./tests/Middleware/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
+    "middlewareCoverage": "nyc --reporter=lcov --reporter=text-lcov npm run middlewareTest",
     "authTest": "env TESTING=true mocha ./tests/Auth/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",
     "authCoverage": "nyc --reporter=lcov --reporter=text-lcov npm run authTest",
     "userTest": "env TESTING=true mocha ./tests/Users/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000",

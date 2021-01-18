@@ -395,7 +395,7 @@ const checkRouteIsPrivate = (done, app, route, routeType, token = '') => {
     .set({'x-auth-token': token})
     .end((err, res) => {
         if (err) done(err)
-        checkForCorrectMessage(res, done, 401, 'No token provided. Authorization denied.')
+        checkForCorrectErrors(res, done, 401, 'No token provided. Authorization denied.')
     })
 }
 
