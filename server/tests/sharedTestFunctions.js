@@ -451,7 +451,15 @@ const checkProblemStatusReturnedContainsProperties = (done, body) => {
     done()
 }
 
-// const checkBadMongoIdParamReturnsErr 
+// Checks that a given submission object contains required properties
+// Note this only checks the required properites
+const checkSubmissionReturnedContainsProperties = (done, body) => {
+    expect(body).to.have.property('result')
+    expect(body).to.have.property('time_spent')
+    expect(body).to.have.property('submit_date')
+    expect(body).to.have.property('_id')
+    done()
+}
 
 
 module.exports = {checkForCorrectErrors, checkForValidAddition, checkForValidRemoval, 
@@ -460,4 +468,5 @@ module.exports = {checkForCorrectErrors, checkForValidAddition, checkForValidRem
     checkRoutesArePrivate,  checkForEmptyArray, checkForNewIdValueInResponseObject, 
     checkIdNotContainedInResArray,checkForAddedIDsAsPartOfResObjects, checkIDsDoNotExistAsPartOfResObjects,
     sleep, dummyFunc, checkIfListsAreSame, checkProblemStatusReturnedContainsProperties, 
+    checkSubmissionReturnedContainsProperties, 
 }

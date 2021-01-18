@@ -69,10 +69,16 @@ router.get('/:problem_id', auth, async (req, res) => {
 
 // @route  POST api/submissions/:problem_id
 // @desc   Create a new submission for a problem
+// @note   Problem_id provided must be a LeetCode ID
 // @access Private
 router.post('/:problem_id', [auth, [
-    check('result', 'Submission result is required').isBoolean(),
-    check('time_spent', 'Time spent on submission is required').isNumeric(),
+    check('result', 'Submission result is required').not().isEmpty(),
+    check('result', 'Submission result is must be boolean').isBoolean(),
+    check('time_spent', 'Time spent on submission is required').not().isEmpty(),
+    check('time_spent', 'Time spent on submission must be number').optional().isNumeric(),
+    check('mem_used', 'Submission\'s memory used must be number').optional().isNumeric(),
+    check('execution_time', 'Submission\'s execution time used must be number').optional().isNumeric(),
+    check('text', 'Submission\'s text must be String').optional().isString(),
 ]], async (req, res) => {
     const validationErrors = validationResult(req)
     if (!validationErrors.isEmpty()) {
@@ -110,7 +116,6 @@ router.post('/:problem_id', [auth, [
             // TODO: Get the time multiplier from the user's settings and replace
             status = await updateProblemStatus(user, 1.5, result, index)
         }
-        // Otherwise this status does belong to the user.
         // Create a new Submission and add it to the status
         const sub = new Submission({
             result: result,
