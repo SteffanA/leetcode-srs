@@ -440,11 +440,24 @@ const sleep = (ms) => {
     })
 }
 
+// Checks that a given problem status object contains required properties
+const checkProblemStatusReturnedContainsProperties = (done, body) => {
+    expect(body).to.have.property('results')
+    expect(body).to.have.property('interval')
+    expect(body).to.have.property('submissions')
+    expect(body).to.have.property('next_submission')
+    expect(body).to.have.property('problem')
+    expect(body).to.have.property('_id')
+    done()
+}
+
+// const checkBadMongoIdParamReturnsErr 
+
 
 module.exports = {checkForCorrectErrors, checkForValidAddition, checkForValidRemoval, 
     checkSuccessfulLogin, checkValidationResult, checkForCorrectMessage, checkForReturnedObject,
     checkForReturnedObjects, checkForAddedIDs, checkAllValidationResults, checkRouteIsPrivate,
     checkRoutesArePrivate,  checkForEmptyArray, checkForNewIdValueInResponseObject, 
     checkIdNotContainedInResArray,checkForAddedIDsAsPartOfResObjects, checkIDsDoNotExistAsPartOfResObjects,
-    sleep, checkIfListsAreSame, 
+    sleep, dummyFunc, checkIfListsAreSame, checkProblemStatusReturnedContainsProperties, 
 }

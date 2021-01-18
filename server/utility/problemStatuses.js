@@ -13,6 +13,7 @@ exports.createProblemStatus = async (result, time_multiplier, user, problem) => 
     // Note that result is a bool - true for a success, false for incorrect
     const new_status = {
         problem: problem._id,
+        // Set interval to either the multiplier or a single day in case of failure
         interval: (result ? time_multiplier : 1),
         results: {
             success: 0,
@@ -48,15 +49,20 @@ exports.updateProblemStatus = async (user, time_multiplier, result, index) => {
     let ttn = 0 // ttn = time to next
     if (result) {
         ttn = time_multiplier * problem_status.interval
+        problem_status.interval = Math.floor(ttn)
         results.success += 1
     }
     else {
+        // Decrement interval by 2x the multiplier
+        // Why 2x? So we can reset ourselves to a step before this attempt
+        problem_status.interval *= ((1/time_multiplier))
+        problem_status.interval *= ((1/time_multiplier))
+        problem_status.interval = Math.floor(problem_status.interval)
         results.incorrect += 1
     }
 
     problem_status.interval = (ttn === 0 ? 1 : ttn)
-    //Fix up date based on ttn
-    let prior_sub = problem_status.next_submission
+    //Set next submission date based on ttn
     if (ttn !== 0) {
         // If ttn isn't 0, set next_submission to
         //  cur Date + (ttn as Days)

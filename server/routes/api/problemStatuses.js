@@ -58,11 +58,11 @@ router.get('/:problem_id', auth, async (req, res) => {
 // @access Private
 router.put('/next_times', [auth, [
     check('problems', 'Must provide array of problems.').isArray(),
-    check('problems.*', 'Must provide problem IDS').isMongoId(),
+    check('problems.*', 'Must provide MongoDB ids for problems.').isMongoId(),
 ]], async (req, res) => {
     // Check our request contains required fields
     const validationErrors = validationResult(req)
-    if (!validationErrors.isEmpty) {
+    if (!validationErrors.isEmpty()) {
         // Something was missing, send an error
         return res.status(400).json({errors : validationErrors.array()})
     }
@@ -102,8 +102,10 @@ router.put('/next_times', [auth, [
 // @note   problem_id passed should be a leetcode ID
 // @access Private
 router.put('/:problem_id', [auth,[
-    check('result', 'Result for this attempt required.').isBoolean(),
-    check('time_multiplier', 'Multiplier for successful attempt required').isNumeric()
+    check('result', 'Result for this attempt required.').not().isEmpty(),
+    check('result', 'Result for this attempt must be boolean.').isBoolean(),
+    check('time_multiplier', 'Multiplier for successful attempt required').not().isEmpty(),
+    check('time_multiplier', 'Multiplier for successful attempt must be Number').isNumeric()
 ]], async (req, res) => {
     try {
         // Check our validators
@@ -159,6 +161,7 @@ router.put('/:problem_id', [auth,[
 
 // @route  PUT api/problem_status/reset/:problem_id
 // @desc   Reset a problem status for a problem. Creates if DNE
+// @note   Expects LeetCode id as param, not MongoDB id
 // @access Private
 router.put('/reset/:problem_id', [auth],
 async (req, res) => {
@@ -182,13 +185,9 @@ async (req, res) => {
         if (index === -1) {
             // Problem status doesn't exist for this problem
             // Make a new empty problem status for it
-            problem_status = {
-                problem: problem._id,
-                results: {
-                    success: 0,
-                    incorrect: 0
-                },
-            }
+            // Note the first two args don't actually matter here
+            problem_status = await createProblemStatus(true, 1.5, user, problem)
+            index = user.problem_statuses.length-1
         }
         else {
             // Get the problem status for the problem by the index
@@ -201,7 +200,7 @@ async (req, res) => {
         problem_status.results.incorrect = 0
 
         //DEFERRED: Need to actually delete all submissions from database
-        //Should we reset submissions? Might be worth having even
+        //Should we reset submissions? Might be worth having even post-delete
         // const submissions = problem_status.submissions
         // problem_status.submissions = []
 

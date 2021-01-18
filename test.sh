@@ -16,10 +16,6 @@ printf "Running %ss:\n" "$testType"
     # Spin up the MongoDB image
     cd './server/tests'
     docker-compose up -d mongo
-    # Add some sample problems to our DB
-    # TODO: Add this somewhere in the server tests, since server isn't running at this point.
-    # Could start a server and then run to fill the DB but this seems slightly clumsy.
-    # python3 ./../../utility/lcAPIparser.py --path ./../../utility/testProblems.json --test true
     # Run our tests
     cd '..'
     npm run $testType

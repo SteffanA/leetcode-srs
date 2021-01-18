@@ -6,6 +6,8 @@ chai.use(chaiHttp);
 
 const {checkForCorrectErrors, checkValidationResult} = require('../sharedTestFunctions.js')
 
+const {createTestUser} = require('../sharedCreationFunctions.js')
+
 const BASE_URL = '/api/auth'
 
 describe('Auth API Tests' , () => {
@@ -13,24 +15,13 @@ describe('Auth API Tests' , () => {
     const testEmail = 'authTester@test.com'
     const testPass = 'test12'
     // Create a user account we can test our authentication with.
-    before(() => {
-        return new Promise((resolve) => {
-            chai.request(app)
-            .post('/api/users')
-            .send({
-                name : testUser,
-                email: testEmail,
-                password: testPass,
-            })
-            .end((err, res) => {
-                if (err) reject(err)
-                // Check response for a valid 200
-                expect(res).to.have.status(200)
-                const body = res.body
-                expect(body).to.have.property('token')
-                resolve(res)
-            })
-        })
+    before(async () => {
+        try {
+            const res = await createTestUser(app, testUser, testEmail, testPass)
+        } catch (error) {
+            console.log('Failed to create user for Auth tests', error)
+            expect(true).to.equal(false)
+        }
     })
 
     describe('Test User Can Login', () => {
