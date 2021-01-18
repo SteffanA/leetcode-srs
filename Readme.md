@@ -63,6 +63,7 @@ docker-compose.yml file.  This compose file spins up a MongoDB database, the ser
 
 Hard requirements to run are:
  - [NPM](https://nodejs.org/en/download/)
+ > Note Node version 12 or higher is required due to the use of Object.fromEntries().  Ubuntu's repository at time of writing is v10, which does not have this function added.
  - [Docker](https://www.docker.com/get-started)
  - [Docker-Compose](https://docs.docker.com/compose/install/)
 
