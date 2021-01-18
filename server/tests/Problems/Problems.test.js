@@ -48,9 +48,7 @@ describe('Problems API Tests' , () => {
     // Create an admin account we can test adding problems with
     before(async () => {
         try {
-            const res = await createOrGetTokenForAdminUser(app)
-            const body = res.body
-            adminToken = body.token
+            adminToken = await createOrGetTokenForAdminUser(app)
         } catch (error) {
             console.log('Hit error creating test admin user for Problems.')
             console.log(error)

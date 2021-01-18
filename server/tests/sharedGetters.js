@@ -69,5 +69,21 @@ const getUsersLists = (app, token) => {
     })
 }
 
+// Get the MongoDB _id field from the provided LeetCode ID
+const getProbIdFromLCid = (app, lcId) => {
+    return new Promise((resolve, reject) => {
+        chai.request(app)
+        .get('/api/problems/id/' + lcId)
+        .end((err, res) => {
+            if (err) reject(err)
+            expect(res).to.have.status(200)
+            const body = res.body
+            expect(body).to.have.property('_id')
+            resolve(body._id)
+        })
+    })
+}
+
 module.exports = {getFakeMongoDBid, getPublicList, getPrivateList, getUsersLists,
+    getProbIdFromLCid, 
     }

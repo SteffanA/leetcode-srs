@@ -11,7 +11,8 @@ chai.use(chaiHttp);
 const dotenv = require('dotenv')
 dotenv.config({path: '../../../.env'}) // Config environmental vars to get admin user
 
-const {checkForAddedIDsAsPartOfResObjects,
+const {checkForAddedIDsAsPartOfResObjects, checkForAddedIDs, 
+    checkProblemStatusReturnedContainsProperties, dummyFunc,
     } = require('./sharedTestFunctions.js')
 
 // Create a test user in our database with given credentials
@@ -37,40 +38,18 @@ const createTestUser = (app, name, email, pass) => {
 
 // Attempts to either create or login the admin user
 // to access the admin token
-const createOrGetTokenForAdminUser = (app) => {
+let adminToken = ''
+const createOrGetTokenForAdminUser = async (app) => {
     // Gather the admin credentials
+    if (adminToken !== '') {
+        return adminToken
+    }
     const adminUser = process.env.ADMIN_NAME
     const adminEmail = process.env.ADMIN_EMAIL
     const adminPass = process.env.ADMIN_PASS
-    return new Promise((resolve) => {
-        chai.request(app)
-        .post('/api/auth')
-        .send({
-            name : adminUser,
-            email: adminEmail,
-            password: adminPass,
-        })
-        .end((err, res) => {
-            if (err) reject(err)
-            // Check response for a valid 200
-            if (res.status === 200) {
-                // Successfully logged in
-                const body = res.body
-                expect(body).to.have.property('token')
-                resolve(res)
-            }
-            else {
-                // Define a create function so we can do async stuff
-                const create = async () => {
-                    r = await createTestUser(app, adminUser, adminEmail, adminPass)
-                    return r
-                }
-                // Couldn't login, try to register
-                res = create()
-                resolve(res)
-            }
-        })
-    })
+    const res = await createTestUser(app, adminUser, adminEmail, adminPass)
+    adminToken = res.body.token
+    return adminToken
 }
 
 // Convert the raw JSON from LeetCode's API to an array of the objects we expect
@@ -93,22 +72,17 @@ const convertLeetCodeResToOurObjects = (lcResAsJson) => {
 
 // Adds a problem status for a particular user and problem
 // Will always be successful with a multiplier of 1.5
-const addSuccessfulProblemStatus = (app, token, probId) => {
+const addProblemStatus = (app, token, probId, status) => {
     return new Promise((resolve, reject) => {
         chai.request(app)
         .put('/api/problem_status/' + probId)
         .set({'x-auth-token' : token})
-        .send({result : true, time_multiplier : 1.5})
+        .send(status)
         .end((err, res) => {
             if (err) reject(err)
             expect(res).to.have.status(200)
             const body = res.body
-            expect(body).to.have.property('results')
-            expect(body).to.have.property('interval')
-            expect(body).to.have.property('submissions')
-            expect(body).to.have.property('next_submission')
-            expect(body).to.have.property('problem')
-            expect(body).to.have.property('_id')
+            checkProblemStatusReturnedContainsProperties(dummyFunc, body)
             resolve(body)
         })
     })
@@ -165,5 +139,36 @@ const addProblemsToList = (app, token, listId, problems) => {
     })
 }
 
+// Adds problems to database. Expects problems to be in bulk problem add
+// api format
+const addProblemsToDatabase = async (app, probs) => {
+    const adminToken = await createOrGetTokenForAdminUser(app)
+    return new Promise((resolve, reject) => {
+        chai.request(app)
+        .post('/api/problems/bulk')
+        .set({'x-auth-token': adminToken})
+        .send({
+            problems: probs,
+        })
+        .end((err, res) => {
+            if (err) reject(err)
+            expect(res).to.have.status(200)
+            const dummyFunc = () => {}
+            const addedProbIds = []
+            for (let prob of probs) {
+                addedProbIds.push(prob.id)
+            }
+            // Check everything was added
+            checkForAddedIDs(res, dummyFunc, addedProbIds, 'Added')
+            // Add the response MongoIDs to our array
+            const problemMongoIds = []
+            for (let added of res.body.Added) {
+                problemMongoIds.push(added)
+            }
+            resolve(problemMongoIds)
+        })
+    })
+}
+
 module.exports = {createTestUser, convertLeetCodeResToOurObjects, createOrGetTokenForAdminUser,
-    addSuccessfulProblemStatus, createList, addProblemsToList, }
+    addProblemStatus, createList, addProblemsToList, addProblemsToDatabase, }

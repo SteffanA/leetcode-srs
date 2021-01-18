@@ -9,6 +9,7 @@ const {checkForCorrectErrors, checkForValidAddition,
 
 const BASE_URL = '/api/users'
 
+// TODO: Refractor this to utilize new test functions
 describe('User API Tests' , () => {
 
     // Token for all tests that use a same registered user

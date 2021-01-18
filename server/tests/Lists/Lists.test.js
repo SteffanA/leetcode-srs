@@ -3,25 +3,19 @@ const app = require('../../server'),
     expect = chai.expect //to solve error when using done(): “ReferenceError: expect is not defined”
 chai.use(chaiHttp);
 
-const dotenv = require('dotenv') // For getting environ vars from .env file
-dotenv.config({path: '../../../.env'}) // Config environmental vars to get admin user
 const fs = require('fs'); // For reading local JSON file
 
 const {checkForCorrectErrors, sleep,
-        checkValidationResult,
-        checkForReturnedObject, checkForAddedIDs,
-        checkAllValidationResults,
+        checkForReturnedObject, checkIfListsAreSame,
+        checkAllValidationResults, checkIDsDoNotExistAsPartOfResObjects,
         checkForReturnedObjects, checkForEmptyArray,
-        checkForNewIdValueInResponseObject,
-        checkForValidAddition, checkIDsDoNotExistAsPartOfResObjects,
-        checkIdNotContainedInResArray,
-        checkForAddedIDsAsPartOfResObjects,
-        checkRoutesArePrivate,
-        checkIfListsAreSame} = require('../sharedTestFunctions.js')
+        checkForNewIdValueInResponseObject, checkIdNotContainedInResArray,
+        checkForAddedIDsAsPartOfResObjects, checkRoutesArePrivate,
+        } = require('../sharedTestFunctions.js')
 
 const {createTestUser, convertLeetCodeResToOurObjects,
-        createOrGetTokenForAdminUser, addSuccessfulProblemStatus,
-        addProblemsToList, createList,
+        createOrGetTokenForAdminUser, addProblemStatus,
+        addProblemsToList, createList, addProblemsToDatabase
     } = require('../sharedCreationFunctions.js')
 
 const {getFakeMongoDBid, getPrivateList, getPublicList, getUsersLists,
@@ -31,9 +25,6 @@ const BASE_URL = '/api/lists'
 // Note that the test is run at the root of the server module,
 // and thus the path is defined as if we are at the root of the server folder
 const TEST_PROBLEMS_PATH = './tests/Lists/listTestProblems.json'
-
-// Dummy function to pass in replacement of done when running multiple test helpers
-const dummyFunc = () => {}
 
 describe('Lists API Tests' , () => {
     // Create a user to create lists for
@@ -55,9 +46,7 @@ describe('Lists API Tests' , () => {
     before(async () => {
         // Create an admin user to add problems with
         try {
-            const res = await createOrGetTokenForAdminUser(app)
-            const body = res.body
-            adminToken = body.token
+            adminToken = await createOrGetTokenForAdminUser(app)
         } catch (error) {
             console.log('Hit error creating test admin user for Problems.')
             console.log(error)
@@ -66,38 +55,19 @@ describe('Lists API Tests' , () => {
     })
     // Insert some problems into our DB for usage during this test
     const testProblems = [] // store the leetcode IDs
-    before((done) => {
+    before( async () => {
         const rawData = fs.readFileSync(TEST_PROBLEMS_PATH)
         const asJson = JSON.parse(rawData)
         const probs = convertLeetCodeResToOurObjects(asJson)
         // Submit problems to the database
-        chai.request(app)
-        .post('/api/problems/bulk')
-        .set({'x-auth-token': adminToken})
-        .send({
-            problems: probs,
-        })
-        .end((err, res) => {
-            if (err) done(err)
-            expect(res).to.have.status(200)
-            const dummyFunc = () => {}
-            const addedProbIds = []
-            for (let prob of probs) {
-                addedProbIds.push(prob.id)
-            }
-            // Check everything was added
-            checkForAddedIDs(res, dummyFunc, addedProbIds, 'Added')
-            // Add the response MongoIDs to our array
-            for (let added of res.body.Added) {
-                testProblems.push(added)
-            }
-            done()
-        })
+        const addedProbs = await addProblemsToDatabase(app, probs)
+        testProblems.push(...addedProbs)
     })
 
     // Some functions uses the MongoDB ID, unlike other list add/remove functions
     // that use the LeetCode ID.  Gather a few IDs to use for said tests
     // NOTE: This requires problems to have been added first!
+    // TODO: This feels like it may be fragile in a larger test suite.
     const testProblemMongoIds = []
     before(() => {
         // When we get our problems in the before for this test suite,
@@ -226,8 +196,7 @@ describe('Lists API Tests' , () => {
 
     describe('Test Can Create Lists', () => {
         it('Tests Validation Checks Work Correctly', (done) => {
-            const 
-            reqs = [
+            const reqs = [
                 {
                     reqBody: {name: '', public: false},
                     err: 'Lists must be named.'
@@ -851,9 +820,13 @@ describe('Lists API Tests' , () => {
             }
             // Adjust the problems we used so we have ordered
             // TTN such that [0] is soonest and [3] is latest
+            const genericPositiveStatus = {
+                result: true,
+                time_multiplier: 1.5,
+            }
             for (let i = 0; i < 4; i++) {
                 const probToUpdate = testProblems[i]
-                await addSuccessfulProblemStatus(app, token, probToUpdate)
+                await addProblemStatus(app, token, probToUpdate, genericPositiveStatus)
                 // Sleep for a bit to avoid a same status time
                 await sleep(5)
             }
@@ -861,7 +834,7 @@ describe('Lists API Tests' , () => {
             // Get problems, ensure order of ids matches 0-3
             await checkIfSortedTTN(testProblemMongoIds.slice(0,4))
             // Set [0] problem status TTN to be latest
-            await addSuccessfulProblemStatus(app, token, testProblems[0])
+            await addProblemStatus(app, token, testProblems[0], genericPositiveStatus)
             // Verify change
             const updatedExpectedOrder = testProblemMongoIds.slice(1,4)
             updatedExpectedOrder.push(testProblemMongoIds[0])
