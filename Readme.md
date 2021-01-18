@@ -133,7 +133,7 @@ One known issue is that the nginx reverse proxy does not currently handle HTTPS 
 
 Note: Testing remains a WIP, and currently is only partially implemented for the server.
 
-This project is setup for automated testing and code coverage results via the Mocha and Istanbul projects.  If you have setup your environmental variable file, running the tests is simple and can be done in two ways:
+This project is setup for automated testing and code coverage results via the Mocha and NYC (Istanbul) projects.  If you have setup your environmental variable file, running the tests is simple and can be done in two ways:
 
 *Automatic running*
  * At the root of the project, run ./test.sh.
@@ -167,9 +167,12 @@ Both tests and coverage can be run for specific subsections - for example, to ru
 | > Lists Routes | 87% coverage - remaining is defensive |
 | > Problems Routes | 86% coverage - remaining is defensive |
 | > ProblemStatuses Routes | 89% - remaining is defensive |
-| > Submissions Routes | 0% |
+| > Submissions Routes | 91% - remaining is defensive |
 | > Middleware | 0% |
 |  React Frontend | TBD |
+
+*Postman Tests*
+A selection of manual Postman test cases has also been provided for your use.  There will be some tuning needed for the imported calls, mainly switching the endpoint of the api to whichever IP your server is hosted on.
 #
 
 ***WIP Features***
@@ -181,10 +184,6 @@ Addition of problem text for all problems, and the ability to search problems vi
 Ability to mark what language your submitted code is in, and see your submitted results with correct code highlighting.
 
 Fully automated testing of both the Express server and React frontend.
-
-> For now, testing of APIs is done with Postman, and a selection of test cases have been exported for your use (after some adjustment).
-
- 
 
 Conversion to TypeScript
 
