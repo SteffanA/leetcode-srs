@@ -76,13 +76,12 @@ router.put('/next_times', [auth, [
         // Define current time in advance so all problems mapped to
         // 'now' have the same value
         const curDate = new Date()
-        const curTime = curDate.getTime()
         for (let problemID of problems) {
             const index = user.problem_statuses.map(status=> status.problem.toString() ).indexOf(problemID)
             if (index === -1) {
                 // We don't have a status for this problem.
                 // Map it to current time
-                problemToTime.set(problemID,curTime)
+                problemToTime.set(problemID,curDate)
             }
             else {
                 // Grab the next_submission date

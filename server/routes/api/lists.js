@@ -6,7 +6,7 @@ const express = require('express')
 const { check, validationResult } = require('express-validator')
 const auth = require('../../middleware/auth')
 const mongoose = require('mongoose')
-const {sortStatusByNextSubmission} = require('../../utility/utility')
+const {sortStatusByNextSubmission, getSortedInsertionIndex} = require('../../utility/utility')
 const {addColorToProblemsBasedOnTON} = require('../../utility/problemStatuses')
 
 const router = express.Router()
@@ -139,15 +139,18 @@ async (req, res) => {
         // For each problem in the list, get the problem object and
         // store it in an array
         problems = []
-
         for (let prob of list.problems) {
             const problem = await Problem.findById(prob._id)
             if (problem) {
-                problems.push(problem)
+                // We'll do sorted insertion such that the easier
+                // problems are seen first
+                const index = getSortedInsertionIndex(problems, problem.difficulty, 'difficulty')
+                problems.splice(index, 0, problem)
             }
         }
+        
         // Sort the problems by time to next if sort requested
-        // As of now, any truthy means sort requested
+        // As of now, any truthy param means sort requested
         const user = await User.findById(req.user.id)
         if (req.params.sort)  {
             // Defensive block, shouldn't hit else case unless func turned

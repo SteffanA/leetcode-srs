@@ -35,8 +35,8 @@ export const getAllLists = () => {
                 }
                 
             }).catch(error => {
-                console.debug(error)
-                reject(error.msg)
+                console.debug('get all lists error of' , error.response.data.errors, ' from ', url)
+                reject(error.response.data.errors[0].msg)
             })
         })
     }
@@ -65,8 +65,8 @@ export const createNewList = (name, isPublic) => {
         ).then(response => {
             resolve(response.data)
         }).catch(err => {
-            console.debug(err)
-            reject(err.message)
+            console.debug('create new list error of' , err.response.data.errors, ' from ', base_url)
+            reject(err.response.data.errors[0].msg)
         })
     })
 }
@@ -116,8 +116,8 @@ export const updateListsProblems = (updatedProblems, curListID) => {
             }
             resolve(response)
         }).catch(err => {
-            console.debug(err)
-            reject(err.message)
+            console.debug('update list problems error of' , err.response.data.errors, ' from ', url)
+            reject(err.response.data.errors[0].msg)
         })
     })
 }
@@ -149,8 +149,8 @@ export const setPublic = async (listID) => {
             }
             resolve(response)
         }).catch(err => {
-            console.debug(err)
-            reject(err.message)
+            console.debug('set public error of' , err.response.data.errors, ' from ', url)
+            reject(err.response.data.errors[0].msg)
         })
     })
 }
@@ -173,8 +173,8 @@ export const searchPublicLists = async (term) => {
                 resolve(response.data)
             }
         ).catch(err => {
-            console.debug(err)
-            reject(err.message)
+            console.debug('search public lists error of' , err.response.data.errors, ' from ', url)
+            reject(err.response.data.errors[0].msg)
         })
     })
 }
@@ -196,8 +196,8 @@ export const getPublicLists = async () => {
                 resolve(response.data)
             }
         ).catch(err => {
-            console.debug(err)
-            reject(err.message)
+            console.debug('get public lists error of' , err.response.data.errors, ' from ', base_url)
+            reject(err.response.data.errors[0].msg)
         })
     })
 }
@@ -227,8 +227,8 @@ export const clonePublicList = async (listID) => {
                 resolve(response.data)
             }
         ).catch(err => {
-            console.debug(err)
-            reject(err.message)
+            console.debug('clone public list error of' , err.response.data.errors, ' from ', url)
+            reject(err.response.data.errors[0].msg)
         })
     })
 }
@@ -257,8 +257,8 @@ export const deletePrivateList = async (listID) => {
                 resolve(response.data)
             }
         ).catch(err => {
-            console.debug(err)
-            reject(err.message)
+            console.debug('delete priv list error of' , err.response.data.errors, ' from ', url)
+            reject(err.response.data.errors[0].msg)
         })
     })
 }
@@ -289,8 +289,8 @@ export const renamePrivateList = async (listID, newName) => {
             }
             resolve(response)
         }).catch(err => {
-            console.debug(err)
-            reject(err.message)
+            console.debug('rename priv list error of' , err.response.data.errors, ' from ', url)
+            reject(err.response.data.errors[0].msg)
         })
     })
 }

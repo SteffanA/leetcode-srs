@@ -461,6 +461,34 @@ const checkSubmissionReturnedContainsProperties = (done, body) => {
     done()
 }
 
+// Checks that a provided response array is sorted by the provided
+// field.  Expects order to be low to high.
+const checkArrayIsOrderedByField = (res, done, field = '', resArrayName = '') => {
+    expect(res).to.have.status(200)
+    const body = res.body
+    let resArray = body
+    // If provided arrayName, set resArray to said property of the body
+    if (resArrayName !== '') {
+        resArray = res.body[`${resArrayName}`]
+    }
+    // Init previous value to lowest possible value
+    let prevVal = Number.MIN_SAFE_INTEGER
+    for (let obj of resArray) {
+        // If field isn't blank, compare objects via property
+        if (field !== '') {
+            expect(obj[`${field}`]).to.be.gte(prevVal)
+            prevVal = obj[`${field}`]
+        }
+        else {
+            // Compare objects directly - assuming not actually objects, but
+            // some other kind of primitive that can be compared with Numbers
+            expect(obj).to.be.gte(prevVal)
+            prevVal = obj
+        }
+    }
+    done()
+}
+
 
 module.exports = {checkForCorrectErrors, checkForValidAddition, checkForValidRemoval, 
     checkSuccessfulLogin, checkValidationResult, checkForCorrectMessage, checkForReturnedObject,
@@ -468,5 +496,5 @@ module.exports = {checkForCorrectErrors, checkForValidAddition, checkForValidRem
     checkRoutesArePrivate,  checkForEmptyArray, checkForNewIdValueInResponseObject, 
     checkIdNotContainedInResArray,checkForAddedIDsAsPartOfResObjects, checkIDsDoNotExistAsPartOfResObjects,
     sleep, dummyFunc, checkIfListsAreSame, checkProblemStatusReturnedContainsProperties, 
-    checkSubmissionReturnedContainsProperties, 
+    checkSubmissionReturnedContainsProperties, checkArrayIsOrderedByField, 
 }

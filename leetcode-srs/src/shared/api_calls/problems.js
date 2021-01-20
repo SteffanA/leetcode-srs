@@ -45,8 +45,8 @@ export const bulkUpdateProblems = (listID, updatedProblems) => {
             }
             resolve(response)
         }).catch(err => {
-            console.debug(err)
-            reject(err.message)
+            console.debug('Bulk update error of' , err.response.data.errors, ' from ', url)
+            reject(err.response.data.errors[0].msg)
         })
     })
 }
@@ -90,8 +90,8 @@ const getProblemsForList = (url, listID) => {
                 resolve(response.data)
             }
         }).catch(error => {
-            console.debug('getProblems error of' , error, ' from ', url)
-            reject(error.msg)
+            console.debug('getProblems error of' , error.response.data.errors, ' from ', url)
+            reject(error.response.data.errors[0].msg)
         })
     })
 }
@@ -114,8 +114,8 @@ export const getAllProblems = () => {
                 resolve(response.data)
             }
         }).catch(error => {
-            console.debug('getProblems error of ' , error, ' from ', url)
-            reject(error.msg)
+            console.debug('getProblemsAll error of' , error.response.data.errors, ' from ', url)
+            reject(error.response.data.errors[0].msg)
         })
     })
 }
@@ -139,8 +139,8 @@ export const getSubsetOfProblems = (start, end) => {
                 resolve(response.data)
             }
         }).catch(error => {
-            console.debug('getProblems error of' , error, ' from ', url)
-            reject(error.msg)
+            console.debug('getProblemsSubset error of' , error.response.data.errors, ' from ', url)
+            reject(error.response.data.errors[0].msg)
         })
     })
 }
@@ -167,8 +167,8 @@ export const getProblemSearchResults = (term) => {
                 resolve(response.data.problems)
             }
         }).catch(error => {
-            console.debug('getProblems error of' , error, ' from ', url)
-            reject(error.msg)
+            console.debug('getProblemsSearch error of' , error.response.data.errors, ' from ', url)
+            reject(error.response.data.errors[0].msg)
         })
     })
 }
@@ -192,8 +192,8 @@ export const getProblemFromID = (id) => {
                 resolve(response.data)
             }
         }).catch(error => {
-            console.debug('get problem by id error of' , error, ' from ', id)
-            reject(error.msg)
+            console.debug('getProblems by id error of' , error.response.data.errors, ' from ', url)
+            reject(error.response.data.errors[0].msg)
         })
     })
 }
@@ -221,8 +221,8 @@ export const getProblemsFromIDs = (ids) => {
                 resolve(response.data.problems)
             }
         }).catch(error => {
-            console.debug('get problem by id error of' , error, ' from bulk ids')
-            reject(error.msg)
+            console.debug('getProblems from ids error of' , error.response.data.errors, ' from ', url)
+            reject(error.response.data.errors[0].msg)
         })
     })
 }

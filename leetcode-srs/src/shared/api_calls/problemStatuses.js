@@ -27,8 +27,8 @@ export const getProblemToNextSubTime = async (problems) => {
             axios.put(url, body, config).then(response => {
                 resolve(response.data)
             }).catch(error => {
-                console.debug('Get next sub times error of ' , error, ' from bulk problems')
-                reject(error.msg)
+                console.debug('get next sub times error of' , error.response.data.errors, ' from ', url)
+                reject(error.response.data.errors[0].msg)
             })
         })
     }
@@ -55,8 +55,8 @@ export const getUsersProblemStatuses = async () => {
             axios.get(url, config).then(response => {
                 resolve(response.data)
             }).catch(error => {
-                console.debug('Get all submissions errors of ' + error)
-                reject(error.msg)
+                console.debug('get all statuses error of' , error.response.data.errors, ' from ', url)
+                reject(error.response.data.errors[0].msg)
             })
         })
     }
