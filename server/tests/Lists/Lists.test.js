@@ -11,6 +11,7 @@ const {checkForCorrectErrors, sleep,
         checkForReturnedObjects, checkForEmptyArray,
         checkForNewIdValueInResponseObject, checkIdNotContainedInResArray,
         checkForAddedIDsAsPartOfResObjects, checkRoutesArePrivate,
+        checkArrayIsOrderedByField, 
         } = require('../sharedTestFunctions.js')
 
 const {createTestUser, convertLeetCodeResToOurObjects,
@@ -793,6 +794,17 @@ describe('Lists API Tests' , () => {
                 if (err) done(err)
                 // Ensure we get all problems that are part of the list back
                 checkForAddedIDsAsPartOfResObjects(res, done, testProblemMongoIds.slice(0,4))
+            })
+        })
+
+        it('Tests When Getting All Problems They Are Returned in Order of Difficulty', (done) => {
+            chai.request(app)
+            .get(BASE_URL + '/' + getProbListId +'/problems/')
+            .set({'x-auth-token' : token})
+            .end((err, res) => {
+                if (err) done(err)
+                // Ensure we get all problems back in order of increasing difficulty
+                checkArrayIsOrderedByField(res, done, 'difficulty')
             })
         })
 

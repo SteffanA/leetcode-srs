@@ -28,8 +28,8 @@ export const addNewSubmission = (sub, prob_id) => {
         ).then(response => {
             resolve(response.data)
         }).catch(err => {
-            console.debug(err)
-            reject(err.message)
+            console.debug('addNewSubmission error of' , err.response.data.errors, ' from ', url)
+            reject(err.response.data.errors[0].msg)
         })
     })
 }
@@ -57,8 +57,8 @@ export const getSubmissionsFromProblemID = (probID) => {
         ).then(response => {
             resolve(response.data)
         }).catch(err => {
-            console.debug(err)
-            reject(err.message)
+            console.debug('getSubFromProbId error of' , err.response.data.errors, ' from ', url)
+            reject(err.response.data.errors[0].msg)
         })
     })
 }

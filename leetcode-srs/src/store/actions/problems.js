@@ -69,7 +69,7 @@ export const problemsGetAllForList = (list) => {
             console.error('Error getting all for list.')
             console.error(error)
             dispatch(problemsClear())
-            dispatch(problemError(error.response))
+            dispatch(problemError(error))
         }
     }
 }
@@ -100,7 +100,7 @@ export const problemsGetAllForListSorted = (list) => {
             console.error('Error getting problems for list sorted.')
             console.error(error)
             dispatch(problemsClear())
-            dispatch(problemError(error.response))
+            dispatch(problemError(error))
         }
     }
 }
@@ -120,7 +120,7 @@ export const problemsGetAll = () => {
             console.error('Error getting all problems.')
             console.error(error)
             dispatch(problemsClear())
-            dispatch(problemError(error.response))
+            dispatch(problemError(error))
         }
     }
 }
@@ -141,7 +141,7 @@ export const problemsGetSome = (start, end) => {
             console.error('Error getting subset of problems.')
             console.error(error)
             dispatch(problemsClear())
-            dispatch(problemError(error.response))
+            dispatch(problemError(error))
         }
     }
 }
@@ -162,7 +162,7 @@ export const problemsGetSearch = (term) => {
             console.error('Error getting search results for problems.')
             console.error(error)
             dispatch(problemsClear())
-            dispatch(problemError(error.response))
+            dispatch(problemError(error))
         }
     }
 }
@@ -187,7 +187,7 @@ export const problemSetProblems = (problems) => {
             const probToTime = await getProblemToNextSubTime(problemIds)
             dispatch(problemsGetProblemsSuccess(problems, firstProblem, probToTime))
         } catch (error) {
-            dispatch(problemError(error.response))
+            dispatch(problemError(error))
         }
     }
 }

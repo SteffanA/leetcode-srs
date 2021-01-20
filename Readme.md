@@ -162,13 +162,13 @@ Both tests and coverage can be run for specific subsections - for example, to ru
 *Test Status:*
 | Test           | Status       |
 | :------------- | :----------: |
-|  Server Tests | 87.2% coverage |
+|  Server Tests | 87.3% Statement Coverage |
 | > Auth Routes | 92% coverage - remaining is defensive |
-| > Users Routes | 82% coverage - remaining is defensive |
 | > Lists Routes | 87% coverage - remaining is defensive |
-| > Problems Routes | 86% coverage - remaining is defensive |
 | > ProblemStatuses Routes | 89% - remaining is defensive |
+| > Problems Routes | 86% coverage - remaining is defensive |
 | > Submissions Routes | 91% - remaining is defensive |
+| > Users Routes | 82% coverage - remaining is defensive |
 | > Middleware | 100% |
 |  React Frontend | TBD |
 
