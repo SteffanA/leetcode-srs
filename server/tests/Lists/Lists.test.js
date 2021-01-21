@@ -27,6 +27,7 @@ const BASE_URL = '/api/lists'
 // and thus the path is defined as if we are at the root of the server folder
 const TEST_PROBLEMS_PATH = './tests/Lists/listTestProblems.json'
 
+// TODO: Refractor some of these tests
 describe('Lists API Tests' , () => {
     // Create a user to create lists for
     let token = ''
