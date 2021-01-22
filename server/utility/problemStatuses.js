@@ -102,8 +102,11 @@ exports.addColorToProblemsBasedOnTON = (user, problems) => {
             const ton = status.next_submission
             const tonAsDate = new Date(ton)
             let color = 'green'
-            if (tonAsDate < addDaysToDate(now, 1)) {
+            if (tonAsDate <= now) {
                 color = 'red'
+            }
+            else if (tonAsDate < addDaysToDate(now, 1)) {
+                color = 'DarkOrange'
             }
             else if (tonAsDate < addDaysToDate(now, 4)) {
                 // Using a slightly easier to see yellow that isnt as jarring
