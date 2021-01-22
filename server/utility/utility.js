@@ -3,7 +3,7 @@
 
 // Helper function for adding days to a Date
 exports.addDays = (days) => {
-    let result = new Date(Date.now())
+    let result = new Date()
     result.setDate(result.getDate() + days);
     return result;
 }

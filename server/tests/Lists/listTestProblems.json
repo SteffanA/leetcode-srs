@@ -87,5 +87,27 @@
       "is_favor": false,
       "frequency": 0.8612515751610689,
       "progress": 18.05202558471277
+    },
+    {
+      "stat": {
+        "question_id": 984,
+        "question__article__live": true,
+        "question__article__slug": "most-stones-removed-with-same-row-or-column",
+        "question__title": "Most Stones Removed with Same Row or Column",
+        "question__title_slug": "most-stones-removed-with-same-row-or-column",
+        "question__hide": false,
+        "total_acs": 40292,
+        "total_submitted": 73338,
+        "frontend_question_id": 947,
+        "is_new_question": false
+      },
+      "status": null,
+      "difficulty": {
+        "level": 2
+      },
+      "paid_only": false,
+      "is_favor": false,
+      "frequency": 1.3023213457536662,
+      "progress": 27.296946596197586
     }
 ], "frequency_high": 0, "frequency_mid": 0, "category_slug": "algorithms"}

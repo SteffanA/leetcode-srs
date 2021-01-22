@@ -82,7 +82,7 @@ exports.updateProblemStatus = async (user, time_multiplier, result, index) => {
 // Adds a 'color' field to the object of problems based on the
 // time of next submission
 exports.addColorToProblemsBasedOnTON = (user, problems) => {
-    const now = new Date(Date.now())
+    const now = new Date()
     const statuses = user.problem_statuses
     // Create a map of problem ID to status based on user's statuses
     const probIdToStatus = new Map()
@@ -102,14 +102,19 @@ exports.addColorToProblemsBasedOnTON = (user, problems) => {
             const ton = status.next_submission
             const tonAsDate = new Date(ton)
             let color = 'green'
-            if (tonAsDate < addDaysToDate(now, 1)) {
+            // TODO: Consider adding new func that returns
+            // a new Date versus current usage of addDaysToDate
+            if (tonAsDate <= now) {
                 color = 'red'
             }
-            else if (tonAsDate < addDaysToDate(now, 4)) {
+            else if (tonAsDate < addDaysToDate(new Date(now), 1)) {
+                color = 'DarkOrange'
+            }
+            else if (tonAsDate < addDaysToDate(new Date(now), 4)) {
                 // Using a slightly easier to see yellow that isnt as jarring
                 color = 'GoldenRod'
             }
-            else if (tonAsDate < addDaysToDate(now, 7)) {
+            else if (tonAsDate < addDaysToDate(new Date(now), 7)) {
                 // Using a slightly easier to see yellow that isnt as jarring
                 color = 'YellowGreen'
             }

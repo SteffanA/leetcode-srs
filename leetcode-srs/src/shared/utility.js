@@ -73,7 +73,7 @@ export const useTraceUpdate = (props) => {
 
 // Add a number of days to today's date and return the date object
 export const addDays = (days) => {
-    let result = new Date(Date.now())
+    let result = new Date()
     result.setDate(result.getDate() + days);
     return result;
 }

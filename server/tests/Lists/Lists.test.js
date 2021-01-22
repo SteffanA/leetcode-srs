@@ -117,6 +117,18 @@ describe('Lists API Tests' , () => {
         public: false,
     }
 
+    // Define a couple statuses to use in tests where
+    // we expect the list to be ordered and given color
+    // coding based on results
+    const genericPositiveStatus = {
+        result: true,
+        time_multiplier: 1.5,
+    }
+    const genericNegativeStatus = {
+        result: false,
+        time_multiplier: 1.5,
+    }
+
     // Store the MongoDB _id field for a public and private list
     // for future use. Private list ID is not owned by 'token' user,
     // but private owned list is.
@@ -833,10 +845,6 @@ describe('Lists API Tests' , () => {
             }
             // Adjust the problems we used so we have ordered
             // TTN such that [0] is soonest and [3] is latest
-            const genericPositiveStatus = {
-                result: true,
-                time_multiplier: 1.5,
-            }
             for (let i = 0; i < 4; i++) {
                 const probToUpdate = testProblems[i]
                 await addProblemStatus(app, token, probToUpdate, genericPositiveStatus)
@@ -852,6 +860,69 @@ describe('Lists API Tests' , () => {
             const updatedExpectedOrder = testProblemMongoIds.slice(1,4)
             updatedExpectedOrder.push(testProblemMongoIds[0])
             await checkIfSortedTTN(updatedExpectedOrder)
+        })
+
+        // Note this test will need to be changed when color coding does
+        // It will also change if we change the multiplier for generic statuses
+        /*
+        Due now or past due => red
+        Due within the next day => DarkOrange
+        Due within the next 4 days => GoldenRod
+        Due within the week => YellowGreen
+        Else green
+        */
+        it('Tests Can Get All Problems In List With Correct Color-Coding', async () => {
+            // Setup our problems such that [4] is needed now - Red
+            // [3] needed wihtin a day - DarkOrange
+            // [2] needed within 4 days - GoldenRod
+            // [1] needed within 7 days - YellowGreen
+            // [0] needed within a week - green
+
+            // Add a new problem to the list
+            await addProblemsToList(app, token, getProbListId, testProblemMongoIds.slice(4,5))
+            // Adjust the problems we used so we have ordered
+            // TTN such that [4] is due soonest and [0] is latest
+            // Based on prior test, [4] should be setup already
+            await addProblemStatus(app, token, testProblems[3], genericNegativeStatus)
+
+            await addProblemStatus(app, token, testProblems[2], genericPositiveStatus)
+
+            await addProblemStatus(app, token, testProblems[1], genericPositiveStatus)
+            await addProblemStatus(app, token, testProblems[1], genericPositiveStatus)
+            await addProblemStatus(app, token, testProblems[1], genericPositiveStatus)
+
+            await addProblemStatus(app, token, testProblems[0], genericPositiveStatus)
+            await addProblemStatus(app, token, testProblems[0], genericPositiveStatus)
+            await addProblemStatus(app, token, testProblems[0], genericPositiveStatus)
+            await addProblemStatus(app, token, testProblems[0], genericPositiveStatus)
+            await addProblemStatus(app, token, testProblems[0], genericPositiveStatus)
+            await addProblemStatus(app, token, testProblems[0], genericPositiveStatus)
+
+            // Get problems, ensure order of ids matches 0-3
+            return new Promise((resolve, reject) => {
+                chai.request(app)
+                .get(BASE_URL + '/' + getProbListId + '/problems/true')
+                .set({'x-auth-token' : token})
+                .end((err, res) => {
+                    if (err) reject(err)
+                    expect(res).to.have.status(200)
+                    const body = res.body
+                    expect(body).to.be.an('array')
+                    const indexToColor = {
+                        4 : 'green',
+                        3: 'YellowGreen',
+                        2: 'GoldenRod',
+                        1: 'DarkOrange',
+                        0: 'red'
+                    }
+                    // Check ordering via colors
+                    for (let index in body) {
+                        expect(body[index]).to.have.property('color')
+                        expect(body[index].color).to.be.equal(indexToColor[index])
+                    }
+                    resolve()
+                })
+            })
         })
 
     })
