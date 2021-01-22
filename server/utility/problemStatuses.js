@@ -111,6 +111,7 @@ exports.addColorToProblemsBasedOnTON = (user, problems) => {
                 color = 'DarkOrange'
             }
             else if (tonAsDate < addDaysToDate(new Date(now), 4)) {
+
                 // Using a slightly easier to see yellow that isnt as jarring
                 color = 'GoldenRod'
             }
