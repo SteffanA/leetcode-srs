@@ -75,7 +75,7 @@ router.post('/:problem_id', [auth, [
     check('result', 'Submission result is required').not().isEmpty(),
     check('result', 'Submission result is must be boolean').isBoolean(),
     check('time_spent', 'Time spent on submission is required').not().isEmpty(),
-    check('time_spent', 'Time spent on submission must be number').optional().isNumeric(),
+    check('time_spent', 'Time spent on submission must be number').isNumeric(),
     check('mem_used', 'Submission\'s memory used must be number').optional().isNumeric(),
     check('execution_time', 'Submission\'s execution time used must be number').optional().isNumeric(),
     check('text', 'Submission\'s text must be String').optional().isString(),

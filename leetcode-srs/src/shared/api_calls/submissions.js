@@ -23,6 +23,15 @@ export const addNewSubmission = (sub, prob_id) => {
         }
     }
 
+    // Cleanup the optional fields - remove them if blank strings
+    // Don't need to do for text since a blank string is acceptable
+    if (sub.mem_used === '') {
+        delete sub.mem_used
+    }
+    if (sub.execution_time === '') {
+        delete sub.execution_time
+    }
+
     return new Promise((resolve, reject) => {
         axios.post(url, sub, config
         ).then(response => {
