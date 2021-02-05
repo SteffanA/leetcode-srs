@@ -82,18 +82,6 @@ const MainPage = (props) => {
                 valid: true,
                 touched: false,
             },
-            // Reported memory used
-            memUsed: {
-                elementType: 'input',
-                elementConfig: {
-                    type: 'number',
-                    placeholder: 'Memory Used (reported by LC)',
-                },
-                value: '',
-                //Validation intentionally missing for now
-                valid: true,
-                touched: false,
-            },
             // Reported execution time
             execTime: {
                 elementType: 'input',
@@ -103,6 +91,18 @@ const MainPage = (props) => {
                 },
                 value: '',
                 // Validation intentionally missing for now
+                valid: true,
+                touched: false,
+            },
+            // Reported memory used
+            memUsed: {
+                elementType: 'input',
+                elementConfig: {
+                    type: 'number',
+                    placeholder: 'Memory Used (reported by LC)',
+                },
+                value: '',
+                //Validation intentionally missing for now
                 valid: true,
                 touched: false,
             },
