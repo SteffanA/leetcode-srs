@@ -46,7 +46,8 @@
     "start": "node server",
     "server": "nodemon server",
     "client": "npm start --prefix ..\\leetcode-srs",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "bamboo": "env TESTING=true node node_modules/mocha/bin/mocha ./tests/**/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000 -R mocha-bamboo-reporter "
   },
   "author": "Steffan Achtmann",
   "license": "MIT"
