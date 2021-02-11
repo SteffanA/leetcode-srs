@@ -147,7 +147,7 @@ router.post('/', [oneOf([
                 return res.json({token, timeout, username: name})
             },
         )
-        console.log('User registered')
+        console.log('User ' + name + ' registered')
     } catch (error) {
         console.error('Error registering: ', error.message)
         return res.status(500).json({errors: [ {msg: 'Server error.'}]})

@@ -13,7 +13,6 @@
     "fs": "0.0.1-security",
     "https": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
-    "mocha": "^8.2.1",
     "mongoose": "^5.11.11",
     "request": "^2.88.2"
   },
@@ -22,7 +21,9 @@
     "chai-http": "^4.3.0",
     "concurrently": "^5.3.0",
     "nodemon": "^2.0.7",
-    "nyc": "^15.1.0"
+    "nyc": "^15.1.0",
+    "mocha": "^8.2.1",
+    "mocha-bamboo-reporter": "1.1.2"
   },
   "scripts": {
     "_comment": "Note: --exit in the test element is to force the test program to exit after finishing in case we use done()",
@@ -45,7 +46,8 @@
     "start": "node server",
     "server": "nodemon server",
     "client": "npm start --prefix ..\\leetcode-srs",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "bamboo": "env TESTING=true node node_modules/mocha/bin/mocha ./tests/**/*.test.js --exit --inspect=0.0.0.0:9299 --timeout 120000 -R mocha-bamboo-reporter "
   },
   "author": "Steffan Achtmann",
   "license": "MIT"

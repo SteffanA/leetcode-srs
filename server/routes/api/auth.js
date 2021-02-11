@@ -66,7 +66,7 @@ router.post('/', [oneOf([
 
         // Password matches, return token to allow user to login
         // extend token life during dev
-        const timeout = process.env.DEVELOPMENT ? 360000 : 36000 
+        const timeout = process.env.DEVELOPMENT ? 3600000 : 360000 
         // Return token to allow user to login.
         const payload = {
             user: {
