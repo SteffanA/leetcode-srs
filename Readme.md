@@ -5,6 +5,8 @@
 
 This is a web application designed to provide Spaced Repetition Studying for LeetCode problems.  Spaced repetition studying works by showing you the same problem multiple times over different periods of time, ensuring that you don't repeat the same problem too many times, while also ensuring you re-visit a problem right before you may forget how to approach it.  [This project is currently live on my website.](https://lcs.steffan.duckdns.org/)
 
+NEW: View current bugs/tasks at https://jira.steffan.duckdns.org
+
  
 
 **How to Use**
@@ -177,6 +179,8 @@ A selection of manual Postman test cases has also been provided for your use.  T
 #
 
 ***WIP Features***
+
+A full list of WIP bug fixes/feature updates and their statuses is here: https://jira.steffan.duckdns.org
 
 Making the site less ugly :)
 
