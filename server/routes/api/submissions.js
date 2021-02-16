@@ -101,6 +101,9 @@ router.post('/:problem_id', [auth, [
             time_spent
         } = req.body
 
+        // Convert the result to a boolean
+        resultAsBool = !!JSON.parse(String(result).toLowerCase());
+
         // Get the status for this problem
         let status = null
         const index = user.problem_statuses.map((status) => {
@@ -109,16 +112,16 @@ router.post('/:problem_id', [auth, [
         if (index === -1) {
             // Couldn't find status - create one, we assume this is a first submission
             // TODO: Adjust this to use the user's defined multiplier
-            status = await createProblemStatus(result, 2.75, user, problem)
+            status = await createProblemStatus(resultAsBool, 2.75, user, problem)
         }
         else {
             // Update the status based on the submission results
             // TODO: Get the time multiplier from the user's settings and replace
-            status = await updateProblemStatus(user, 2.75, result, index)
+            status = await updateProblemStatus(user, 2.75, resultAsBool, index)
         }
         // Create a new Submission and add it to the status
         const sub = new Submission({
-            result: result,
+            result: resultAsBool,
             time_spent: time_spent,
         })
         // Add optional paramaters if they exist
