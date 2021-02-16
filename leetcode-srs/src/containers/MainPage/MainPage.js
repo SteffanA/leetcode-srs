@@ -188,6 +188,7 @@ const MainPage = (props) => {
             "time_spent": timeSpent.value,
         }
 
+
         // Call our submit handler
         try {
             await subAPI.addNewSubmission(submission, curProblem.id)
