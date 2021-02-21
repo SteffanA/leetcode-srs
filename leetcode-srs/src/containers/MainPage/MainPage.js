@@ -201,30 +201,35 @@ const MainPage = (props) => {
             // Update the problem states by and refresh the selector box by doing it
             getProblems(curList)
             // Refresh the state of the form and re-hide
-            const updatedControls = controls
-            updatedControls.code.touched = false
-            updatedControls.code.value = ''
-            updatedControls.execTime.touched = false
-            updatedControls.execTime.value = ''
-            updatedControls.timeSpent.touched = false
-            updatedControls.timeSpent.valid = false
-            updatedControls.timeSpent.value = ''
-            updatedControls.result.touched = false
-            updatedControls.result.value = true
-            updatedControls.memUsed.touched = false
-            updatedControls.memUsed.value = ''
-            setSubState({...subState, updatedControls, formValid : false})
-            // Repeat for the timer, and set ref
-            setCurState('')
-            setCurTime(0)
-            setStoppedTime(0)
-            timer.current = <TimerBox start={true} updateTime={setCurTime} updateState={setCurState} initialTime={0}/>
-            setelements({...elements, formVisible: false, timerVisible: false})
+            resetPageState()
         } catch (error) {
             console.error('Error submitting:')
             console.error(error)
             alert('Unable to process submission, please try later.')
         }
+    }
+
+    // Reset the page to the default initialized state before a problem was started
+    const resetPageState = () => {
+        const updatedControls = controls
+        updatedControls.code.touched = false
+        updatedControls.code.value = ''
+        updatedControls.execTime.touched = false
+        updatedControls.execTime.value = ''
+        updatedControls.timeSpent.touched = false
+        updatedControls.timeSpent.valid = false
+        updatedControls.timeSpent.value = ''
+        updatedControls.result.touched = false
+        updatedControls.result.value = true
+        updatedControls.memUsed.touched = false
+        updatedControls.memUsed.value = ''
+        setSubState({...subState, updatedControls, formValid : false})
+        // Repeat for the timer, and set ref
+        setCurState('')
+        setCurTime(0)
+        setStoppedTime(0)
+        timer.current = <TimerBox start={true} updateTime={setCurTime} updateState={setCurState} initialTime={0}/>
+        setelements({...elements, formVisible: false, timerVisible: false})
     }
 
     // TODO: Use this reducer hook for our form state updates - will provide cleaner
@@ -272,6 +277,12 @@ const MainPage = (props) => {
         window.open(currentProblemLink.current, "_blank")
         // Show the form and the timer box
         setelements({...elements, formVisible: true, timerVisible: true})
+    }
+
+    // Reset the page to the default state, before the current problem was opened
+    const stopProblemHandler = (event) => {
+        event.preventDefault()
+        resetPageState()
     }
 
     // Change the timer from hidden to visible or vice versa depending on the
@@ -386,6 +397,11 @@ const MainPage = (props) => {
         <Button clicked={openProblemHandler} disabled={false} btnType="Success">Start Problem</Button>
     )
 
+    // Button to stop attempting the currently selected problem
+    const problemStopButton = (
+        <Button clicked={stopProblemHandler} disabled={false} btnType="Danger">Quit Problem</Button>
+    )
+
     /* Cols => left/right, rows = up/down*/
     return (
         <div id='main' className='grid grid-cols-3 grid-rows-5 bg-blue-100 h-full flex flex-grow'>
@@ -393,8 +409,9 @@ const MainPage = (props) => {
             <div id='selector' className='row-start-1 col-start-2 h-8 text-center'>
                 {isAuth && <Selector showLists={true} showProblems={true} />}
             </div>
-            <div id='start' className='row-start-1 col-start-2 mt-9 relative text-center '>
+            <div id='start_stop' className='row-start-1 col-start-2 mt-9 relative text-center '>
                 {(!formVisible && isAuth && curProblem) && problemLinkButton}
+                {(formVisible) && problemStopButton}
             </div>
             <div id='form' className='row-start-2 col-start-1 row-span-3 col-span-3 text-center'>
                 {formVisible && form}
